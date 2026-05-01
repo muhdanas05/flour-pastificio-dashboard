@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flour Pastificio — Marco</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #120B06;
+      --bg-card:      #1A1009;
+      --bg-card-2:    #20140B;
+      --bg-divider:   #160D07;
+      --terra:        #B84A25;
+      --terra-lt:     #CC6040;
+      --cream:        #EDE0C8;
+      --cream-dim:    #BDA98E;
+      --muted:        #7A6858;
+      --muted-lt:     #9A8878;
+      --gold:         #C49030;
+      --gold-lt:      #D4A840;
+      --amber-bg:     #2E1A00;
+      --amber-text:   #D4933A;
+      --olive-bg:     #141E09;
+      --olive-text:   #7A9A48;
+      --border:       rgba(190, 165, 120, 0.09);
+      --border-md:    rgba(190, 165, 120, 0.15);
+      --border-lg:    rgba(190, 165, 120, 0.24);
+    }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Lato', system-ui, sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      padding: 44px 56px 100px;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.65;
+    }
+
+    /* ── ANIMATIONS ─────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .anim { opacity: 0; animation: fadeUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+    .d1 { animation-delay: 0.04s; }
+    .d2 { animation-delay: 0.14s; }
+    .d3 { animation-delay: 0.26s; }
+    .d4 { animation-delay: 0.40s; }
+    .d5 { animation-delay: 0.54s; }
+
+    /* ── HEADER ─────────────────────────────────── */
+    .header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding-bottom: 28px;
+      margin-bottom: 36px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .wordmark {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.9rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: var(--cream);
+      line-height: 1;
+    }
+
+    .wordmark-sub {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 5px;
+      letter-spacing: 0.04em;
+    }
+
+    .header-right { text-align: right; }
+
+    .marco-label {
+      font-size: 0.65rem;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+
+    .header-date {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--cream-dim);
+      margin-top: 4px;
+    }
+
+    /* ── SUMMARY CARD ───────────────────────────── */
+    .summary-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-md);
+      border-top: 2px solid var(--terra);
+      border-radius: 8px;
+      display: flex;
+      align-items: stretch;
+      margin-bottom: 22px;
+      overflow: hidden;
+    }
+
+    .summary-context {
+      padding: 32px 40px;
+      border-right: 1px solid var(--border);
+      min-width: 220px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .summary-eyebrow {
+      font-size: 0.63rem;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .summary-date-text {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: var(--cream);
+      line-height: 1.1;
+    }
+
+    .summary-stats {
+      flex: 1;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .stat-block {
+      flex: 1;
+      padding: 32px 36px;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .stat-block:last-child { border-right: none; }
+
+    .stat-num {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2.8rem;
+      font-weight: 300;
+      color: var(--cream);
+      line-height: 1;
+      letter-spacing: -0.01em;
+    }
+
+    .stat-lbl {
+      font-size: 0.63rem;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    /* ── ALERTS ─────────────────────────────────── */
+    .alerts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 40px;
+    }
+
+    .alert-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-md);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .card-head {
+      padding: 13px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .card-head-title {
+      font-size: 0.63rem;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+
+    .badge {
+      font-size: 0.6rem;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    .badge-warn {
+      background: rgba(184, 74, 37, 0.15);
+      color: var(--terra-lt);
+      border: 1px solid rgba(184, 74, 37, 0.28);
+    }
+
+    .badge-ok {
+      background: rgba(90, 130, 50, 0.12);
+      color: var(--olive-text);
+      border: 1px solid rgba(90, 130, 50, 0.22);
+    }
+
+    .card-body { padding: 18px 22px; }
+
+    .allergy-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .allergy-row:last-child { border-bottom: none; }
+
+    .allergy-guest {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.05rem;
+      font-weight: 400;
+      color: var(--cream);
+    }
+
+    .allergy-time-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-left: 10px;
+    }
+
+    .allergy-pill {
+      font-size: 0.65rem;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 11px;
+      border-radius: 4px;
+      background: var(--amber-bg);
+      color: var(--amber-text);
+      border: 1px solid rgba(196, 144, 48, 0.2);
+      white-space: nowrap;
+    }
+
+    .escalation-row {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .escalation-row:last-child { border-bottom: none; }
+
+    .escalation-name {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.05rem;
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 5px;
+    }
+
+    .escalation-note {
+      font-size: 0.8rem;
+      color: var(--cream-dim);
+      line-height: 1.55;
+    }
+
+    .escalation-time-text {
+      font-size: 0.68rem;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    .all-clear-text {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 1rem;
+      color: var(--muted);
+      padding: 10px 0;
+    }
+
+    /* ── SECTION HEADING ────────────────────────── */
+    .section-head {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 1.25rem;
+      color: var(--cream-dim);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .section-head::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── TABLE ──────────────────────────────────── */
+    .tbl-wrap {
+      background: var(--bg-card);
+      border: 1px solid var(--border-md);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 44px;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead tr { border-bottom: 1px solid var(--border-lg); }
+
+    th {
+      padding: 14px 22px;
+      font-size: 0.62rem;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.13em;
+      color: var(--muted);
+      text-align: left;
+    }
+
+    td {
+      padding: 15px 22px;
+      font-size: 0.86rem;
+      color: var(--cream-dim);
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    tbody tr { transition: background 0.12s ease; }
+    tbody tr:hover { background: rgba(190, 165, 120, 0.03); }
+
+    .td-name {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.05rem;
+      font-weight: 400;
+      color: var(--cream);
+    }
+
+    .td-mono { font-size: 0.84rem; }
+
+    .td-guests { font-size: 0.84rem; }
+
+    .td-allergy-pill {
+      display: inline-block;
+      font-size: 0.63rem;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 3px 10px;
+      border-radius: 4px;
+      background: var(--amber-bg);
+      color: var(--amber-text);
+      border: 1px solid rgba(196, 144, 48, 0.18);
+    }
+
+    .td-none { color: var(--muted); font-size: 0.8rem; }
+
+    .td-phone {
+      font-size: 0.78rem;
+      color: var(--gold);
+      text-decoration: none;
+      letter-spacing: 0.025em;
+      transition: color 0.12s;
+    }
+
+    .td-phone:hover { color: var(--cream); }
+
+    .date-sep td {
+      padding: 8px 22px;
+      background: var(--bg-divider);
+      font-size: 0.6rem;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted-lt);
+      border-bottom: 1px solid var(--border-md);
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── CHART ──────────────────────────────────── */
+    .chart-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-md);
+      border-radius: 8px;
+      padding: 34px 38px 30px;
+    }
+
+    .chart-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .chart-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 1.25rem;
+      color: var(--cream-dim);
+    }
+
+    .chart-legend {
+      display: flex;
+      gap: 22px;
+      padding-top: 4px;
+    }
+
+    .leg {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.65rem;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    .leg-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot-terra { background: var(--terra-lt); }
+    .dot-gold  { background: var(--gold-lt); }
+
+    #weeklyChart { max-height: 210px; }
+
+    /* ── RESPONSIVE ─────────────────────────────── */
+    @media (max-width: 960px) {
+      body { padding: 28px 24px 72px; }
+
+      .summary-card { flex-direction: column; }
+      .summary-context { border-right: none; border-bottom: 1px solid var(--border); }
+      .summary-stats { flex-wrap: wrap; }
+      .stat-block { flex-basis: 50%; border-right: none; border-bottom: 1px solid var(--border); }
+      .stat-block:nth-child(odd) { border-right: 1px solid var(--border); }
+      .stat-block:last-child, .stat-block:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+
+      .alerts-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header anim d1">
+    <div>
+      <div class="wordmark">Flour Pastificio</div>
+      <div class="wordmark-sub">Via della Croce 18, Roma</div>
+    </div>
+    <div class="header-right">
+      <div class="marco-label">AI Receptionist — Marco</div>
+      <div class="header-date" id="hdr-date"></div>
+    </div>
+  </header>
+
+  <!-- DAILY SUMMARY -->
+  <div class="summary-card anim d2">
+    <div class="summary-context">
+      <div class="summary-eyebrow">Today at a glance</div>
+      <div class="summary-date-text" id="summary-date"></div>
+    </div>
+    <div class="summary-stats">
+      <div class="stat-block">
+        <div class="stat-num">24</div>
+        <div class="stat-lbl">Calls Received</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-num">8</div>
+        <div class="stat-lbl">Reservations</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-num">33%</div>
+        <div class="stat-lbl">Conversion</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-num">29</div>
+        <div class="stat-lbl">Covers Booked</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="alerts-grid anim d3">
+    <div class="alert-card">
+      <div class="card-head">
+        <span class="card-head-title">Allergy Alerts</span>
+        <span class="badge badge-warn">2 flagged</span>
+      </div>
+      <div class="card-body">
+        <div class="allergy-row">
+          <div>
+            <span class="allergy-guest">Valentina Conti</span>
+            <span class="allergy-time-label">20:00</span>
+          </div>
+          <span class="allergy-pill">Nut allergy, severe</span>
+        </div>
+        <div class="allergy-row">
+          <div>
+            <span class="allergy-guest">Alessandro Greco</span>
+            <span class="allergy-time-label">20:30</span>
+          </div>
+          <span class="allergy-pill">Dairy intolerant x2</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-card">
+      <div class="card-head">
+        <span class="card-head-title">Escalations</span>
+        <span class="badge badge-warn">1 pending</span>
+      </div>
+      <div class="card-body">
+        <div class="escalation-row">
+          <div class="escalation-name">Unknown Caller</div>
+          <div class="escalation-note">Enquired about exclusive private hire for 35 guests. Pricing and availability require owner decision before callback.</div>
+          <div class="escalation-time-text">Received at 11:42</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPCOMING RESERVATIONS -->
+  <div class="anim d4">
+    <div class="section-head">Upcoming Reservations</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Guest</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Guests</th>
+            <th>Allergies</th>
+            <th>WhatsApp</th>
+          </tr>
+        </thead>
+        <tbody id="res-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- WEEKLY OVERVIEW -->
+  <div class="anim d5">
+    <div class="section-head">Weekly Overview</div>
+    <div class="chart-card">
+      <div class="chart-top">
+        <div class="chart-title">Calls and reservations, last 7 days</div>
+        <div class="chart-legend">
+          <div class="leg"><div class="leg-dot dot-terra"></div>Calls</div>
+          <div class="leg"><div class="leg-dot dot-gold"></div>Reservations</div>
+        </div>
+      </div>
+      <canvas id="weeklyChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    // ── DATES ──────────────────────────────────────────────────
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
+    const isoDate = d => d.toISOString().slice(0, 10);
+
+    const d0 = isoDate(today);
+    const d1 = isoDate(addDays(today, 1));
+    const d2 = isoDate(addDays(today, 2));
+
+    document.getElementById('hdr-date').textContent =
+      today.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    document.getElementById('summary-date').textContent =
+      today.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    // ── RESERVATIONS ───────────────────────────────────────────
+    const reservations = [
+      { name: 'Martina Ferraro',    date: d0, time: '12:30', guests: 2, allergy: null,                      phone: '+39 06 4521 8834' },
+      { name: 'Davide Romano',      date: d0, time: '13:00', guests: 4, allergy: 'Gluten intolerant',       phone: '+39 338 742 1093' },
+      { name: 'Elena Ricci',        date: d0, time: '13:30', guests: 2, allergy: null,                      phone: '+39 06 9921 4455' },
+      { name: 'Marco Salvatore',    date: d0, time: '19:30', guests: 3, allergy: null,                      phone: '+39 347 882 3310' },
+      { name: 'Valentina Conti',    date: d0, time: '20:00', guests: 2, allergy: 'Nut allergy, severe',     phone: '+39 06 7733 2211' },
+      { name: 'Alessandro Greco',   date: d0, time: '20:30', guests: 6, allergy: 'Dairy intolerant x2',    phone: '+39 349 223 4418' },
+      { name: 'Sofia De Luca',      date: d0, time: '21:00', guests: 2, allergy: null,                      phone: '+39 333 551 9920' },
+      { name: 'Federico Marchetti', date: d1, time: '13:00', guests: 4, allergy: null,                      phone: '+39 06 3312 7741' },
+      { name: 'Giulia Bianchi',     date: d1, time: '20:00', guests: 2, allergy: 'Shellfish allergy',       phone: '+39 348 991 2206' },
+      { name: 'Luca Esposito',      date: d1, time: '20:30', guests: 5, allergy: null,                      phone: '+39 339 441 5572' },
+      { name: 'Isabella Fontana',   date: d1, time: '21:00', guests: 3, allergy: 'Gluten-free required',    phone: '+39 06 4411 3390' },
+      { name: 'Chiara Lombardi',    date: d2, time: '19:30', guests: 4, allergy: null,                      phone: '+39 345 770 3318' },
+      { name: 'Antonio Moretti',    date: d2, time: '20:00', guests: 2, allergy: null,                      phone: '+39 06 6612 8843' },
+      { name: 'Roberto Caruso',     date: d2, time: '20:30', guests: 6, allergy: 'Tree nut allergy',        phone: '+39 06 8831 2290' },
+    ];
+
+    reservations.sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+
+    const dateLabel = iso => {
+      const d = new Date(iso + 'T00:00:00');
+      if (iso === d0) return 'Today';
+      if (iso === d1) return 'Tomorrow';
+      return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    };
+
+    const shortDate = iso => {
+      const d = new Date(iso + 'T00:00:00');
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    };
+
+    const tbody = document.getElementById('res-tbody');
+    let lastDate = null;
+
+    reservations.forEach(r => {
+      if (r.date !== lastDate) {
+        const sep = document.createElement('tr');
+        sep.className = 'date-sep';
+        sep.innerHTML = `<td colspan="6">${dateLabel(r.date)}</td>`;
+        tbody.appendChild(sep);
+        lastDate = r.date;
+      }
+
+      const tr = document.createElement('tr');
+      const waNum = r.phone.replace(/\D/g, '');
+      tr.innerHTML = `
+        <td class="td-name">${r.name}</td>
+        <td class="td-mono">${shortDate(r.date)}</td>
+        <td class="td-mono">${r.time}</td>
+        <td class="td-guests">${r.guests}</td>
+        <td>${r.allergy
+          ? `<span class="td-allergy-pill">${r.allergy}</span>`
+          : `<span class="td-none">None</span>`
+        }</td>
+        <td><a class="td-phone" href="https://wa.me/${waNum}" target="_blank">${r.phone}</a></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    // ── WEEKLY CHART ───────────────────────────────────────────
+    const days = [];
+    const callsData        = [44, 32, 16, 19, 21, 26, 24];
+    const reservationsData = [18, 12,  6,  8,  8, 11,  8];
+
+    for (let i = 6; i >= 0; i--) {
+      const d = addDays(today, -i);
+      days.push(d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' }));
+    }
+
+    const ctx = document.getElementById('weeklyChart').getContext('2d');
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: days,
+        datasets: [
+          {
+            label: 'Calls',
+            data: callsData,
+            backgroundColor: 'rgba(204, 96, 64, 0.65)',
+            borderColor:     'rgba(204, 96, 64, 0.9)',
+            borderWidth: 1,
+            borderRadius: 3,
+            borderSkipped: false,
+          },
+          {
+            label: 'Reservations',
+            data: reservationsData,
+            backgroundColor: 'rgba(212, 168, 64, 0.6)',
+            borderColor:     'rgba(212, 168, 64, 0.85)',
+            borderWidth: 1,
+            borderRadius: 3,
+            borderSkipped: false,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1A1009',
+            borderColor: 'rgba(190, 165, 120, 0.2)',
+            borderWidth: 1,
+            titleColor: '#EDE0C8',
+            bodyColor: '#BDA98E',
+            titleFont: { family: "'Lato', sans-serif", size: 11, weight: '400' },
+            bodyFont:  { family: "'Lato', sans-serif", size: 11, weight: '300' },
+            padding: 12,
+            cornerRadius: 5,
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(190, 165, 120, 0.05)', drawBorder: false },
+            ticks: {
+              color: '#7A6858',
+              font: { family: "'Lato', sans-serif", size: 11, weight: '300' }
+            },
+            border: { display: false }
+          },
+          y: {
+            grid: { color: 'rgba(190, 165, 120, 0.05)', drawBorder: false },
+            ticks: {
+              color: '#7A6858',
+              font: { family: "'Lato', sans-serif", size: 11, weight: '300' },
+              stepSize: 10
+            },
+            border: { display: false },
+            beginAtZero: true
+          }
+        },
+        interaction: { mode: 'index', intersect: false },
+        animation: { duration: 900, easing: 'easeOutQuart' }
+      }
+    });
+  </script>
+</body>
+</html>
