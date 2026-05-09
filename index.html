@@ -3,34 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flour Pastificio — Marco</title>
+  <title>Voice AI Dashboard</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:          #09090B;
-      --surface:     #111113;
-      --surface-2:   #1C1C21;
-      --ink:         #F2EDE6;
-      --ink-2:       #B0AAA2;
-      --muted:       #6A6560;
-      --copper:      #D4886A;
-      --copper-dim:  rgba(212, 136, 106, 0.12);
-      --red:         #E05248;
-      --red-dim:     rgba(224, 82, 72, 0.12);
-      --green:       #52AF7E;
-      --green-dim:   rgba(82, 175, 126, 0.11);
-      --amber:       #CFA040;
-      --amber-dim:   rgba(207, 160, 64, 0.12);
-      --border:      rgba(255, 255, 255, 0.05);
-      --border-md:   rgba(255, 255, 255, 0.08);
-      --border-lg:   rgba(255, 255, 255, 0.13);
+      --bg:          #F8F7F4;
+      --surface:     #FFFFFF;
+      --surface-2:   #F0EEE9;
+      --ink:         #18181A;
+      --ink-2:       #52504C;
+      --muted:       #94918A;
+      --copper:      #B8622A;
+      --copper-dim:  rgba(184, 98, 42, 0.09);
+      --red:         #C23B33;
+      --red-dim:     rgba(194, 59, 51, 0.08);
+      --green:       #2A9060;
+      --green-dim:   rgba(42, 144, 96, 0.09);
+      --amber:       #A87420;
+      --amber-dim:   rgba(168, 116, 32, 0.09);
+      --border:      rgba(0, 0, 0, 0.06);
+      --border-md:   rgba(0, 0, 0, 0.09);
+      --border-lg:   rgba(0, 0, 0, 0.14);
     }
 
     html { font-size: 16px; }
@@ -41,7 +42,7 @@
       font-family: 'Inter', system-ui, sans-serif;
       font-weight: 300;
       min-height: 100vh;
-      padding: 52px 72px 120px;
+      padding: 40px 72px 120px;
       -webkit-font-smoothing: antialiased;
       line-height: 1.6;
     }
@@ -58,13 +59,66 @@
     .d4 { animation-delay: 0.42s; }
     .d5 { animation-delay: 0.56s; }
 
+    /* ── CLIENT SELECTOR BAR ── */
+    .client-bar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .client-bar-label {
+      font-size: 0.57rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.17em;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .client-select {
+      appearance: none;
+      -webkit-appearance: none;
+      background: var(--surface);
+      border: 1px solid var(--border-lg);
+      border-radius: 7px;
+      padding: 8px 36px 8px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.84rem;
+      font-weight: 500;
+      color: var(--ink);
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394918A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      min-width: 220px;
+    }
+    .client-select:hover { border-color: var(--muted); }
+    .client-select:focus { outline: 2px solid var(--copper); outline-offset: 2px; border-color: transparent; }
+
+    .status-msg {
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .error-msg {
+      font-size: 0.78rem;
+      color: var(--red);
+      font-weight: 400;
+    }
+
     /* ── HEADER ── */
     .header {
       display: flex;
       align-items: flex-end;
       justify-content: space-between;
       padding-bottom: 32px;
-      margin-bottom: 56px;
+      margin-bottom: 52px;
       border-bottom: 1px solid var(--border-lg);
     }
 
@@ -103,7 +157,7 @@
       color: var(--ink-2);
     }
 
-    .marco-badge {
+    .agent-badge {
       display: inline-flex;
       align-items: center;
       gap: 7px;
@@ -114,16 +168,16 @@
       color: var(--green);
       padding: 5px 13px;
       border-radius: 20px;
-      border: 1px solid rgba(82, 175, 126, 0.22);
+      border: 1px solid rgba(42, 144, 96, 0.25);
       background: var(--green-dim);
     }
 
-    .marco-dot {
+    .agent-dot {
       width: 6px; height: 6px;
       border-radius: 50%;
       background: var(--green);
       flex-shrink: 0;
-      box-shadow: 0 0 7px var(--green);
+      box-shadow: 0 0 6px rgba(42, 144, 96, 0.55);
     }
 
     /* ── STATS ── */
@@ -168,7 +222,7 @@
       color: var(--red);
       margin-top: 4px;
       font-weight: 400;
-      opacity: 0.85;
+      opacity: 0.8;
     }
 
     /* ── ALERTS GRID ── */
@@ -185,6 +239,7 @@
       border-radius: 10px;
       border: 1px solid var(--border-md);
       overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.03);
     }
 
     .card-head {
@@ -215,16 +270,24 @@
     .badge-red {
       background: var(--red-dim);
       color: var(--red);
-      border: 1px solid rgba(224, 82, 72, 0.2);
+      border: 1px solid rgba(194, 59, 51, 0.18);
     }
 
     .badge-amber {
       background: var(--amber-dim);
       color: var(--amber);
-      border: 1px solid rgba(207, 160, 64, 0.2);
+      border: 1px solid rgba(168, 116, 32, 0.18);
     }
 
     .card-body { padding: 0 22px; }
+
+    .no-items {
+      padding: 22px 0;
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-style: italic;
+      text-align: center;
+    }
 
     /* ── ALLERGY ROWS ── */
     .allergy-row {
@@ -270,7 +333,7 @@
       border-radius: 4px;
       background: var(--red-dim);
       color: var(--red);
-      border: 1px solid rgba(224, 82, 72, 0.2);
+      border: 1px solid rgba(194, 59, 51, 0.18);
       white-space: nowrap;
       flex-shrink: 0;
     }
@@ -312,7 +375,7 @@
       border-radius: 4px;
       background: var(--amber-dim);
       color: var(--amber);
-      border: 1px solid rgba(207, 160, 64, 0.2);
+      border: 1px solid rgba(168, 116, 32, 0.18);
       white-space: nowrap;
       flex-shrink: 0;
       margin-top: 2px;
@@ -382,7 +445,7 @@
     tr:last-child td { border-bottom: none; }
 
     tbody tr { transition: background 0.1s ease; }
-    tbody tr:hover td { background: rgba(255,255,255,0.02); }
+    tbody tr:hover td { background: rgba(0,0,0,0.025); }
 
     .td-name {
       font-size: 0.88rem;
@@ -400,7 +463,7 @@
       border-radius: 4px;
       background: var(--red-dim);
       color: var(--red);
-      border: 1px solid rgba(224, 82, 72, 0.2);
+      border: 1px solid rgba(194, 59, 51, 0.18);
     }
 
     .td-none { color: var(--muted); font-size: 0.78rem; }
@@ -432,6 +495,7 @@
       border-radius: 10px;
       border: 1px solid var(--border-md);
       padding: 32px 40px 28px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.03);
     }
 
     .chart-head {
@@ -470,14 +534,14 @@
 
     /* ── RESPONSIVE ── */
     @media (max-width: 1100px) {
-      body { padding: 40px 40px 100px; }
+      body { padding: 32px 40px 100px; }
       .stats-row { grid-template-columns: repeat(3, 1fr); gap: 36px 0; }
       .stat-cell:nth-child(3) { border-right: none; padding-right: 0; }
       .stat-cell:nth-child(4) { padding-left: 0; }
     }
 
     @media (max-width: 860px) {
-      body { padding: 32px 24px 80px; }
+      body { padding: 24px 24px 80px; }
       .stats-row { grid-template-columns: 1fr 1fr; gap: 32px 0; }
       .stat-num { font-size: 3.2rem; }
       .alerts-grid { grid-template-columns: 1fr; }
@@ -490,38 +554,49 @@
 </head>
 <body>
 
+  <!-- CLIENT SELECTOR -->
+  <div class="client-bar anim d1">
+    <span class="client-bar-label">Client</span>
+    <select class="client-select" id="client-select" style="display:none;"></select>
+    <span class="status-msg" id="status-msg">Loading clients…</span>
+    <span class="error-msg" id="error-msg" style="display:none;"></span>
+  </div>
+
   <!-- HEADER -->
   <header class="header anim d1">
     <div>
-      <div class="wordmark">Flour Pastificio</div>
-      <div class="wordmark-address">Via della Croce 18, Roma</div>
+      <div class="wordmark" id="client-name">—</div>
+      <div class="wordmark-address" id="client-address"></div>
     </div>
     <div class="header-right">
       <div class="hdr-date" id="hdr-date"></div>
-      <span class="marco-badge"><span class="marco-dot"></span>Marco, AI Receptionist</span>
+      <span class="agent-badge">
+        <span class="agent-dot"></span>
+        <span id="agent-badge-text">AI Receptionist</span>
+      </span>
     </div>
   </header>
 
   <!-- STATS -->
   <div class="stats-row anim d2">
     <div class="stat-cell">
-      <div class="stat-num num-default">24</div>
+      <div class="stat-num num-default" id="stat-calls">—</div>
       <div class="stat-lbl">Calls Today</div>
     </div>
     <div class="stat-cell">
-      <div class="stat-num num-default">8</div>
+      <div class="stat-num num-default" id="stat-reservations">—</div>
       <div class="stat-lbl">Reservations</div>
     </div>
     <div class="stat-cell">
-      <div class="stat-num num-copper">33%</div>
+      <div class="stat-num num-copper" id="stat-conversion">—</div>
       <div class="stat-lbl">Conversion</div>
     </div>
     <div class="stat-cell">
-      <div class="stat-num num-default">29</div>
+      <div class="stat-num num-default" id="stat-covers">—</div>
       <div class="stat-lbl">Covers Booked</div>
     </div>
     <div class="stat-cell">
-      <div class="stat-num num-red">3</div>
+      <div class="stat-num num-red" id="stat-escalations">—</div>
       <div class="stat-lbl">Escalations</div>
       <div class="stat-sub">Needs human review</div>
     </div>
@@ -529,74 +604,21 @@
 
   <!-- ALERTS -->
   <div class="alerts-grid anim d3">
-
-    <!-- Allergy Alerts -->
     <div class="card">
       <div class="card-head">
         <span class="card-head-label">Allergy Alerts</span>
-        <span class="badge badge-red">2 flagged</span>
+        <span class="badge badge-red" id="allergy-badge">—</span>
       </div>
-      <div class="card-body">
-        <div class="allergy-row">
-          <div class="allergy-left">
-            <div class="allergy-name">Valentina Conti <span class="allergy-time">20:00</span></div>
-            <div class="allergy-phone">+39 06 7733 2211</div>
-          </div>
-          <span class="red-pill">Nut allergy, severe</span>
-        </div>
-        <div class="allergy-row">
-          <div class="allergy-left">
-            <div class="allergy-name">Alessandro Greco <span class="allergy-time">20:30</span></div>
-            <div class="allergy-phone">+39 349 223 4418</div>
-          </div>
-          <span class="red-pill">Dairy intolerant ×2</span>
-        </div>
-      </div>
+      <div class="card-body" id="allergy-body"></div>
     </div>
 
-    <!-- Human Escalations -->
     <div class="card">
       <div class="card-head">
         <span class="card-head-label">Human Escalations</span>
-        <span class="badge badge-amber">3 pending</span>
+        <span class="badge badge-amber" id="esc-badge">—</span>
       </div>
-      <div class="card-body">
-        <div class="esc-row">
-          <div class="esc-top">
-            <div>
-              <div class="esc-name">Unknown Caller</div>
-              <div class="esc-phone">+39 06 3344 5521</div>
-            </div>
-            <span class="esc-type-pill">Private Hire</span>
-          </div>
-          <div class="esc-note">Enquired about exclusive private hire for 35 guests. Pricing and availability require owner decision before callback.</div>
-          <div class="esc-ts">Received 11:42</div>
-        </div>
-        <div class="esc-row">
-          <div class="esc-top">
-            <div>
-              <div class="esc-name">Giorgio Mancini</div>
-              <div class="esc-phone">+39 349 771 8832</div>
-            </div>
-            <span class="esc-type-pill">Complaint</span>
-          </div>
-          <div class="esc-note">Caller unhappy with wait time on last visit and requested a manager callback to discuss compensation.</div>
-          <div class="esc-ts">Received 14:15</div>
-        </div>
-        <div class="esc-row">
-          <div class="esc-top">
-            <div>
-              <div class="esc-name">Unknown Caller</div>
-              <div class="esc-phone">+39 06 5593 2284</div>
-            </div>
-            <span class="esc-type-pill">Language Barrier</span>
-          </div>
-          <div class="esc-note">Caller spoke no Italian or English — possible French speaker. Marco could not complete booking and flagged for callback.</div>
-          <div class="esc-ts">Received 16:03</div>
-        </div>
-      </div>
+      <div class="card-body" id="esc-body"></div>
     </div>
-
   </div>
 
   <!-- UPCOMING RESERVATIONS -->
@@ -645,132 +667,275 @@
     const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
     const isoDate = d => d.toISOString().slice(0, 10);
 
+    const D0 = isoDate(today);
+    const D1 = isoDate(addDays(today, 1));
+    const D2 = isoDate(addDays(today, 2));
+
     document.getElementById('hdr-date').textContent =
       today.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-    const d0 = isoDate(today);
-    const d1 = isoDate(addDays(today, 1));
-    const d2 = isoDate(addDays(today, 2));
-
-    // ── RESERVATIONS ──
-    const reservations = [
-      { name: 'Martina Ferraro',    date: d0, time: '12:30', guests: 2, allergy: null,                   phone: '+39 06 4521 8834' },
-      { name: 'Davide Romano',      date: d0, time: '13:00', guests: 4, allergy: 'Gluten intolerant',    phone: '+39 338 742 1093' },
-      { name: 'Elena Ricci',        date: d0, time: '13:30', guests: 2, allergy: null,                   phone: '+39 06 9921 4455' },
-      { name: 'Marco Salvatore',    date: d0, time: '19:30', guests: 3, allergy: null,                   phone: '+39 347 882 3310' },
-      { name: 'Valentina Conti',    date: d0, time: '20:00', guests: 2, allergy: 'Nut allergy, severe',  phone: '+39 06 7733 2211' },
-      { name: 'Alessandro Greco',   date: d0, time: '20:30', guests: 6, allergy: 'Dairy intolerant ×2', phone: '+39 349 223 4418' },
-      { name: 'Sofia De Luca',      date: d0, time: '21:00', guests: 2, allergy: null,                   phone: '+39 333 551 9920' },
-      { name: 'Federico Marchetti', date: d1, time: '13:00', guests: 4, allergy: null,                   phone: '+39 06 3312 7741' },
-      { name: 'Giulia Bianchi',     date: d1, time: '20:00', guests: 2, allergy: 'Shellfish allergy',    phone: '+39 348 991 2206' },
-      { name: 'Luca Esposito',      date: d1, time: '20:30', guests: 5, allergy: null,                   phone: '+39 339 441 5572' },
-      { name: 'Isabella Fontana',   date: d1, time: '21:00', guests: 3, allergy: 'Gluten-free required', phone: '+39 06 4411 3390' },
-      { name: 'Chiara Lombardi',    date: d2, time: '19:30', guests: 4, allergy: null,                   phone: '+39 345 770 3318' },
-      { name: 'Antonio Moretti',    date: d2, time: '20:00', guests: 2, allergy: null,                   phone: '+39 06 6612 8843' },
-      { name: 'Roberto Caruso',     date: d2, time: '20:30', guests: 6, allergy: 'Tree nut allergy',     phone: '+39 06 8831 2290' },
-    ];
-
-    reservations.sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
-
-    const dateLabel = iso => {
-      if (iso === d0) return 'Today';
-      if (iso === d1) return 'Tomorrow';
-      return new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-    };
-
-    const shortDate = iso =>
-      new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-
-    const tbody = document.getElementById('res-tbody');
-    let lastDate = null;
-
-    reservations.forEach(r => {
-      if (r.date !== lastDate) {
-        const sep = document.createElement('tr');
-        sep.className = 'date-sep';
-        sep.innerHTML = `<td colspan="6">${dateLabel(r.date)}</td>`;
-        tbody.appendChild(sep);
-        lastDate = r.date;
-      }
-      const tr = document.createElement('tr');
-      const waNum = r.phone.replace(/\D/g, '');
-      tr.innerHTML = `
-        <td class="td-name">${r.name}</td>
-        <td>${shortDate(r.date)}</td>
-        <td>${r.time}</td>
-        <td>${r.guests}</td>
-        <td>${r.allergy
-          ? `<span class="td-allergy-pill">${r.allergy}</span>`
-          : `<span class="td-none">—</span>`}</td>
-        <td><a class="td-phone" href="https://wa.me/${waNum}" target="_blank">${r.phone}</a></td>
-      `;
-      tbody.appendChild(tr);
-    });
-
     // ── CHART ──
-    const days = [];
-    for (let i = 6; i >= 0; i--)
-      days.push(addDays(today, -i).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' }));
+    let weeklyChart = null;
 
-    new Chart(document.getElementById('weeklyChart').getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels: days,
-        datasets: [
-          {
-            label: 'Calls',
-            data: [44, 32, 16, 19, 21, 26, 24],
-            backgroundColor: 'rgba(212, 136, 106, 0.15)',
-            borderColor:     'rgba(212, 136, 106, 0.65)',
-            borderWidth: 1.5,
-            borderRadius: 3,
-            borderSkipped: false,
-          },
-          {
-            label: 'Reservations',
-            data: [18, 12, 6, 8, 8, 11, 8],
-            backgroundColor: 'rgba(207, 160, 64, 0.15)',
-            borderColor:     'rgba(207, 160, 64, 0.65)',
-            borderWidth: 1.5,
-            borderRadius: 3,
-            borderSkipped: false,
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: '#1C1C21',
-            borderColor: 'rgba(255,255,255,0.1)',
-            borderWidth: 1,
-            titleColor: '#F2EDE6',
-            bodyColor: '#6A6560',
-            titleFont: { family: "'Inter', sans-serif", size: 11, weight: '500' },
-            bodyFont:  { family: "'Inter', sans-serif", size: 11, weight: '300' },
-            padding: 12,
-            cornerRadius: 6,
-          }
+    function renderChart(callsData, reservData) {
+      const labels = [];
+      for (let i = 6; i >= 0; i--)
+        labels.push(addDays(today, -i).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' }));
+
+      if (weeklyChart) weeklyChart.destroy();
+
+      weeklyChart = new Chart(document.getElementById('weeklyChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Calls',
+              data: callsData,
+              backgroundColor: 'rgba(184, 98, 42, 0.11)',
+              borderColor:     'rgba(184, 98, 42, 0.60)',
+              borderWidth: 1.5,
+              borderRadius: 3,
+              borderSkipped: false,
+            },
+            {
+              label: 'Reservations',
+              data: reservData,
+              backgroundColor: 'rgba(168, 116, 32, 0.11)',
+              borderColor:     'rgba(168, 116, 32, 0.60)',
+              borderWidth: 1.5,
+              borderRadius: 3,
+              borderSkipped: false,
+            }
+          ]
         },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: { color: '#6A6560', font: { family: "'Inter', sans-serif", size: 11 } },
-            border: { display: false },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#FFFFFF',
+              borderColor: 'rgba(0,0,0,0.10)',
+              borderWidth: 1,
+              titleColor: '#18181A',
+              bodyColor: '#94918A',
+              titleFont: { family: "'Inter', sans-serif", size: 11, weight: '500' },
+              bodyFont:  { family: "'Inter', sans-serif", size: 11, weight: '300' },
+              padding: 12,
+              cornerRadius: 6,
+            }
           },
-          y: {
-            grid: { color: 'rgba(255,255,255,0.04)' },
-            ticks: { color: '#6A6560', font: { family: "'Inter', sans-serif", size: 11 }, stepSize: 10 },
-            border: { display: false },
-            beginAtZero: true,
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: '#94918A', font: { family: "'Inter', sans-serif", size: 11 } },
+              border: { display: false },
+            },
+            y: {
+              grid: { color: 'rgba(0,0,0,0.05)' },
+              ticks: { color: '#94918A', font: { family: "'Inter', sans-serif", size: 11 }, stepSize: 10 },
+              border: { display: false },
+              beginAtZero: true,
+            }
+          },
+          interaction: { mode: 'index', intersect: false },
+          animation: { duration: 600, easing: 'easeOutQuart' }
+        }
+      });
+    }
+
+    // ── EXCEL PARSING ──
+    // Each sheet has: META key/value pairs, then SECTION markers followed by tabular data.
+    // SECTION names: STATS, ALLERGY_ALERTS, ESCALATIONS, RESERVATIONS, WEEKLY
+    function parseSheet(sheet) {
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: true });
+      const out = { meta: {}, stats: {}, allergyAlerts: [], escalations: [], reservations: [], weekly: [] };
+      let section = 'META';
+      let headers = [];
+
+      for (const row of rows) {
+        const a = String(row[0] ?? '').trim();
+        const b = String(row[1] ?? '').trim();
+
+        if (a === 'SECTION') {
+          section = b;
+          headers = [];
+          continue;
+        }
+        if (row.every(c => String(c ?? '').trim() === '')) continue;
+
+        if (section === 'META') {
+          if (a) out.meta[a] = b;
+        } else {
+          if (headers.length === 0) {
+            headers = row.map(c => String(c ?? '').trim()).filter(Boolean);
+          } else if (row.some(c => String(c ?? '').trim() !== '')) {
+            const obj = {};
+            headers.forEach((h, i) => { obj[h] = row[i] !== undefined ? row[i] : ''; });
+            if      (section === 'STATS')          { headers.forEach((h, i) => { out.stats[h] = row[i]; }); }
+            else if (section === 'ALLERGY_ALERTS') out.allergyAlerts.push(obj);
+            else if (section === 'ESCALATIONS')    out.escalations.push(obj);
+            else if (section === 'RESERVATIONS')   out.reservations.push(obj);
+            else if (section === 'WEEKLY')         out.weekly.push(obj);
           }
-        },
-        interaction: { mode: 'index', intersect: false },
-        animation: { duration: 1000, easing: 'easeOutQuart' }
+        }
       }
-    });
+      return out;
+    }
+
+    // ── DATE HELPERS ──
+    function normalizeDate(val) {
+      if (!val) return '';
+      if (val instanceof Date) return isoDate(val);
+      // Handle Excel serial numbers (unlikely with our string storage but safe)
+      if (typeof val === 'number') {
+        const d = new Date(Math.round((val - 25569) * 86400 * 1000));
+        return isoDate(d);
+      }
+      return String(val).slice(0, 10);
+    }
+
+    function dateLabel(iso) {
+      if (iso === D0) return 'Today';
+      if (iso === D1) return 'Tomorrow';
+      return new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    }
+
+    function shortDate(iso) {
+      return new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    }
+
+    // ── RENDER ──
+    function renderDashboard(data) {
+      // Header
+      document.getElementById('client-name').textContent    = data.meta['CLIENT_NAME'] || '—';
+      document.getElementById('client-address').textContent = data.meta['ADDRESS']     || '';
+      const agentName = data.meta['AGENT_NAME'] || 'AI';
+      document.getElementById('agent-badge-text').textContent = `${agentName}, AI Receptionist`;
+
+      // Stats
+      const cvt = data.stats['conversion_pct'];
+      document.getElementById('stat-calls').textContent       = data.stats['calls_today']    ?? '—';
+      document.getElementById('stat-reservations').textContent= data.stats['reservations']   ?? '—';
+      document.getElementById('stat-conversion').textContent  = cvt != null ? `${cvt}%` : '—';
+      document.getElementById('stat-covers').textContent      = data.stats['covers_booked']  ?? '—';
+      document.getElementById('stat-escalations').textContent = data.stats['escalations']    ?? '—';
+
+      // Allergy alerts
+      const allergyBody  = document.getElementById('allergy-body');
+      const allergyBadge = document.getElementById('allergy-badge');
+      allergyBadge.textContent = `${data.allergyAlerts.length} flagged`;
+      allergyBody.innerHTML = data.allergyAlerts.length
+        ? data.allergyAlerts.map(a => `
+            <div class="allergy-row">
+              <div class="allergy-left">
+                <div class="allergy-name">${a.name} <span class="allergy-time">${a.time}</span></div>
+                <div class="allergy-phone">${a.phone}</div>
+              </div>
+              <span class="red-pill">${a.allergy}</span>
+            </div>`).join('')
+        : '<div class="no-items">No allergy alerts today</div>';
+
+      // Escalations
+      const escBody  = document.getElementById('esc-body');
+      const escBadge = document.getElementById('esc-badge');
+      escBadge.textContent = `${data.escalations.length} pending`;
+      escBody.innerHTML = data.escalations.length
+        ? data.escalations.map(e => `
+            <div class="esc-row">
+              <div class="esc-top">
+                <div>
+                  <div class="esc-name">${e.name}</div>
+                  <div class="esc-phone">${e.phone}</div>
+                </div>
+                <span class="esc-type-pill">${e.type}</span>
+              </div>
+              <div class="esc-note">${e.note}</div>
+              <div class="esc-ts">Received ${e.received}</div>
+            </div>`).join('')
+        : '<div class="no-items">No pending escalations</div>';
+
+      // Reservations
+      const tbody = document.getElementById('res-tbody');
+      const sorted = data.reservations.map(r => ({ ...r, _iso: normalizeDate(r.date) }))
+        .sort((a, b) => (a._iso + String(a.time)).localeCompare(b._iso + String(b.time)));
+
+      tbody.innerHTML = '';
+      let lastDate = null;
+      for (const r of sorted) {
+        const iso = r._iso;
+        if (iso !== lastDate) {
+          const sep = document.createElement('tr');
+          sep.className = 'date-sep';
+          sep.innerHTML = `<td colspan="6">${dateLabel(iso)}</td>`;
+          tbody.appendChild(sep);
+          lastDate = iso;
+        }
+        const tr = document.createElement('tr');
+        const waNum = String(r.phone).replace(/\D/g, '');
+        const allergyStr = String(r.allergy ?? '').trim();
+        tr.innerHTML = `
+          <td class="td-name">${r.name}</td>
+          <td>${shortDate(iso)}</td>
+          <td>${r.time}</td>
+          <td>${r.guests}</td>
+          <td>${allergyStr
+            ? `<span class="td-allergy-pill">${allergyStr}</span>`
+            : `<span class="td-none">—</span>`}</td>
+          <td><a class="td-phone" href="https://wa.me/${waNum}" target="_blank">${r.phone}</a></td>`;
+        tbody.appendChild(tr);
+      }
+
+      // Chart
+      renderChart(
+        data.weekly.map(w => Number(w.calls) || 0),
+        data.weekly.map(w => Number(w.reservations) || 0)
+      );
+    }
+
+    // ── LOAD EXCEL ──
+    let workbook = null;
+
+    async function loadExcel() {
+      const statusMsg = document.getElementById('status-msg');
+      const errorMsg  = document.getElementById('error-msg');
+      const sel       = document.getElementById('client-select');
+
+      try {
+        const resp = await fetch('clients_data.xlsx');
+        if (!resp.ok) throw new Error(`Could not load clients_data.xlsx — HTTP ${resp.status}`);
+        const buf = await resp.arrayBuffer();
+        workbook = XLSX.read(buf, { type: 'array', cellDates: false });
+
+        sel.innerHTML = '';
+        for (const name of workbook.SheetNames) {
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          sel.appendChild(opt);
+        }
+
+        statusMsg.style.display = 'none';
+        sel.style.display = '';
+
+        loadClient(workbook.SheetNames[0]);
+        sel.addEventListener('change', () => loadClient(sel.value));
+      } catch (err) {
+        statusMsg.style.display = 'none';
+        errorMsg.style.display = '';
+        errorMsg.textContent = `Error: ${err.message}`;
+        console.error(err);
+      }
+    }
+
+    function loadClient(sheetName) {
+      if (!workbook) return;
+      const data = parseSheet(workbook.Sheets[sheetName]);
+      renderDashboard(data);
+    }
+
+    loadExcel();
   </script>
 </body>
 </html>
