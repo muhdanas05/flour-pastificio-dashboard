@@ -15,23 +15,24 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:          #F8F7F4;
-      --surface:     #FFFFFF;
-      --surface-2:   #F0EEE9;
-      --ink:         #18181A;
-      --ink-2:       #52504C;
-      --muted:       #94918A;
-      --copper:      #B8622A;
-      --copper-dim:  rgba(184, 98, 42, 0.09);
-      --red:         #C23B33;
-      --red-dim:     rgba(194, 59, 51, 0.08);
-      --green:       #2A9060;
-      --green-dim:   rgba(42, 144, 96, 0.09);
-      --amber:       #A87420;
-      --amber-dim:   rgba(168, 116, 32, 0.09);
-      --border:      rgba(0, 0, 0, 0.06);
-      --border-md:   rgba(0, 0, 0, 0.09);
-      --border-lg:   rgba(0, 0, 0, 0.14);
+      /* ── Palette: Crema / Nero / Oro / Verde scuro / Rosso pomodoro / Arancione / Terracotta ── */
+      --bg:          #F0E6D3;   /* Crema  */
+      --surface:     #FFFDF8;   /* near-white surface above crema bg */
+      --surface-2:   #F5DEB3;   /* Beige grano */
+      --ink:         #1A1A1A;   /* Nero */
+      --ink-2:       #4A3A2E;   /* warm dark brown, derived from Nero + Terracotta */
+      --muted:       #8A7A6A;   /* warm muted, derived */
+      --copper:      #C5963A;   /* Oro */
+      --copper-dim:  rgba(197, 150, 58, 0.12);
+      --red:         #C0392B;   /* Rosso pomodoro */
+      --red-dim:     rgba(192, 57, 43, 0.10);
+      --green:       #2D6A4F;   /* Verde scuro */
+      --green-dim:   rgba(45, 106, 79, 0.10);
+      --amber:       #E67E22;   /* Arancione caldo */
+      --amber-dim:   rgba(230, 126, 34, 0.10);
+      --border:      rgba(160, 82, 45, 0.09);   /* Terracotta-tinted */
+      --border-md:   rgba(160, 82, 45, 0.13);
+      --border-lg:   rgba(160, 82, 45, 0.20);
     }
 
     html { font-size: 16px; }
@@ -168,7 +169,7 @@
       color: var(--green);
       padding: 5px 13px;
       border-radius: 20px;
-      border: 1px solid rgba(42, 144, 96, 0.25);
+      border: 1px solid rgba(45, 106, 79, 0.25);
       background: var(--green-dim);
     }
 
@@ -177,7 +178,7 @@
       border-radius: 50%;
       background: var(--green);
       flex-shrink: 0;
-      box-shadow: 0 0 6px rgba(42, 144, 96, 0.55);
+      box-shadow: 0 0 6px rgba(45, 106, 79, 0.55);
     }
 
     /* ── STATS ── */
@@ -692,8 +693,8 @@
             {
               label: 'Calls',
               data: callsData,
-              backgroundColor: 'rgba(184, 98, 42, 0.11)',
-              borderColor:     'rgba(184, 98, 42, 0.60)',
+              backgroundColor: 'rgba(197, 150, 58, 0.14)',  /* Oro */
+              borderColor:     'rgba(197, 150, 58, 0.70)',
               borderWidth: 1.5,
               borderRadius: 3,
               borderSkipped: false,
@@ -701,8 +702,8 @@
             {
               label: 'Reservations',
               data: reservData,
-              backgroundColor: 'rgba(168, 116, 32, 0.11)',
-              borderColor:     'rgba(168, 116, 32, 0.60)',
+              backgroundColor: 'rgba(160, 82, 45, 0.13)',   /* Terracotta */
+              borderColor:     'rgba(160, 82, 45, 0.65)',
               borderWidth: 1.5,
               borderRadius: 3,
               borderSkipped: false,
@@ -715,11 +716,11 @@
           plugins: {
             legend: { display: false },
             tooltip: {
-              backgroundColor: '#FFFFFF',
-              borderColor: 'rgba(0,0,0,0.10)',
+              backgroundColor: '#FFFDF8',
+              borderColor: 'rgba(160, 82, 45, 0.18)',
               borderWidth: 1,
-              titleColor: '#18181A',
-              bodyColor: '#94918A',
+              titleColor: '#1A1A1A',   /* Nero */
+              bodyColor: '#8A7A6A',
               titleFont: { family: "'Inter', sans-serif", size: 11, weight: '500' },
               bodyFont:  { family: "'Inter', sans-serif", size: 11, weight: '300' },
               padding: 12,
@@ -729,12 +730,12 @@
           scales: {
             x: {
               grid: { display: false },
-              ticks: { color: '#94918A', font: { family: "'Inter', sans-serif", size: 11 } },
+              ticks: { color: '#8A7A6A', font: { family: "'Inter', sans-serif", size: 11 } },
               border: { display: false },
             },
             y: {
-              grid: { color: 'rgba(0,0,0,0.05)' },
-              ticks: { color: '#94918A', font: { family: "'Inter', sans-serif", size: 11 }, stepSize: 10 },
+              grid: { color: 'rgba(160, 82, 45, 0.07)' },
+              ticks: { color: '#8A7A6A', font: { family: "'Inter', sans-serif", size: 11 }, stepSize: 10 },
               border: { display: false },
               beginAtZero: true,
             }
