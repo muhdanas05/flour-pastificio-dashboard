@@ -9,19 +9,18 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      /* ── Palette: Crema / Nero / Oro / Verde scuro / Rosso pomodoro / Arancione / Terracotta ── */
-      --bg:          #F0E6D3;   /* Crema  */
-      --surface:     #FFFDF8;   /* near-white surface above crema bg */
+      --bg:          #F0E6D3;   /* Crema */
+      --surface:     #FFFDF8;
       --surface-2:   #F5DEB3;   /* Beige grano */
       --ink:         #1A1A1A;   /* Nero */
-      --ink-2:       #4A3A2E;   /* warm dark brown, derived from Nero + Terracotta */
-      --muted:       #8A7A6A;   /* warm muted, derived */
+      --ink-2:       #4A3A2E;
+      --muted:       #8A7A6A;
       --copper:      #C5963A;   /* Oro */
       --copper-dim:  rgba(197, 150, 58, 0.12);
       --red:         #C0392B;   /* Rosso pomodoro */
@@ -30,7 +29,7 @@
       --green-dim:   rgba(45, 106, 79, 0.10);
       --amber:       #E67E22;   /* Arancione caldo */
       --amber-dim:   rgba(230, 126, 34, 0.10);
-      --border:      rgba(160, 82, 45, 0.09);   /* Terracotta-tinted */
+      --border:      rgba(160, 82, 45, 0.09);
       --border-md:   rgba(160, 82, 45, 0.13);
       --border-lg:   rgba(160, 82, 45, 0.20);
     }
@@ -48,7 +47,6 @@
       line-height: 1.6;
     }
 
-    /* ── ANIMATIONS ── */
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(14px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -59,8 +57,9 @@
     .d3 { animation-delay: 0.28s; }
     .d4 { animation-delay: 0.42s; }
     .d5 { animation-delay: 0.56s; }
+    .d6 { animation-delay: 0.68s; }
 
-    /* ── CLIENT SELECTOR BAR ── */
+    /* ── CLIENT SELECTOR ── */
     .client-bar {
       display: flex;
       align-items: center;
@@ -91,27 +90,18 @@
       font-weight: 500;
       color: var(--ink);
       cursor: pointer;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394918A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A7A6A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 12px center;
       box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-      transition: border-color 0.15s, box-shadow 0.15s;
+      transition: border-color 0.15s;
       min-width: 220px;
     }
     .client-select:hover { border-color: var(--muted); }
     .client-select:focus { outline: 2px solid var(--copper); outline-offset: 2px; border-color: transparent; }
 
-    .status-msg {
-      font-size: 0.78rem;
-      color: var(--muted);
-      font-style: italic;
-    }
-
-    .error-msg {
-      font-size: 0.78rem;
-      color: var(--red);
-      font-weight: 400;
-    }
+    .status-msg { font-size: 0.78rem; color: var(--muted); font-style: italic; }
+    .error-msg  { font-size: 0.78rem; color: var(--red); }
 
     /* ── HEADER ── */
     .header {
@@ -127,7 +117,6 @@
       font-family: 'Fraunces', Georgia, serif;
       font-size: 1.9rem;
       font-weight: 400;
-      font-optical-sizing: auto;
       letter-spacing: -0.01em;
       color: var(--ink);
       line-height: 1;
@@ -185,7 +174,7 @@
     .stats-row {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      margin-bottom: 52px;
+      margin-bottom: 28px;
     }
 
     .stat-cell {
@@ -200,7 +189,6 @@
       font-family: 'Fraunces', Georgia, serif;
       font-size: 4rem;
       font-weight: 300;
-      font-optical-sizing: auto;
       line-height: 1;
       letter-spacing: -0.03em;
     }
@@ -224,6 +212,132 @@
       margin-top: 4px;
       font-weight: 400;
       opacity: 0.8;
+    }
+
+    /* ── SEAT AVAILABILITY CARD ── */
+    .seat-card {
+      background: var(--surface);
+      border-radius: 10px;
+      border: 1px solid var(--border-md);
+      padding: 20px 28px;
+      margin-bottom: 28px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .seat-left { flex: 1; min-width: 0; }
+
+    .seat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      gap: 16px;
+    }
+
+    .seat-title {
+      font-size: 0.57rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.17em;
+      color: var(--muted);
+    }
+
+    .seat-numbers {
+      font-size: 0.72rem;
+      color: var(--ink-2);
+      display: flex;
+      gap: 20px;
+    }
+
+    .seat-num-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .seat-num-val  { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 300; line-height: 1; }
+    .seat-num-lbl  { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); }
+
+    .seat-bar-wrap {
+      height: 8px;
+      background: var(--border-md);
+      border-radius: 99px;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .seat-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s;
+    }
+
+    .seat-status {
+      font-size: 0.68rem;
+      font-weight: 500;
+      margin-top: 8px;
+    }
+
+    .seat-status.ok     { color: var(--green); }
+    .seat-status.warn   { color: var(--amber); }
+    .seat-status.full   { color: var(--red); }
+
+    /* Capacity editor */
+    .seat-editor {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .seat-editor-label {
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      letter-spacing: 0.13em;
+      color: var(--muted);
+    }
+
+    .seat-editor-row { display: flex; align-items: center; gap: 8px; }
+
+    .seat-input {
+      width: 72px;
+      padding: 6px 10px;
+      font-family: 'Fraunces', serif;
+      font-size: 1.1rem;
+      font-weight: 300;
+      color: var(--ink);
+      background: var(--bg);
+      border: 1px solid var(--border-lg);
+      border-radius: 6px;
+      text-align: center;
+      transition: border-color 0.15s;
+    }
+    .seat-input:focus { outline: 2px solid var(--copper); outline-offset: 2px; border-color: transparent; }
+
+    .seat-save-btn {
+      padding: 6px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--surface);
+      background: var(--copper);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .seat-save-btn:hover { opacity: 0.85; }
+    .seat-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .seat-save-msg {
+      font-size: 0.62rem;
+      color: var(--green);
+      height: 14px;
+    }
+
+    .seat-unset-note {
+      font-size: 0.72rem;
+      color: var(--amber);
+      font-style: italic;
     }
 
     /* ── ALERTS GRID ── */
@@ -268,17 +382,8 @@
       border-radius: 4px;
     }
 
-    .badge-red {
-      background: var(--red-dim);
-      color: var(--red);
-      border: 1px solid rgba(194, 59, 51, 0.18);
-    }
-
-    .badge-amber {
-      background: var(--amber-dim);
-      color: var(--amber);
-      border: 1px solid rgba(168, 116, 32, 0.18);
-    }
+    .badge-red   { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(192,57,43,0.18); }
+    .badge-amber { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(230,126,34,0.18); }
 
     .card-body { padding: 0 22px; }
 
@@ -301,8 +406,6 @@
     }
     .allergy-row:last-child { border-bottom: none; }
 
-    .allergy-left { min-width: 0; }
-
     .allergy-name {
       font-size: 0.88rem;
       font-weight: 500;
@@ -312,18 +415,8 @@
       gap: 10px;
     }
 
-    .allergy-time {
-      font-size: 0.67rem;
-      color: var(--muted);
-      font-weight: 400;
-    }
-
-    .allergy-phone {
-      font-size: 0.67rem;
-      color: var(--copper);
-      margin-top: 3px;
-      font-weight: 400;
-    }
+    .allergy-time  { font-size: 0.67rem; color: var(--muted); font-weight: 400; }
+    .allergy-phone { font-size: 0.67rem; color: var(--copper); margin-top: 3px; font-weight: 400; }
 
     .red-pill {
       font-size: 0.56rem;
@@ -334,7 +427,7 @@
       border-radius: 4px;
       background: var(--red-dim);
       color: var(--red);
-      border: 1px solid rgba(194, 59, 51, 0.18);
+      border: 1px solid rgba(192,57,43,0.18);
       white-space: nowrap;
       flex-shrink: 0;
     }
@@ -354,18 +447,10 @@
       margin-bottom: 6px;
     }
 
-    .esc-name {
-      font-size: 0.88rem;
-      font-weight: 500;
-      color: var(--ink);
-    }
-
-    .esc-phone {
-      font-size: 0.67rem;
-      color: var(--copper);
-      margin-top: 2px;
-      font-weight: 400;
-    }
+    .esc-name  { font-size: 0.88rem; font-weight: 500; color: var(--ink); }
+    .esc-phone { font-size: 0.67rem; color: var(--copper); margin-top: 2px; font-weight: 400; }
+    .esc-note  { font-size: 0.75rem; color: var(--ink-2); line-height: 1.55; }
+    .esc-ts    { font-size: 0.61rem; color: var(--muted); margin-top: 6px; }
 
     .esc-type-pill {
       font-size: 0.52rem;
@@ -376,32 +461,14 @@
       border-radius: 4px;
       background: var(--amber-dim);
       color: var(--amber);
-      border: 1px solid rgba(168, 116, 32, 0.18);
+      border: 1px solid rgba(230,126,34,0.18);
       white-space: nowrap;
       flex-shrink: 0;
       margin-top: 2px;
     }
 
-    .esc-note {
-      font-size: 0.75rem;
-      color: var(--ink-2);
-      line-height: 1.55;
-    }
-
-    .esc-ts {
-      font-size: 0.61rem;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-
     /* ── SECTION LABEL ── */
-    .sec {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      margin-bottom: 20px;
-    }
-
+    .sec { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
     .sec-lbl {
       font-size: 0.57rem;
       font-weight: 500;
@@ -410,18 +477,12 @@
       color: var(--muted);
       white-space: nowrap;
     }
-
-    .sec-line {
-      flex: 1;
-      height: 1px;
-      background: var(--border-md);
-    }
+    .sec-line { flex: 1; height: 1px; background: var(--border-md); }
 
     /* ── TABLE ── */
     .tbl-outer { margin-bottom: 52px; }
 
     table { width: 100%; border-collapse: collapse; }
-
     thead tr { border-bottom: 1px solid var(--border-lg); }
 
     th {
@@ -446,13 +507,9 @@
     tr:last-child td { border-bottom: none; }
 
     tbody tr { transition: background 0.1s ease; }
-    tbody tr:hover td { background: rgba(0,0,0,0.025); }
+    tbody tr:hover td { background: rgba(0,0,0,0.02); }
 
-    .td-name {
-      font-size: 0.88rem;
-      font-weight: 500;
-      color: var(--ink);
-    }
+    .td-name { font-size: 0.88rem; font-weight: 500; color: var(--ink); }
 
     .td-allergy-pill {
       display: inline-block;
@@ -464,7 +521,7 @@
       border-radius: 4px;
       background: var(--red-dim);
       color: var(--red);
-      border: 1px solid rgba(194, 59, 51, 0.18);
+      border: 1px solid rgba(192,57,43,0.18);
     }
 
     .td-none { color: var(--muted); font-size: 0.78rem; }
@@ -515,7 +572,6 @@
     }
 
     .legend { display: flex; gap: 20px; padding-top: 3px; }
-
     .leg {
       display: flex;
       align-items: center;
@@ -526,7 +582,6 @@
       letter-spacing: 0.12em;
       color: var(--muted);
     }
-
     .leg-dot { width: 6px; height: 6px; border-radius: 50%; }
     .dot-copper { background: var(--copper); }
     .dot-amber  { background: var(--amber); }
@@ -539,6 +594,8 @@
       .stats-row { grid-template-columns: repeat(3, 1fr); gap: 36px 0; }
       .stat-cell:nth-child(3) { border-right: none; padding-right: 0; }
       .stat-cell:nth-child(4) { padding-left: 0; }
+      .seat-card { flex-direction: column; align-items: stretch; }
+      .seat-editor { align-items: flex-start; }
     }
 
     @media (max-width: 860px) {
@@ -560,7 +617,7 @@
     <span class="client-bar-label">Client</span>
     <select class="client-select" id="client-select" style="display:none;"></select>
     <span class="status-msg" id="status-msg">Loading clients…</span>
-    <span class="error-msg" id="error-msg" style="display:none;"></span>
+    <span class="error-msg"  id="error-msg"  style="display:none;"></span>
   </div>
 
   <!-- HEADER -->
@@ -603,8 +660,44 @@
     </div>
   </div>
 
+  <!-- SEAT AVAILABILITY -->
+  <div class="seat-card anim d3" id="seat-card">
+    <div class="seat-left">
+      <div class="seat-header">
+        <span class="seat-title">Seat Availability — Today</span>
+        <div class="seat-numbers" id="seat-numbers">
+          <div class="seat-num-item">
+            <span class="seat-num-val num-default" id="seat-available">—</span>
+            <span class="seat-num-lbl">Available</span>
+          </div>
+          <div class="seat-num-item">
+            <span class="seat-num-val" id="seat-booked" style="color:var(--copper)">—</span>
+            <span class="seat-num-lbl">Booked</span>
+          </div>
+          <div class="seat-num-item">
+            <span class="seat-num-val" id="seat-total" style="color:var(--muted)">—</span>
+            <span class="seat-num-lbl">Total</span>
+          </div>
+        </div>
+      </div>
+      <div class="seat-bar-wrap">
+        <div class="seat-bar-fill" id="seat-bar" style="width:0%; background:var(--green);"></div>
+      </div>
+      <div class="seat-status ok" id="seat-status">Set today's capacity to enable overbooking protection</div>
+    </div>
+
+    <div class="seat-editor">
+      <span class="seat-editor-label">Today's Capacity</span>
+      <div class="seat-editor-row">
+        <input class="seat-input" id="seat-input" type="number" min="1" max="999" placeholder="—">
+        <button class="seat-save-btn" id="seat-save-btn" onclick="saveCapacity()">Save</button>
+      </div>
+      <div class="seat-save-msg" id="seat-save-msg"></div>
+    </div>
+  </div>
+
   <!-- ALERTS -->
-  <div class="alerts-grid anim d3">
+  <div class="alerts-grid anim d4">
     <div class="card">
       <div class="card-head">
         <span class="card-head-label">Allergy Alerts</span>
@@ -623,7 +716,7 @@
   </div>
 
   <!-- UPCOMING RESERVATIONS -->
-  <div class="tbl-outer anim d4">
+  <div class="tbl-outer anim d5">
     <div class="sec">
       <span class="sec-lbl">Upcoming Reservations</span>
       <div class="sec-line"></div>
@@ -644,7 +737,7 @@
   </div>
 
   <!-- WEEKLY OVERVIEW -->
-  <div class="anim d5">
+  <div class="anim d6">
     <div class="sec">
       <span class="sec-lbl">Weekly Overview</span>
       <div class="sec-line"></div>
@@ -662,29 +755,34 @@
   </div>
 
   <script>
+    // ── CONFIG ── (use anon key in production with RLS enabled)
+    const SUPABASE_URL = 'https://esovvrmqjjpydsqpamec.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzb3Z2cm1xampweWRzcXBhbWVjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjMyMjQ2MiwiZXhwIjoyMDcxODk4NDYyfQ.S-CC9PNi51zf1PnTMD05zW53BNQkU2rxPDyOW41iH8o';
+
+    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
     // ── DATES ──
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
-    const isoDate = d => d.toISOString().slice(0, 10);
-
-    const D0 = isoDate(today);
-    const D1 = isoDate(addDays(today, 1));
-    const D2 = isoDate(addDays(today, 2));
+    const addDays  = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
+    const isoDate  = d => d.toISOString().slice(0, 10);
+    const TODAY    = isoDate(today);
+    const TOMORROW = isoDate(addDays(today, 1));
 
     document.getElementById('hdr-date').textContent =
       today.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-    // ── CHART ──
+    // ── STATE ──
+    let currentClientId = null;
+    let currentTodayReservations = [];
     let weeklyChart = null;
 
-    function renderChart(callsData, reservData) {
-      const labels = [];
-      for (let i = 6; i >= 0; i--)
-        labels.push(addDays(today, -i).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' }));
-
+    // ── CHART ──
+    function renderChart(weekly) {
+      const labels = weekly.map(w =>
+        new Date(w.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' })
+      );
       if (weeklyChart) weeklyChart.destroy();
-
       weeklyChart = new Chart(document.getElementById('weeklyChart').getContext('2d'), {
         type: 'bar',
         data: {
@@ -692,21 +790,17 @@
           datasets: [
             {
               label: 'Calls',
-              data: callsData,
-              backgroundColor: 'rgba(197, 150, 58, 0.14)',  /* Oro */
+              data: weekly.map(w => w.calls),
+              backgroundColor: 'rgba(197, 150, 58, 0.14)',
               borderColor:     'rgba(197, 150, 58, 0.70)',
-              borderWidth: 1.5,
-              borderRadius: 3,
-              borderSkipped: false,
+              borderWidth: 1.5, borderRadius: 3, borderSkipped: false,
             },
             {
               label: 'Reservations',
-              data: reservData,
-              backgroundColor: 'rgba(160, 82, 45, 0.13)',   /* Terracotta */
+              data: weekly.map(w => w.reservations),
+              backgroundColor: 'rgba(160, 82, 45, 0.13)',
               borderColor:     'rgba(160, 82, 45, 0.65)',
-              borderWidth: 1.5,
-              borderRadius: 3,
-              borderSkipped: false,
+              borderWidth: 1.5, borderRadius: 3, borderSkipped: false,
             }
           ]
         },
@@ -719,12 +813,11 @@
               backgroundColor: '#FFFDF8',
               borderColor: 'rgba(160, 82, 45, 0.18)',
               borderWidth: 1,
-              titleColor: '#1A1A1A',   /* Nero */
+              titleColor: '#1A1A1A',
               bodyColor: '#8A7A6A',
               titleFont: { family: "'Inter', sans-serif", size: 11, weight: '500' },
               bodyFont:  { family: "'Inter', sans-serif", size: 11, weight: '300' },
-              padding: 12,
-              cornerRadius: 6,
+              padding: 12, cornerRadius: 6,
             }
           },
           scales: {
@@ -746,91 +839,112 @@
       });
     }
 
-    // ── EXCEL PARSING ──
-    // Each sheet has: META key/value pairs, then SECTION markers followed by tabular data.
-    // SECTION names: STATS, ALLERGY_ALERTS, ESCALATIONS, RESERVATIONS, WEEKLY
-    function parseSheet(sheet) {
-      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: '', raw: true });
-      const out = { meta: {}, stats: {}, allergyAlerts: [], escalations: [], reservations: [], weekly: [] };
-      let section = 'META';
-      let headers = [];
+    // ── SEAT AVAILABILITY ──
+    function renderSeats(seatRow, bookedToday) {
+      const totalEl     = document.getElementById('seat-total');
+      const bookedEl    = document.getElementById('seat-booked');
+      const availEl     = document.getElementById('seat-available');
+      const barEl       = document.getElementById('seat-bar');
+      const statusEl    = document.getElementById('seat-status');
+      const inputEl     = document.getElementById('seat-input');
 
-      for (const row of rows) {
-        const a = String(row[0] ?? '').trim();
-        const b = String(row[1] ?? '').trim();
+      bookedEl.textContent = bookedToday;
 
-        if (a === 'SECTION') {
-          section = b;
-          headers = [];
-          continue;
-        }
-        if (row.every(c => String(c ?? '').trim() === '')) continue;
-
-        if (section === 'META') {
-          if (a) out.meta[a] = b;
-        } else {
-          if (headers.length === 0) {
-            headers = row.map(c => String(c ?? '').trim()).filter(Boolean);
-          } else if (row.some(c => String(c ?? '').trim() !== '')) {
-            const obj = {};
-            headers.forEach((h, i) => { obj[h] = row[i] !== undefined ? row[i] : ''; });
-            if      (section === 'STATS')          { headers.forEach((h, i) => { out.stats[h] = row[i]; }); }
-            else if (section === 'ALLERGY_ALERTS') out.allergyAlerts.push(obj);
-            else if (section === 'ESCALATIONS')    out.escalations.push(obj);
-            else if (section === 'RESERVATIONS')   out.reservations.push(obj);
-            else if (section === 'WEEKLY')         out.weekly.push(obj);
-          }
-        }
+      if (!seatRow || !seatRow.total_seats) {
+        totalEl.textContent = '—';
+        availEl.textContent = '—';
+        barEl.style.width   = '0%';
+        barEl.style.background = 'var(--border-md)';
+        statusEl.className  = 'seat-status warn';
+        statusEl.textContent = 'Capacity not set — AI may overbook. Set total seats to enable protection.';
+        inputEl.value = '';
+        return;
       }
-      return out;
-    }
 
-    // ── DATE HELPERS ──
-    function normalizeDate(val) {
-      if (!val) return '';
-      if (val instanceof Date) return isoDate(val);
-      // Handle Excel serial numbers (unlikely with our string storage but safe)
-      if (typeof val === 'number') {
-        const d = new Date(Math.round((val - 25569) * 86400 * 1000));
-        return isoDate(d);
+      const total     = seatRow.total_seats;
+      const available = Math.max(0, total - bookedToday);
+      const pct       = Math.min(100, Math.round((bookedToday / total) * 100));
+
+      totalEl.textContent = total;
+      bookedEl.textContent = bookedToday;
+      availEl.textContent = available;
+      inputEl.value = total;
+
+      barEl.style.width = pct + '%';
+
+      if (pct >= 100) {
+        barEl.style.background = 'var(--red)';
+        statusEl.className = 'seat-status full';
+        statusEl.textContent = 'Fully booked — AI is blocking new reservations for today.';
+      } else if (pct >= 80) {
+        barEl.style.background = 'var(--amber)';
+        statusEl.className = 'seat-status warn';
+        statusEl.textContent = `Almost full — ${available} seat${available !== 1 ? 's' : ''} remaining today.`;
+      } else {
+        barEl.style.background = 'var(--green)';
+        statusEl.className = 'seat-status ok';
+        statusEl.textContent = `${available} seat${available !== 1 ? 's' : ''} available today (${100 - pct}% capacity remaining).`;
       }
-      return String(val).slice(0, 10);
     }
 
-    function dateLabel(iso) {
-      if (iso === D0) return 'Today';
-      if (iso === D1) return 'Tomorrow';
-      return new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    async function saveCapacity() {
+      if (!currentClientId) return;
+      const input = document.getElementById('seat-input');
+      const btn   = document.getElementById('seat-save-btn');
+      const msg   = document.getElementById('seat-save-msg');
+      const val   = parseInt(input.value, 10);
+
+      if (!val || val < 1) { msg.style.color = 'var(--red)'; msg.textContent = 'Enter a valid number'; return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+
+      const { error } = await db.from('seat_availability').upsert(
+        { client_id: currentClientId, date: TODAY, total_seats: val },
+        { onConflict: 'client_id,date' }
+      );
+
+      btn.disabled = false;
+      btn.textContent = 'Save';
+
+      if (error) {
+        msg.style.color = 'var(--red)';
+        msg.textContent = 'Error saving';
+      } else {
+        msg.style.color = 'var(--green)';
+        msg.textContent = 'Saved ✓';
+        setTimeout(() => { msg.textContent = ''; }, 2500);
+        const bookedToday = currentTodayReservations.reduce((s, r) => s + (r.guests || 0), 0);
+        renderSeats({ total_seats: val }, bookedToday);
+      }
     }
 
-    function shortDate(iso) {
-      return new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-    }
-
-    // ── RENDER ──
-    function renderDashboard(data) {
+    // ── RENDER DASHBOARD ──
+    function renderDashboard({ client, stats, allergyAlerts, escalations, reservations, weekly, seats }) {
       // Header
-      document.getElementById('client-name').textContent    = data.meta['CLIENT_NAME'] || '—';
-      document.getElementById('client-address').textContent = data.meta['ADDRESS']     || '';
-      const agentName = data.meta['AGENT_NAME'] || 'AI';
-      document.getElementById('agent-badge-text').textContent = `${agentName}, AI Receptionist`;
+      document.getElementById('client-name').textContent    = client.name;
+      document.getElementById('client-address').textContent = client.address || '';
+      document.getElementById('agent-badge-text').textContent = `${client.agent_name || 'AI'}, AI Receptionist`;
 
       // Stats
-      const cvt = data.stats['conversion_pct'];
-      document.getElementById('stat-calls').textContent       = data.stats['calls_today']    ?? '—';
-      document.getElementById('stat-reservations').textContent= data.stats['reservations']   ?? '—';
-      document.getElementById('stat-conversion').textContent  = cvt != null ? `${cvt}%` : '—';
-      document.getElementById('stat-covers').textContent      = data.stats['covers_booked']  ?? '—';
-      document.getElementById('stat-escalations').textContent = data.stats['escalations']    ?? '—';
+      const s = stats || {};
+      document.getElementById('stat-calls').textContent        = s.calls_today    ?? '—';
+      document.getElementById('stat-reservations').textContent = s.reservations   ?? '—';
+      document.getElementById('stat-conversion').textContent   = s.conversion_pct != null ? `${s.conversion_pct}%` : '—';
+      document.getElementById('stat-covers').textContent       = s.covers_booked  ?? '—';
+      document.getElementById('stat-escalations').textContent  = s.escalations    ?? '—';
+
+      // Seat availability — booked = sum of guests from today's reservations
+      currentTodayReservations = reservations.filter(r => r.date === TODAY);
+      const bookedToday = currentTodayReservations.reduce((sum, r) => sum + (r.guests || 0), 0);
+      renderSeats(seats, bookedToday);
 
       // Allergy alerts
-      const allergyBody  = document.getElementById('allergy-body');
-      const allergyBadge = document.getElementById('allergy-badge');
-      allergyBadge.textContent = `${data.allergyAlerts.length} flagged`;
-      allergyBody.innerHTML = data.allergyAlerts.length
-        ? data.allergyAlerts.map(a => `
+      document.getElementById('allergy-badge').textContent = `${allergyAlerts.length} flagged`;
+      document.getElementById('allergy-body').innerHTML = allergyAlerts.length
+        ? allergyAlerts.map(a => `
             <div class="allergy-row">
-              <div class="allergy-left">
+              <div>
                 <div class="allergy-name">${a.name} <span class="allergy-time">${a.time}</span></div>
                 <div class="allergy-phone">${a.phone}</div>
               </div>
@@ -839,11 +953,9 @@
         : '<div class="no-items">No allergy alerts today</div>';
 
       // Escalations
-      const escBody  = document.getElementById('esc-body');
-      const escBadge = document.getElementById('esc-badge');
-      escBadge.textContent = `${data.escalations.length} pending`;
-      escBody.innerHTML = data.escalations.length
-        ? data.escalations.map(e => `
+      document.getElementById('esc-badge').textContent = `${escalations.length} pending`;
+      document.getElementById('esc-body').innerHTML = escalations.length
+        ? escalations.map(e => `
             <div class="esc-row">
               <div class="esc-top">
                 <div>
@@ -857,86 +969,109 @@
             </div>`).join('')
         : '<div class="no-items">No pending escalations</div>';
 
-      // Reservations
-      const tbody = document.getElementById('res-tbody');
-      const sorted = data.reservations.map(r => ({ ...r, _iso: normalizeDate(r.date) }))
-        .sort((a, b) => (a._iso + String(a.time)).localeCompare(b._iso + String(b.time)));
+      // Reservations table
+      const tbody  = document.getElementById('res-tbody');
+      const sorted = [...reservations].sort((a, b) =>
+        (a.date + a.time).localeCompare(b.date + b.time)
+      );
+
+      const dateLabel = iso => {
+        if (iso === TODAY)    return 'Today';
+        if (iso === TOMORROW) return 'Tomorrow';
+        return new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+      };
+      const shortDate = iso =>
+        new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
       tbody.innerHTML = '';
       let lastDate = null;
       for (const r of sorted) {
-        const iso = r._iso;
-        if (iso !== lastDate) {
+        if (r.date !== lastDate) {
           const sep = document.createElement('tr');
           sep.className = 'date-sep';
-          sep.innerHTML = `<td colspan="6">${dateLabel(iso)}</td>`;
+          sep.innerHTML = `<td colspan="6">${dateLabel(r.date)}</td>`;
           tbody.appendChild(sep);
-          lastDate = iso;
+          lastDate = r.date;
         }
-        const tr = document.createElement('tr');
-        const waNum = String(r.phone).replace(/\D/g, '');
-        const allergyStr = String(r.allergy ?? '').trim();
+        const tr  = document.createElement('tr');
+        const wa  = String(r.phone).replace(/\D/g, '');
+        const al  = (r.allergy || '').trim();
         tr.innerHTML = `
-          <td class="td-name">${r.name}</td>
-          <td>${shortDate(iso)}</td>
+          <td class="td-name">${r.guest_name}</td>
+          <td>${shortDate(r.date)}</td>
           <td>${r.time}</td>
           <td>${r.guests}</td>
-          <td>${allergyStr
-            ? `<span class="td-allergy-pill">${allergyStr}</span>`
-            : `<span class="td-none">—</span>`}</td>
-          <td><a class="td-phone" href="https://wa.me/${waNum}" target="_blank">${r.phone}</a></td>`;
+          <td>${al ? `<span class="td-allergy-pill">${al}</span>` : `<span class="td-none">—</span>`}</td>
+          <td><a class="td-phone" href="https://wa.me/${wa}" target="_blank">${r.phone}</a></td>`;
         tbody.appendChild(tr);
       }
 
       // Chart
-      renderChart(
-        data.weekly.map(w => Number(w.calls) || 0),
-        data.weekly.map(w => Number(w.reservations) || 0)
-      );
+      renderChart(weekly);
     }
 
-    // ── LOAD EXCEL ──
-    let workbook = null;
+    // ── LOAD CLIENT ──
+    async function loadClient(clientId) {
+      currentClientId = clientId;
 
-    async function loadExcel() {
+      const sevenDaysAgo = isoDate(addDays(today, -6));
+
+      const [statsRes, allergyRes, escRes, resRes, weeklyRes, seatRes] = await Promise.all([
+        db.from('daily_stats')     .select('*').eq('client_id', clientId).eq('date', TODAY).maybeSingle(),
+        db.from('allergy_alerts')  .select('*').eq('client_id', clientId).eq('date', TODAY),
+        db.from('escalations')     .select('*').eq('client_id', clientId).eq('date', TODAY),
+        db.from('reservations')    .select('*').eq('client_id', clientId).gte('date', TODAY).order('date').order('time'),
+        db.from('weekly_metrics')  .select('*').eq('client_id', clientId).gte('date', sevenDaysAgo).order('date'),
+        db.from('seat_availability').select('*').eq('client_id', clientId).eq('date', TODAY).maybeSingle(),
+      ]);
+
+      const client = document.getElementById('client-select').selectedOptions[0];
+      renderDashboard({
+        client:       { name: client.textContent, address: client.dataset.address, agent_name: client.dataset.agent },
+        stats:        statsRes.data,
+        allergyAlerts: allergyRes.data  || [],
+        escalations:   escRes.data      || [],
+        reservations:  resRes.data      || [],
+        weekly:        weeklyRes.data   || [],
+        seats:         seatRes.data,
+      });
+    }
+
+    // ── INIT ──
+    async function init() {
       const statusMsg = document.getElementById('status-msg');
       const errorMsg  = document.getElementById('error-msg');
       const sel       = document.getElementById('client-select');
 
-      try {
-        const resp = await fetch('clients_data.xlsx');
-        if (!resp.ok) throw new Error(`Could not load clients_data.xlsx — HTTP ${resp.status}`);
-        const buf = await resp.arrayBuffer();
-        workbook = XLSX.read(buf, { type: 'array', cellDates: false });
+      const { data: clients, error } = await db.from('clients').select('*').order('name');
 
-        sel.innerHTML = '';
-        for (const name of workbook.SheetNames) {
-          const opt = document.createElement('option');
-          opt.value = name;
-          opt.textContent = name;
-          sel.appendChild(opt);
-        }
-
+      if (error || !clients?.length) {
         statusMsg.style.display = 'none';
-        sel.style.display = '';
-
-        loadClient(workbook.SheetNames[0]);
-        sel.addEventListener('change', () => loadClient(sel.value));
-      } catch (err) {
-        statusMsg.style.display = 'none';
-        errorMsg.style.display = '';
-        errorMsg.textContent = `Error: ${err.message}`;
-        console.error(err);
+        errorMsg.style.display  = '';
+        errorMsg.textContent = error
+          ? `Supabase error: ${error.message}`
+          : 'No clients found. Run supabase_setup.sql first.';
+        return;
       }
+
+      sel.innerHTML = '';
+      for (const c of clients) {
+        const opt = document.createElement('option');
+        opt.value           = c.id;
+        opt.textContent     = c.name;
+        opt.dataset.address = c.address || '';
+        opt.dataset.agent   = c.agent_name || 'AI';
+        sel.appendChild(opt);
+      }
+
+      statusMsg.style.display = 'none';
+      sel.style.display = '';
+
+      await loadClient(clients[0].id);
+      sel.addEventListener('change', () => loadClient(sel.value));
     }
 
-    function loadClient(sheetName) {
-      if (!workbook) return;
-      const data = parseSheet(workbook.Sheets[sheetName]);
-      renderDashboard(data);
-    }
-
-    loadExcel();
+    init();
   </script>
 </body>
 </html>
