@@ -764,7 +764,8 @@
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const addDays  = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
-    const isoDate  = d => d.toISOString().slice(0, 10);
+    // Use local date parts — toISOString() shifts to UTC and breaks non-UTC timezones
+    const isoDate  = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     const TODAY    = isoDate(today);
     const TOMORROW = isoDate(addDays(today, 1));
 
