@@ -1363,22 +1363,17 @@
       document.getElementById('hdr-date').textContent =
         TODAY_DATE.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-      // Stats
+      // Stats — column names: calls_today, reservations, conversion_pct, covers_booked, escalations
       const s = statsRes.data || {};
-      const calls = s.calls_handled    != null ? s.calls_handled    : null;
-      const res   = s.reservations_made != null ? s.reservations_made : null;
-      const escs  = s.escalations       != null ? s.escalations       : null;
+      document.getElementById('stat-calls').textContent        = s.calls_today    != null ? s.calls_today    : '—';
+      document.getElementById('stat-reservations').textContent = s.reservations   != null ? s.reservations   : '—';
+      document.getElementById('stat-conversion').textContent   = s.conversion_pct != null ? `${s.conversion_pct}%` : '—';
+      document.getElementById('stat-covers').textContent       = s.covers_booked  != null ? s.covers_booked  : '—';
+      document.getElementById('stat-escalations').textContent  = s.escalations    != null ? s.escalations    : '—';
 
-      document.getElementById('stat-calls').textContent       = calls != null ? calls : '—';
-      document.getElementById('stat-reservations').textContent = res  != null ? res   : '—';
-      document.getElementById('stat-conversion').textContent  = (calls && res != null)
-        ? `${Math.round((res / calls) * 100)}%` : '—';
-
-      // Covers today = sum of guests from today's reservations
+      // Covers for seat availability = sum of guests from today's actual reservations
       const todayRes    = resRes.data || [];
       const coversToday = todayRes.reduce((sum, r) => sum + (r.guests || 0), 0);
-      document.getElementById('stat-covers').textContent      = coversToday || '—';
-      document.getElementById('stat-escalations').textContent = escs != null ? escs : '—';
 
       // Seat availability
       renderSeats(seatRes.data, coversToday);
