@@ -15,19 +15,19 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:          #F0E6D3;   /* Crema */
+      --bg:          #F0E6D3;
       --surface:     #FFFDF8;
-      --surface-2:   #F5DEB3;   /* Beige grano */
-      --ink:         #1A1A1A;   /* Nero */
+      --surface-2:   #F5DEB3;
+      --ink:         #1A1A1A;
       --ink-2:       #4A3A2E;
       --muted:       #8A7A6A;
-      --copper:      #C5963A;   /* Oro */
+      --copper:      #C5963A;
       --copper-dim:  rgba(197, 150, 58, 0.12);
-      --red:         #C0392B;   /* Rosso pomodoro */
+      --red:         #C0392B;
       --red-dim:     rgba(192, 57, 43, 0.10);
-      --green:       #2D6A4F;   /* Verde scuro */
+      --green:       #2D6A4F;
       --green-dim:   rgba(45, 106, 79, 0.10);
-      --amber:       #E67E22;   /* Arancione caldo */
+      --amber:       #E67E22;
       --amber-dim:   rgba(230, 126, 34, 0.10);
       --border:      rgba(160, 82, 45, 0.09);
       --border-md:   rgba(160, 82, 45, 0.13);
@@ -42,9 +42,179 @@
       font-family: 'Inter', system-ui, sans-serif;
       font-weight: 300;
       min-height: 100vh;
-      padding: 40px 72px 120px;
       -webkit-font-smoothing: antialiased;
       line-height: 1.6;
+    }
+
+    /* ══════════════════════════════════════════════
+       LOGIN SCREEN
+    ══════════════════════════════════════════════ */
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: var(--bg);
+    }
+
+    .login-wrap {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .login-brand {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .login-wordmark {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 2rem;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .login-sub {
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border-lg);
+      border-radius: 14px;
+      padding: 40px 36px 32px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .login-title {
+      font-family: 'Fraunces', Georgia, serif;
+      font-style: italic;
+      font-size: 1.05rem;
+      font-weight: 300;
+      color: var(--ink-2);
+      margin-bottom: 28px;
+    }
+
+    .login-field {
+      margin-bottom: 16px;
+    }
+
+    .login-label {
+      display: block;
+      font-size: 0.58rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 11px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: var(--ink);
+      background: var(--bg);
+      border: 1px solid var(--border-lg);
+      border-radius: 8px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .login-input:focus {
+      outline: none;
+      border-color: var(--copper);
+      box-shadow: 0 0 0 3px var(--copper-dim);
+    }
+
+    .login-btn {
+      width: 100%;
+      margin-top: 8px;
+      padding: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: var(--surface);
+      background: var(--copper);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .login-btn:hover  { opacity: 0.88; }
+    .login-btn:active { transform: scale(0.99); }
+
+    .login-error {
+      margin-top: 14px;
+      font-size: 0.78rem;
+      color: var(--red);
+      text-align: center;
+      min-height: 18px;
+    }
+
+    .login-hints {
+      margin-top: 28px;
+      padding: 16px 18px;
+      background: var(--copper-dim);
+      border: 1px solid rgba(197,150,58,0.18);
+      border-radius: 8px;
+    }
+
+    .login-hints-title {
+      font-size: 0.58rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--copper);
+      margin-bottom: 10px;
+    }
+
+    .login-hint-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(197,150,58,0.12);
+      gap: 12px;
+    }
+    .login-hint-row:last-child { border-bottom: none; }
+
+    .hint-role {
+      font-size: 0.67rem;
+      color: var(--ink-2);
+      font-weight: 500;
+    }
+    .hint-creds {
+      font-family: 'Inter', monospace;
+      font-size: 0.62rem;
+      color: var(--muted);
+    }
+    .hint-badge {
+      font-size: 0.52rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 2px 7px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+    .hint-badge.admin  { background: var(--copper-dim); color: var(--copper); border: 1px solid rgba(197,150,58,0.22); }
+    .hint-badge.client { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(45,106,79,0.22);  }
+
+    /* ══════════════════════════════════════════════
+       DASHBOARD
+    ══════════════════════════════════════════════ */
+    #dashboard {
+      padding: 40px 72px 120px;
     }
 
     @keyframes fadeUp {
@@ -59,17 +229,33 @@
     .d5 { animation-delay: 0.56s; }
     .d6 { animation-delay: 0.68s; }
 
-    /* ── CLIENT SELECTOR ── */
-    .client-bar {
+    /* ── TOP BAR ── */
+    .top-bar {
       display: flex;
       align-items: center;
       gap: 14px;
-      margin-bottom: 28px;
-      padding-bottom: 20px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
       border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
     }
 
-    .client-bar-label {
+    .top-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .top-label {
       font-size: 0.57rem;
       font-weight: 500;
       text-transform: uppercase;
@@ -95,13 +281,131 @@
       background-position: right 12px center;
       box-shadow: 0 1px 3px rgba(0,0,0,0.06);
       transition: border-color 0.15s;
-      min-width: 220px;
+      min-width: 200px;
     }
     .client-select:hover { border-color: var(--muted); }
     .client-select:focus { outline: 2px solid var(--copper); outline-offset: 2px; border-color: transparent; }
 
     .status-msg { font-size: 0.78rem; color: var(--muted); font-style: italic; }
     .error-msg  { font-size: 0.78rem; color: var(--red); }
+
+    /* session pill */
+    .session-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border-lg);
+      border-radius: 20px;
+      font-size: 0.62rem;
+      font-weight: 500;
+      color: var(--ink-2);
+    }
+    .session-role {
+      font-size: 0.52rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .session-role.admin  { background: var(--copper-dim); color: var(--copper); }
+    .session-role.client { background: var(--green-dim);  color: var(--green); }
+
+    .logout-btn {
+      padding: 7px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--border-lg);
+      border-radius: 7px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .logout-btn:hover { color: var(--ink); border-color: var(--muted); }
+
+    /* ── DATE NAV ── */
+    .date-nav {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+      padding: 14px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border-md);
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+
+    .date-nav-btn {
+      padding: 7px 13px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--ink-2);
+      background: var(--bg);
+      border: 1px solid var(--border-lg);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s;
+      white-space: nowrap;
+    }
+    .date-nav-btn:hover { background: var(--surface-2); border-color: var(--muted); }
+
+    .date-nav-btn.today-btn {
+      color: var(--copper);
+      border-color: rgba(197,150,58,0.30);
+      background: var(--copper-dim);
+    }
+    .date-nav-btn.today-btn:hover { background: rgba(197,150,58,0.20); }
+
+    .date-display {
+      flex: 1;
+      text-align: center;
+      font-family: 'Fraunces', Georgia, serif;
+      font-style: italic;
+      font-size: 1rem;
+      font-weight: 300;
+      color: var(--ink);
+    }
+
+    .date-display-sub {
+      font-family: 'Inter', sans-serif;
+      font-style: normal;
+      font-size: 0.6rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    .date-input-wrap { position: relative; }
+    .date-native {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .date-pick-btn {
+      padding: 7px 13px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--muted);
+      background: var(--bg);
+      border: 1px solid var(--border-lg);
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.12s;
+    }
+    .date-pick-btn:hover { background: var(--surface-2); }
 
     /* ── HEADER ── */
     .header {
@@ -276,11 +580,10 @@
       margin-top: 8px;
     }
 
-    .seat-status.ok     { color: var(--green); }
-    .seat-status.warn   { color: var(--amber); }
-    .seat-status.full   { color: var(--red); }
+    .seat-status.ok   { color: var(--green); }
+    .seat-status.warn { color: var(--amber); }
+    .seat-status.full { color: var(--red); }
 
-    /* Capacity editor */
     .seat-editor {
       display: flex;
       flex-direction: column;
@@ -332,12 +635,6 @@
       font-size: 0.62rem;
       color: var(--green);
       height: 14px;
-    }
-
-    .seat-unset-note {
-      font-size: 0.72rem;
-      color: var(--amber);
-      font-style: italic;
     }
 
     /* ── ALERTS GRID ── */
@@ -535,18 +832,6 @@
     }
     .td-phone:hover { color: var(--ink); }
 
-    .date-sep td {
-      padding: 8px 0;
-      font-family: 'Fraunces', Georgia, serif;
-      font-style: italic;
-      font-size: 0.8rem;
-      color: var(--muted);
-      background: transparent;
-      border-bottom: none;
-      border-top: 1px solid var(--border-md);
-    }
-    .date-sep:first-child td { border-top: none; }
-
     /* ── CHART ── */
     .chart-card {
       background: var(--surface);
@@ -590,7 +875,7 @@
 
     /* ── RESPONSIVE ── */
     @media (max-width: 1100px) {
-      body { padding: 32px 40px 100px; }
+      #dashboard { padding: 32px 40px 100px; }
       .stats-row { grid-template-columns: repeat(3, 1fr); gap: 36px 0; }
       .stat-cell:nth-child(3) { border-right: none; padding-right: 0; }
       .stat-cell:nth-child(4) { padding-left: 0; }
@@ -599,7 +884,7 @@
     }
 
     @media (max-width: 860px) {
-      body { padding: 24px 24px 80px; }
+      #dashboard { padding: 24px 24px 80px; }
       .stats-row { grid-template-columns: 1fr 1fr; gap: 32px 0; }
       .stat-num { font-size: 3.2rem; }
       .alerts-grid { grid-template-columns: 1fr; }
@@ -607,177 +892,354 @@
       .stat-cell:nth-child(even) { border-right: none; padding-right: 0; }
       .stat-cell:nth-child(odd)  { border-right: 1px solid var(--border-md); }
       .stat-cell:last-child      { border-right: none; }
+      .date-nav { flex-wrap: wrap; }
     }
   </style>
 </head>
 <body>
 
-  <!-- CLIENT SELECTOR -->
-  <div class="client-bar anim d1">
-    <span class="client-bar-label">Client</span>
-    <select class="client-select" id="client-select" style="display:none;"></select>
-    <span class="status-msg" id="status-msg">Loading clients…</span>
-    <span class="error-msg"  id="error-msg"  style="display:none;"></span>
-  </div>
+  <!-- ═══════════════════════════════════ LOGIN ═══════════════════════════════════ -->
+  <div id="login-screen">
+    <div class="login-wrap">
+      <div class="login-brand">
+        <div class="login-wordmark">Voice AI</div>
+        <div class="login-sub">Restaurant Dashboard</div>
+      </div>
 
-  <!-- HEADER -->
-  <header class="header anim d1">
-    <div>
-      <div class="wordmark" id="client-name">—</div>
-      <div class="wordmark-address" id="client-address"></div>
-    </div>
-    <div class="header-right">
-      <div class="hdr-date" id="hdr-date"></div>
-      <span class="agent-badge">
-        <span class="agent-dot"></span>
-        <span id="agent-badge-text">AI Receptionist</span>
-      </span>
-    </div>
-  </header>
+      <div class="login-card">
+        <div class="login-title">Sign in to your account</div>
 
-  <!-- STATS -->
-  <div class="stats-row anim d2">
-    <div class="stat-cell">
-      <div class="stat-num num-default" id="stat-calls">—</div>
-      <div class="stat-lbl">Calls Today</div>
-    </div>
-    <div class="stat-cell">
-      <div class="stat-num num-default" id="stat-reservations">—</div>
-      <div class="stat-lbl">Reservations</div>
-    </div>
-    <div class="stat-cell">
-      <div class="stat-num num-copper" id="stat-conversion">—</div>
-      <div class="stat-lbl">Conversion</div>
-    </div>
-    <div class="stat-cell">
-      <div class="stat-num num-default" id="stat-covers">—</div>
-      <div class="stat-lbl">Covers Booked</div>
-    </div>
-    <div class="stat-cell">
-      <div class="stat-num num-red" id="stat-escalations">—</div>
-      <div class="stat-lbl">Escalations</div>
-      <div class="stat-sub">Needs human review</div>
-    </div>
-  </div>
+        <div class="login-field">
+          <label class="login-label" for="l-user">Username</label>
+          <input class="login-input" id="l-user" type="text" autocomplete="username" placeholder="username">
+        </div>
 
-  <!-- SEAT AVAILABILITY -->
-  <div class="seat-card anim d3" id="seat-card">
-    <div class="seat-left">
-      <div class="seat-header">
-        <span class="seat-title">Seat Availability — Today</span>
-        <div class="seat-numbers" id="seat-numbers">
-          <div class="seat-num-item">
-            <span class="seat-num-val num-default" id="seat-available">—</span>
-            <span class="seat-num-lbl">Available</span>
-          </div>
-          <div class="seat-num-item">
-            <span class="seat-num-val" id="seat-booked" style="color:var(--copper)">—</span>
-            <span class="seat-num-lbl">Booked</span>
-          </div>
-          <div class="seat-num-item">
-            <span class="seat-num-val" id="seat-total" style="color:var(--muted)">—</span>
-            <span class="seat-num-lbl">Total</span>
-          </div>
+        <div class="login-field">
+          <label class="login-label" for="l-pass">Password</label>
+          <input class="login-input" id="l-pass" type="password" autocomplete="current-password" placeholder="••••••••">
+        </div>
+
+        <button class="login-btn" id="login-btn" onclick="doLogin()">Sign In</button>
+        <div class="login-error" id="login-error"></div>
+      </div>
+
+      <div class="login-hints">
+        <div class="login-hints-title">Demo credentials</div>
+        <div class="login-hint-row">
+          <span class="hint-role">Admin</span>
+          <span class="hint-creds">admin / admin2024</span>
+          <span class="hint-badge admin">Admin</span>
+        </div>
+        <div class="login-hint-row">
+          <span class="hint-role">Flour Pastificio</span>
+          <span class="hint-creds">flour / flour2024</span>
+          <span class="hint-badge client">Client</span>
+        </div>
+        <div class="login-hint-row">
+          <span class="hint-role">La Trattoria</span>
+          <span class="hint-creds">trattoria / trattoria2024</span>
+          <span class="hint-badge client">Client</span>
+        </div>
+        <div class="login-hint-row">
+          <span class="hint-role">Osteria del Vino</span>
+          <span class="hint-creds">osteria / osteria2024</span>
+          <span class="hint-badge client">Client</span>
         </div>
       </div>
-      <div class="seat-bar-wrap">
-        <div class="seat-bar-fill" id="seat-bar" style="width:0%; background:var(--green);"></div>
-      </div>
-      <div class="seat-status ok" id="seat-status">Set today's capacity to enable overbooking protection</div>
-    </div>
-
-    <div class="seat-editor">
-      <span class="seat-editor-label">Today's Capacity</span>
-      <div class="seat-editor-row">
-        <input class="seat-input" id="seat-input" type="number" min="1" max="999" placeholder="—">
-        <button class="seat-save-btn" id="seat-save-btn" onclick="saveCapacity()">Save</button>
-      </div>
-      <div class="seat-save-msg" id="seat-save-msg"></div>
     </div>
   </div>
 
-  <!-- ALERTS -->
-  <div class="alerts-grid anim d4">
-    <div class="card">
-      <div class="card-head">
-        <span class="card-head-label">Allergy Alerts</span>
-        <span class="badge badge-red" id="allergy-badge">—</span>
+  <!-- ═══════════════════════════════════ DASHBOARD ═══════════════════════════════ -->
+  <div id="dashboard" style="display:none;">
+
+    <!-- TOP BAR -->
+    <div class="top-bar anim d1">
+      <div class="top-bar-left">
+        <span class="top-label" id="client-bar-label">Client</span>
+        <select class="client-select" id="client-select" style="display:none;"></select>
+        <span class="status-msg" id="status-msg">Loading…</span>
+        <span class="error-msg"  id="error-msg" style="display:none;"></span>
       </div>
-      <div class="card-body" id="allergy-body"></div>
-    </div>
-
-    <div class="card">
-      <div class="card-head">
-        <span class="card-head-label">Human Escalations</span>
-        <span class="badge badge-amber" id="esc-badge">—</span>
-      </div>
-      <div class="card-body" id="esc-body"></div>
-    </div>
-  </div>
-
-  <!-- UPCOMING RESERVATIONS -->
-  <div class="tbl-outer anim d5">
-    <div class="sec">
-      <span class="sec-lbl">Upcoming Reservations</span>
-      <div class="sec-line"></div>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Guest</th>
-          <th>Date</th>
-          <th>Time</th>
-          <th>Guests</th>
-          <th>Allergies</th>
-          <th>WhatsApp</th>
-        </tr>
-      </thead>
-      <tbody id="res-tbody"></tbody>
-    </table>
-  </div>
-
-  <!-- WEEKLY OVERVIEW -->
-  <div class="anim d6">
-    <div class="sec">
-      <span class="sec-lbl">Weekly Overview</span>
-      <div class="sec-line"></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-head">
-        <div class="chart-title">Calls and reservations, last 7 days</div>
-        <div class="legend">
-          <div class="leg"><div class="leg-dot dot-copper"></div>Calls</div>
-          <div class="leg"><div class="leg-dot dot-amber"></div>Reservations</div>
+      <div class="top-bar-right">
+        <div class="session-pill">
+          <span id="session-user"></span>
+          <span class="session-role" id="session-role-badge"></span>
         </div>
+        <button class="logout-btn" onclick="doLogout()">Sign out</button>
       </div>
-      <canvas id="weeklyChart"></canvas>
     </div>
-  </div>
+
+    <!-- DATE NAV -->
+    <div class="date-nav anim d1">
+      <button class="date-nav-btn" onclick="shiftDate(-1)">← Previous</button>
+      <div style="flex:1; text-align:center;">
+        <div class="date-display" id="date-display"></div>
+        <div class="date-display-sub" id="date-display-sub"></div>
+      </div>
+      <div class="date-input-wrap">
+        <div class="date-pick-btn">📅 Pick date</div>
+        <input class="date-native" type="date" id="date-picker" onchange="pickDate(this.value)">
+      </div>
+      <button class="date-nav-btn today-btn" onclick="goToday()">Today</button>
+      <button class="date-nav-btn" onclick="shiftDate(1)">Next →</button>
+    </div>
+
+    <!-- HEADER -->
+    <header class="header anim d1">
+      <div>
+        <div class="wordmark" id="client-name">—</div>
+        <div class="wordmark-address" id="client-address"></div>
+      </div>
+      <div class="header-right">
+        <div class="hdr-date" id="hdr-date"></div>
+        <span class="agent-badge">
+          <span class="agent-dot"></span>
+          <span id="agent-badge-text">AI Receptionist</span>
+        </span>
+      </div>
+    </header>
+
+    <!-- STATS -->
+    <div class="stats-row anim d2">
+      <div class="stat-cell">
+        <div class="stat-num num-default" id="stat-calls">—</div>
+        <div class="stat-lbl">Calls</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num num-default" id="stat-reservations">—</div>
+        <div class="stat-lbl">Reservations</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num num-copper" id="stat-conversion">—</div>
+        <div class="stat-lbl">Conversion</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num num-default" id="stat-covers">—</div>
+        <div class="stat-lbl">Covers Booked</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num num-red" id="stat-escalations">—</div>
+        <div class="stat-lbl">Escalations</div>
+        <div class="stat-sub">Needs human review</div>
+      </div>
+    </div>
+
+    <!-- SEAT AVAILABILITY -->
+    <div class="seat-card anim d3" id="seat-card">
+      <div class="seat-left">
+        <div class="seat-header">
+          <span class="seat-title" id="seat-title">Seat Availability</span>
+          <div class="seat-numbers" id="seat-numbers">
+            <div class="seat-num-item">
+              <span class="seat-num-val num-default" id="seat-available">—</span>
+              <span class="seat-num-lbl">Available</span>
+            </div>
+            <div class="seat-num-item">
+              <span class="seat-num-val" id="seat-booked" style="color:var(--copper)">—</span>
+              <span class="seat-num-lbl">Booked</span>
+            </div>
+            <div class="seat-num-item">
+              <span class="seat-num-val" id="seat-total" style="color:var(--muted)">—</span>
+              <span class="seat-num-lbl">Total</span>
+            </div>
+          </div>
+        </div>
+        <div class="seat-bar-wrap">
+          <div class="seat-bar-fill" id="seat-bar" style="width:0%; background:var(--green);"></div>
+        </div>
+        <div class="seat-status ok" id="seat-status">Set today's capacity to enable overbooking protection</div>
+      </div>
+
+      <div class="seat-editor">
+        <span class="seat-editor-label" id="seat-editor-label">Capacity</span>
+        <div class="seat-editor-row">
+          <input class="seat-input" id="seat-input" type="number" min="1" max="999" placeholder="—">
+          <button class="seat-save-btn" id="seat-save-btn" onclick="saveCapacity()">Save</button>
+        </div>
+        <div class="seat-save-msg" id="seat-save-msg"></div>
+      </div>
+    </div>
+
+    <!-- ALERTS -->
+    <div class="alerts-grid anim d4">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-head-label">Allergy Alerts</span>
+          <span class="badge badge-red" id="allergy-badge">—</span>
+        </div>
+        <div class="card-body" id="allergy-body"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-head-label">Human Escalations</span>
+          <span class="badge badge-amber" id="esc-badge">—</span>
+        </div>
+        <div class="card-body" id="esc-body"></div>
+      </div>
+    </div>
+
+    <!-- RESERVATIONS TABLE -->
+    <div class="tbl-outer anim d5">
+      <div class="sec">
+        <span class="sec-lbl" id="res-section-label">Reservations</span>
+        <div class="sec-line"></div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Guest</th>
+            <th>Time</th>
+            <th>Guests</th>
+            <th>Allergies</th>
+            <th>WhatsApp</th>
+          </tr>
+        </thead>
+        <tbody id="res-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- WEEKLY OVERVIEW -->
+    <div class="anim d6">
+      <div class="sec">
+        <span class="sec-lbl">Weekly Overview</span>
+        <div class="sec-line"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head">
+          <div class="chart-title">Calls and reservations, last 7 days</div>
+          <div class="legend">
+            <div class="leg"><div class="leg-dot dot-copper"></div>Calls</div>
+            <div class="leg"><div class="leg-dot dot-amber"></div>Reservations</div>
+          </div>
+        </div>
+        <canvas id="weeklyChart"></canvas>
+      </div>
+    </div>
+
+  </div><!-- /#dashboard -->
 
   <script>
     const SUPABASE_URL = '%%SUPABASE_URL%%';
     const SUPABASE_KEY = '%%SUPABASE_KEY%%';
-
     const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // ── DATES ──
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const addDays  = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
-    // Use local date parts — toISOString() shifts to UTC and breaks non-UTC timezones
-    const isoDate  = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const TODAY    = isoDate(today);
-    const TOMORROW = isoDate(addDays(today, 1));
+    // ══════════════════════════════════════════════════════════════
+    //  AUTH  — hardcoded demo credentials
+    // ══════════════════════════════════════════════════════════════
+    const USERS = {
+      'admin':     { password: 'admin2024',     role: 'admin',  clientName: null               },
+      'flour':     { password: 'flour2024',     role: 'client', clientName: 'Flour Pastificio' },
+      'trattoria': { password: 'trattoria2024', role: 'client', clientName: 'La Trattoria'     },
+      'osteria':   { password: 'osteria2024',   role: 'client', clientName: 'Osteria del Vino' },
+    };
 
-    document.getElementById('hdr-date').textContent =
-      today.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    let session = null; // { username, role, clientName }
 
-    // ── STATE ──
+    function doLogin() {
+      const username = document.getElementById('l-user').value.trim().toLowerCase();
+      const password = document.getElementById('l-pass').value;
+      const errEl    = document.getElementById('login-error');
+      errEl.textContent = '';
+
+      const user = USERS[username];
+      if (!user || user.password !== password) {
+        errEl.textContent = 'Incorrect username or password.';
+        return;
+      }
+
+      session = { username, role: user.role, clientName: user.clientName };
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('dashboard').style.display = '';
+
+      document.getElementById('session-user').textContent = username;
+      const roleBadge = document.getElementById('session-role-badge');
+      roleBadge.textContent = session.role;
+      roleBadge.className   = `session-role ${session.role}`;
+
+      init();
+    }
+
+    function doLogout() {
+      session = null;
+      document.getElementById('dashboard').style.display    = 'none';
+      document.getElementById('login-screen').style.display = '';
+      document.getElementById('l-pass').value = '';
+      document.getElementById('login-error').textContent = '';
+      currentClientId = null;
+      if (weeklyChart) { weeklyChart.destroy(); weeklyChart = null; }
+    }
+
+    // allow Enter key on login form
+    document.getElementById('l-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+    document.getElementById('l-user').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+    // ══════════════════════════════════════════════════════════════
+    //  DATE HELPERS
+    // ══════════════════════════════════════════════════════════════
+    const realToday = new Date();
+    realToday.setHours(0, 0, 0, 0);
+
+    const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
+    const isoDate = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+    let selectedDate = new Date(realToday); // mutable — changes when user navigates
+
+    function updateDateNav() {
+      const TODAY_ISO = isoDate(realToday);
+      const sel_ISO   = isoDate(selectedDate);
+      const isToday   = sel_ISO === TODAY_ISO;
+
+      const longLabel = selectedDate.toLocaleDateString('en-GB', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      });
+      document.getElementById('date-display').textContent = longLabel;
+      document.getElementById('date-display-sub').textContent = isToday ? '— Today —' : '';
+      document.getElementById('date-picker').value = sel_ISO;
+
+      // Update seat card label
+      document.getElementById('seat-title').textContent =
+        `Seat Availability — ${isToday ? 'Today' : selectedDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`;
+      document.getElementById('seat-editor-label').textContent =
+        isToday ? 'Today\'s Capacity' : 'Capacity';
+
+      // Update reservations section label
+      document.getElementById('res-section-label').textContent =
+        isToday ? 'Reservations — Today'
+        : `Reservations — ${selectedDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}`;
+
+      // Header date
+      document.getElementById('hdr-date').textContent = longLabel;
+    }
+
+    function shiftDate(n) {
+      selectedDate = addDays(selectedDate, n);
+      updateDateNav();
+      if (currentClientId) loadClient(currentClientId);
+    }
+
+    function goToday() {
+      selectedDate = new Date(realToday);
+      updateDateNav();
+      if (currentClientId) loadClient(currentClientId);
+    }
+
+    function pickDate(val) {
+      if (!val) return;
+      selectedDate = new Date(val + 'T00:00:00');
+      updateDateNav();
+      if (currentClientId) loadClient(currentClientId);
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  STATE
+    // ══════════════════════════════════════════════════════════════
     let currentClientId = null;
-    let currentTodayReservations = [];
-    let weeklyChart = null;
+    let weeklyChart     = null;
 
-    // ── CHART ──
+    // ══════════════════════════════════════════════════════════════
+    //  CHART
+    // ══════════════════════════════════════════════════════════════
     function renderChart(weekly) {
       const labels = weekly.map(w =>
         new Date(w.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' })
@@ -828,7 +1290,7 @@
             },
             y: {
               grid: { color: 'rgba(160, 82, 45, 0.07)' },
-              ticks: { color: '#8A7A6A', font: { family: "'Inter', sans-serif", size: 11 }, stepSize: 10 },
+              ticks: { color: '#8A7A6A', font: { family: "'Inter', sans-serif", size: 11 }, stepSize: 1 },
               border: { display: false },
               beginAtZero: true,
             }
@@ -839,60 +1301,61 @@
       });
     }
 
-    // ── SEAT AVAILABILITY ──
-    function renderSeats(seatRow, bookedToday) {
-      const totalEl     = document.getElementById('seat-total');
-      const bookedEl    = document.getElementById('seat-booked');
-      const availEl     = document.getElementById('seat-available');
-      const barEl       = document.getElementById('seat-bar');
-      const statusEl    = document.getElementById('seat-status');
-      const inputEl     = document.getElementById('seat-input');
+    // ══════════════════════════════════════════════════════════════
+    //  SEAT AVAILABILITY
+    // ══════════════════════════════════════════════════════════════
+    function renderSeats(seatRow, bookedCount) {
+      const totalEl  = document.getElementById('seat-total');
+      const bookedEl = document.getElementById('seat-booked');
+      const availEl  = document.getElementById('seat-available');
+      const barEl    = document.getElementById('seat-bar');
+      const statusEl = document.getElementById('seat-status');
+      const inputEl  = document.getElementById('seat-input');
 
-      bookedEl.textContent = bookedToday;
+      bookedEl.textContent = bookedCount;
 
       if (!seatRow || !seatRow.total_seats) {
-        totalEl.textContent = '—';
-        availEl.textContent = '—';
-        barEl.style.width   = '0%';
+        totalEl.textContent    = '—';
+        availEl.textContent    = '—';
+        barEl.style.width      = '0%';
         barEl.style.background = 'var(--border-md)';
-        statusEl.className  = 'seat-status warn';
-        statusEl.textContent = 'Capacity not set — AI may overbook. Set total seats to enable protection.';
+        statusEl.className     = 'seat-status warn';
+        statusEl.textContent   = 'Capacity not set — AI may overbook. Set total seats to enable protection.';
         inputEl.value = '';
         return;
       }
 
       const total     = seatRow.total_seats;
-      const available = Math.max(0, total - bookedToday);
-      const pct       = Math.min(100, Math.round((bookedToday / total) * 100));
+      const available = Math.max(0, total - bookedCount);
+      const pct       = Math.min(100, Math.round((bookedCount / total) * 100));
 
-      totalEl.textContent = total;
-      bookedEl.textContent = bookedToday;
-      availEl.textContent = available;
-      inputEl.value = total;
-
-      barEl.style.width = pct + '%';
+      totalEl.textContent  = total;
+      availEl.textContent  = available;
+      inputEl.value        = total;
+      barEl.style.width    = pct + '%';
 
       if (pct >= 100) {
         barEl.style.background = 'var(--red)';
-        statusEl.className = 'seat-status full';
-        statusEl.textContent = 'Fully booked — AI is blocking new reservations for today.';
+        statusEl.className     = 'seat-status full';
+        statusEl.textContent   = 'Fully booked — AI is blocking new reservations for this date.';
       } else if (pct >= 80) {
         barEl.style.background = 'var(--amber)';
-        statusEl.className = 'seat-status warn';
-        statusEl.textContent = `Almost full — ${available} seat${available !== 1 ? 's' : ''} remaining today.`;
+        statusEl.className     = 'seat-status warn';
+        statusEl.textContent   = `Almost full — ${available} seat${available !== 1 ? 's' : ''} remaining.`;
       } else {
         barEl.style.background = 'var(--green)';
-        statusEl.className = 'seat-status ok';
-        statusEl.textContent = `${available} seat${available !== 1 ? 's' : ''} available today (${100 - pct}% capacity remaining).`;
+        statusEl.className     = 'seat-status ok';
+        statusEl.textContent   = `${available} seat${available !== 1 ? 's' : ''} available (${100 - pct}% capacity remaining).`;
       }
     }
 
     async function saveCapacity() {
       if (!currentClientId) return;
-      const input = document.getElementById('seat-input');
-      const btn   = document.getElementById('seat-save-btn');
-      const msg   = document.getElementById('seat-save-msg');
-      const val   = parseInt(input.value, 10);
+      const input  = document.getElementById('seat-input');
+      const btn    = document.getElementById('seat-save-btn');
+      const msg    = document.getElementById('seat-save-msg');
+      const val    = parseInt(input.value, 10);
+      const SELISO = isoDate(selectedDate);
 
       if (!val || val < 1) { msg.style.color = 'var(--red)'; msg.textContent = 'Enter a valid number'; return; }
 
@@ -900,7 +1363,7 @@
       btn.textContent = 'Saving…';
 
       const { error } = await db.from('seat_availability').upsert(
-        { client_id: currentClientId, date: TODAY, total_seats: val },
+        { client_id: currentClientId, date: SELISO, total_seats: val },
         { onConflict: 'client_id,date' }
       );
 
@@ -914,30 +1377,31 @@
         msg.style.color = 'var(--green)';
         msg.textContent = 'Saved ✓';
         setTimeout(() => { msg.textContent = ''; }, 2500);
-        const bookedToday = currentTodayReservations.reduce((s, r) => s + (r.guests || 0), 0);
-        renderSeats({ total_seats: val }, bookedToday);
+        const { data: resData } = await db.from('reservations').select('guests').eq('client_id', currentClientId).eq('date', SELISO);
+        const booked = (resData || []).reduce((s, r) => s + (r.guests || 0), 0);
+        renderSeats({ total_seats: val }, booked);
       }
     }
 
-    // ── RENDER DASHBOARD ──
+    // ══════════════════════════════════════════════════════════════
+    //  RENDER DASHBOARD
+    // ══════════════════════════════════════════════════════════════
     function renderDashboard({ client, stats, allergyAlerts, escalations, reservations, weekly, seats }) {
-      // Header
       document.getElementById('client-name').textContent    = client.name;
       document.getElementById('client-address').textContent = client.address || '';
       document.getElementById('agent-badge-text').textContent = `${client.agent_name || 'AI'}, AI Receptionist`;
 
-      // Stats
       const s = stats || {};
-      document.getElementById('stat-calls').textContent        = s.calls_today    ?? '—';
-      document.getElementById('stat-reservations').textContent = s.reservations   ?? '—';
-      document.getElementById('stat-conversion').textContent   = s.conversion_pct != null ? `${s.conversion_pct}%` : '—';
-      document.getElementById('stat-covers').textContent       = s.covers_booked  ?? '—';
-      document.getElementById('stat-escalations').textContent  = s.escalations    ?? '—';
+      document.getElementById('stat-calls').textContent        = s.calls_handled    != null ? s.calls_handled    : '—';
+      document.getElementById('stat-reservations').textContent = s.reservations_made != null ? s.reservations_made : '—';
+      document.getElementById('stat-conversion').textContent   = (s.calls_handled && s.reservations_made != null)
+        ? `${Math.round((s.reservations_made / s.calls_handled) * 100)}%` : '—';
+      document.getElementById('stat-covers').textContent       = reservations.reduce((sum, r) => sum + (r.guests || 0), 0) || '—';
+      document.getElementById('stat-escalations').textContent  = s.escalations != null ? s.escalations : '—';
 
-      // Seat availability — booked = sum of guests from today's reservations
-      currentTodayReservations = reservations.filter(r => r.date === TODAY);
-      const bookedToday = currentTodayReservations.reduce((sum, r) => sum + (r.guests || 0), 0);
-      renderSeats(seats, bookedToday);
+      // Seat availability — booked = sum of guests from selected date's reservations
+      const bookedCount = reservations.reduce((sum, r) => sum + (r.guests || 0), 0);
+      renderSeats(seats, bookedCount);
 
       // Allergy alerts
       document.getElementById('allergy-badge').textContent = `${allergyAlerts.length} flagged`;
@@ -945,12 +1409,12 @@
         ? allergyAlerts.map(a => `
             <div class="allergy-row">
               <div>
-                <div class="allergy-name">${a.name} <span class="allergy-time">${a.time}</span></div>
-                <div class="allergy-phone">${a.phone}</div>
+                <div class="allergy-name">${a.name} <span class="allergy-time">${a.time || ''}</span></div>
+                <div class="allergy-phone">${a.phone || ''}</div>
               </div>
               <span class="red-pill">${a.allergy}</span>
             </div>`).join('')
-        : '<div class="no-items">No allergy alerts today</div>';
+        : '<div class="no-items">No allergy alerts for this date</div>';
 
       // Escalations
       document.getElementById('esc-badge').textContent = `${escalations.length} pending`;
@@ -960,7 +1424,7 @@
               <div class="esc-top">
                 <div>
                   <div class="esc-name">${e.name}</div>
-                  <div class="esc-phone">${e.phone}</div>
+                  <div class="esc-phone">${e.phone || ''}</div>
                 </div>
                 <span class="esc-type-pill">${e.type}</span>
               </div>
@@ -969,66 +1433,50 @@
             </div>`).join('')
         : '<div class="no-items">No pending escalations</div>';
 
-      // Reservations table
+      // Reservations table — only the selected date
       const tbody  = document.getElementById('res-tbody');
-      const sorted = [...reservations].sort((a, b) =>
-        (a.date + a.time).localeCompare(b.date + b.time)
-      );
+      const sorted = [...reservations].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
 
-      const dateLabel = iso => {
-        if (iso === TODAY)    return 'Today';
-        if (iso === TOMORROW) return 'Tomorrow';
-        return new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-      };
-      const shortDate = iso =>
-        new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      tbody.innerHTML = sorted.length
+        ? sorted.map(r => {
+            const wa = String(r.phone || '').replace(/\D/g, '');
+            const al = (r.allergy || '').trim();
+            return `<tr>
+              <td class="td-name">${r.guest_name || r.name || '—'}</td>
+              <td>${r.time || '—'}</td>
+              <td>${r.guests || '—'}</td>
+              <td>${al ? `<span class="td-allergy-pill">${al}</span>` : `<span class="td-none">—</span>`}</td>
+              <td>${r.phone ? `<a class="td-phone" href="https://wa.me/${wa}" target="_blank">${r.phone}</a>` : `<span class="td-none">—</span>`}</td>
+            </tr>`;
+          }).join('')
+        : `<tr><td colspan="5" style="text-align:center; color:var(--muted); font-style:italic; padding:22px 0;">No reservations for this date</td></tr>`;
 
-      tbody.innerHTML = '';
-      let lastDate = null;
-      for (const r of sorted) {
-        if (r.date !== lastDate) {
-          const sep = document.createElement('tr');
-          sep.className = 'date-sep';
-          sep.innerHTML = `<td colspan="6">${dateLabel(r.date)}</td>`;
-          tbody.appendChild(sep);
-          lastDate = r.date;
-        }
-        const tr  = document.createElement('tr');
-        const wa  = String(r.phone).replace(/\D/g, '');
-        const al  = (r.allergy || '').trim();
-        tr.innerHTML = `
-          <td class="td-name">${r.guest_name}</td>
-          <td>${shortDate(r.date)}</td>
-          <td>${r.time}</td>
-          <td>${r.guests}</td>
-          <td>${al ? `<span class="td-allergy-pill">${al}</span>` : `<span class="td-none">—</span>`}</td>
-          <td><a class="td-phone" href="https://wa.me/${wa}" target="_blank">${r.phone}</a></td>`;
-        tbody.appendChild(tr);
-      }
-
-      // Chart
       renderChart(weekly);
     }
 
-    // ── LOAD CLIENT ──
+    // ══════════════════════════════════════════════════════════════
+    //  LOAD CLIENT DATA
+    // ══════════════════════════════════════════════════════════════
     async function loadClient(clientId) {
       currentClientId = clientId;
-
-      const sevenDaysAgo = isoDate(addDays(today, -6));
+      const SELISO    = isoDate(selectedDate);
+      const sevenAgo  = isoDate(addDays(selectedDate, -6));
 
       const [statsRes, allergyRes, escRes, resRes, weeklyRes, seatRes] = await Promise.all([
-        db.from('daily_stats')     .select('*').eq('client_id', clientId).eq('date', TODAY).maybeSingle(),
-        db.from('allergy_alerts')  .select('*').eq('client_id', clientId).eq('date', TODAY),
-        db.from('escalations')     .select('*').eq('client_id', clientId).eq('date', TODAY),
-        db.from('reservations')    .select('*').eq('client_id', clientId).gte('date', TODAY).order('date').order('time'),
-        db.from('weekly_metrics')  .select('*').eq('client_id', clientId).gte('date', sevenDaysAgo).order('date'),
-        db.from('seat_availability').select('*').eq('client_id', clientId).eq('date', TODAY).maybeSingle(),
+        db.from('daily_stats')      .select('*').eq('client_id', clientId).eq('date', SELISO).maybeSingle(),
+        db.from('allergy_alerts')   .select('*').eq('client_id', clientId).eq('date', SELISO),
+        db.from('escalations')      .select('*').eq('client_id', clientId).eq('date', SELISO),
+        db.from('reservations')     .select('*').eq('client_id', clientId).eq('date', SELISO).order('time'),
+        db.from('weekly_metrics')   .select('*').eq('client_id', clientId).gte('date', sevenAgo).lte('date', SELISO).order('date'),
+        db.from('seat_availability').select('*').eq('client_id', clientId).eq('date', SELISO).maybeSingle(),
       ]);
 
-      const client = document.getElementById('client-select').selectedOptions[0];
+      const sel = document.getElementById('client-select');
+      const opt = sel.selectedOptions[0];
+
       renderDashboard({
-        client:       { name: client.textContent, address: client.dataset.address, agent_name: client.dataset.agent },
-        stats:        statsRes.data,
+        client:        { name: opt ? opt.textContent : '', address: opt ? opt.dataset.address : '', agent_name: opt ? opt.dataset.agent : 'AI' },
+        stats:         statsRes.data,
         allergyAlerts: allergyRes.data  || [],
         escalations:   escRes.data      || [],
         reservations:  resRes.data      || [],
@@ -1037,41 +1485,72 @@
       });
     }
 
-    // ── INIT ──
+    // ══════════════════════════════════════════════════════════════
+    //  INIT
+    // ══════════════════════════════════════════════════════════════
     async function init() {
       const statusMsg = document.getElementById('status-msg');
       const errorMsg  = document.getElementById('error-msg');
       const sel       = document.getElementById('client-select');
+      const labelEl   = document.getElementById('client-bar-label');
 
-      const { data: clients, error } = await db.from('clients').select('*').order('name');
+      updateDateNav();
 
-      if (error || !clients?.length) {
+      let clients;
+
+      if (session.role === 'admin') {
+        // Admin: fetch all clients
+        const { data, error } = await db.from('clients').select('*').order('name');
+        if (error || !data?.length) {
+          statusMsg.style.display = 'none';
+          errorMsg.style.display  = '';
+          errorMsg.textContent = error ? `Supabase error: ${error.message}` : 'No clients found. Run supabase_setup.sql first.';
+          return;
+        }
+        clients = data;
+
+        sel.innerHTML = '';
+        for (const c of clients) {
+          const opt = document.createElement('option');
+          opt.value           = c.id;
+          opt.textContent     = c.name;
+          opt.dataset.address = c.address || '';
+          opt.dataset.agent   = c.agent_name || 'AI';
+          sel.appendChild(opt);
+        }
         statusMsg.style.display = 'none';
-        errorMsg.style.display  = '';
-        errorMsg.textContent = error
-          ? `Supabase error: ${error.message}`
-          : 'No clients found. Run supabase_setup.sql first.';
-        return;
-      }
+        sel.style.display = '';
+        labelEl.textContent = 'Client';
+        sel.addEventListener('change', () => loadClient(sel.value));
+        await loadClient(clients[0].id);
 
-      sel.innerHTML = '';
-      for (const c of clients) {
+      } else {
+        // Client: fetch only their client
+        const { data, error } = await db.from('clients').select('*').eq('name', session.clientName).maybeSingle();
+        if (error || !data) {
+          statusMsg.style.display = 'none';
+          errorMsg.style.display  = '';
+          errorMsg.textContent = `Client "${session.clientName}" not found in database.`;
+          return;
+        }
+        clients = [data];
+
+        // Populate the select with one hidden option so loadClient can read it
         const opt = document.createElement('option');
-        opt.value           = c.id;
-        opt.textContent     = c.name;
-        opt.dataset.address = c.address || '';
-        opt.dataset.agent   = c.agent_name || 'AI';
+        opt.value           = data.id;
+        opt.textContent     = data.name;
+        opt.dataset.address = data.address || '';
+        opt.dataset.agent   = data.agent_name || 'AI';
         sel.appendChild(opt);
+
+        // Show client name as label, hide dropdown
+        statusMsg.style.display = 'none';
+        sel.style.display       = 'none';
+        labelEl.textContent     = data.name;
+
+        await loadClient(data.id);
       }
-
-      statusMsg.style.display = 'none';
-      sel.style.display = '';
-
-      await loadClient(clients[0].id);
-      sel.addEventListener('change', () => loadClient(sel.value));
     }
-
-    init();
   </script>
 </body>
 </html>
