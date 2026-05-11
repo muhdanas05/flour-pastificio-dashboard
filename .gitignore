@@ -1,5 +1,4 @@
 .netlify/
 .env
 dist/
-n8n_supabase.json
 n8n.json
