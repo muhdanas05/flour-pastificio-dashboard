@@ -58,15 +58,9 @@
       background: var(--bg);
     }
 
-    .login-wrap {
-      width: 100%;
-      max-width: 420px;
-    }
+    .login-wrap { width: 100%; max-width: 420px; }
 
-    .login-brand {
-      text-align: center;
-      margin-bottom: 40px;
-    }
+    .login-brand { text-align: center; margin-bottom: 40px; }
 
     .login-wordmark {
       font-family: 'Fraunces', Georgia, serif;
@@ -103,9 +97,7 @@
       margin-bottom: 28px;
     }
 
-    .login-field {
-      margin-bottom: 16px;
-    }
+    .login-field { margin-bottom: 16px; }
 
     .login-label {
       display: block;
@@ -188,16 +180,9 @@
     }
     .login-hint-row:last-child { border-bottom: none; }
 
-    .hint-role {
-      font-size: 0.67rem;
-      color: var(--ink-2);
-      font-weight: 500;
-    }
-    .hint-creds {
-      font-family: 'Inter', monospace;
-      font-size: 0.62rem;
-      color: var(--muted);
-    }
+    .hint-role  { font-size: 0.67rem; color: var(--ink-2); font-weight: 500; }
+    .hint-creds { font-family: 'Inter', monospace; font-size: 0.62rem; color: var(--muted); }
+
     .hint-badge {
       font-size: 0.52rem;
       font-weight: 500;
@@ -213,9 +198,7 @@
     /* ══════════════════════════════════════════════
        DASHBOARD
     ══════════════════════════════════════════════ */
-    #dashboard {
-      padding: 40px 72px 120px;
-    }
+    #dashboard { padding: 36px 72px 120px; }
 
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(14px); }
@@ -234,8 +217,8 @@
       display: flex;
       align-items: center;
       gap: 14px;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
+      margin-bottom: 28px;
+      padding-bottom: 18px;
       border-bottom: 1px solid var(--border);
       flex-wrap: wrap;
     }
@@ -289,7 +272,6 @@
     .status-msg { font-size: 0.78rem; color: var(--muted); font-style: italic; }
     .error-msg  { font-size: 0.78rem; color: var(--red); }
 
-    /* session pill */
     .session-pill {
       display: flex;
       align-items: center;
@@ -302,6 +284,7 @@
       font-weight: 500;
       color: var(--ink-2);
     }
+
     .session-role {
       font-size: 0.52rem;
       font-weight: 500;
@@ -326,86 +309,6 @@
       transition: color 0.15s, border-color 0.15s;
     }
     .logout-btn:hover { color: var(--ink); border-color: var(--muted); }
-
-    /* ── DATE NAV ── */
-    .date-nav {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 28px;
-      padding: 14px 20px;
-      background: var(--surface);
-      border: 1px solid var(--border-md);
-      border-radius: 10px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    }
-
-    .date-nav-btn {
-      padding: 7px 13px;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: var(--ink-2);
-      background: var(--bg);
-      border: 1px solid var(--border-lg);
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.12s, border-color 0.12s;
-      white-space: nowrap;
-    }
-    .date-nav-btn:hover { background: var(--surface-2); border-color: var(--muted); }
-
-    .date-nav-btn.today-btn {
-      color: var(--copper);
-      border-color: rgba(197,150,58,0.30);
-      background: var(--copper-dim);
-    }
-    .date-nav-btn.today-btn:hover { background: rgba(197,150,58,0.20); }
-
-    .date-display {
-      flex: 1;
-      text-align: center;
-      font-family: 'Fraunces', Georgia, serif;
-      font-style: italic;
-      font-size: 1rem;
-      font-weight: 300;
-      color: var(--ink);
-    }
-
-    .date-display-sub {
-      font-family: 'Inter', sans-serif;
-      font-style: normal;
-      font-size: 0.6rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--muted);
-      margin-top: 1px;
-    }
-
-    .date-input-wrap { position: relative; }
-    .date-native {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-      width: 100%;
-      height: 100%;
-    }
-    .date-pick-btn {
-      padding: 7px 13px;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: var(--muted);
-      background: var(--bg);
-      border: 1px solid var(--border-lg);
-      border-radius: 6px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: background 0.12s;
-    }
-    .date-pick-btn:hover { background: var(--surface-2); }
 
     /* ── HEADER ── */
     .header {
@@ -518,7 +421,7 @@
       opacity: 0.8;
     }
 
-    /* ── SEAT AVAILABILITY CARD ── */
+    /* ── SEAT CARD ── */
     .seat-card {
       background: var(--surface);
       border-radius: 10px;
@@ -574,12 +477,7 @@
       transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s;
     }
 
-    .seat-status {
-      font-size: 0.68rem;
-      font-weight: 500;
-      margin-top: 8px;
-    }
-
+    .seat-status { font-size: 0.68rem; font-weight: 500; margin-top: 8px; }
     .seat-status.ok   { color: var(--green); }
     .seat-status.warn { color: var(--amber); }
     .seat-status.full { color: var(--red); }
@@ -631,11 +529,7 @@
     .seat-save-btn:hover { opacity: 0.85; }
     .seat-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .seat-save-msg {
-      font-size: 0.62rem;
-      color: var(--green);
-      height: 14px;
-    }
+    .seat-save-msg { font-size: 0.62rem; color: var(--green); height: 14px; }
 
     /* ── ALERTS GRID ── */
     .alerts-grid {
@@ -645,7 +539,6 @@
       margin-bottom: 52px;
     }
 
-    /* ── CARD ── */
     .card {
       background: var(--surface);
       border-radius: 10px;
@@ -730,10 +623,7 @@
     }
 
     /* ── ESCALATION ROWS ── */
-    .esc-row {
-      padding: 14px 0;
-      border-bottom: 1px solid var(--border);
-    }
+    .esc-row { padding: 14px 0; border-bottom: 1px solid var(--border); }
     .esc-row:last-child { border-bottom: none; }
 
     .esc-top {
@@ -765,7 +655,7 @@
     }
 
     /* ── SECTION LABEL ── */
-    .sec { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
+    .sec { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
     .sec-lbl {
       font-size: 0.57rem;
       font-weight: 500;
@@ -776,6 +666,55 @@
     }
     .sec-line { flex: 1; height: 1px; background: var(--border-md); }
 
+    /* ── RESERVATION DATE NAV (inline in section header) ── */
+    .res-date-nav {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .rdn-btn {
+      padding: 4px 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: var(--ink-2);
+      background: var(--surface);
+      border: 1px solid var(--border-lg);
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.12s;
+      white-space: nowrap;
+    }
+    .rdn-btn:hover { background: var(--surface-2); }
+
+    .rdn-btn.active {
+      color: var(--copper);
+      border-color: rgba(197,150,58,0.30);
+      background: var(--copper-dim);
+    }
+
+    .rdn-label {
+      font-family: 'Fraunces', Georgia, serif;
+      font-style: italic;
+      font-size: 0.82rem;
+      font-weight: 300;
+      color: var(--ink);
+      padding: 0 6px;
+      white-space: nowrap;
+    }
+
+    .rdn-date-wrap { position: relative; }
+    .rdn-date-native {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
     /* ── TABLE ── */
     .tbl-outer { margin-bottom: 52px; }
 
@@ -783,7 +722,7 @@
     thead tr { border-bottom: 1px solid var(--border-lg); }
 
     th {
-      padding: 0 20px 12px;
+      padding: 0 16px 12px;
       font-size: 0.56rem;
       font-weight: 500;
       text-transform: uppercase;
@@ -794,7 +733,7 @@
     th:first-child { padding-left: 0; }
 
     td {
-      padding: 13px 20px;
+      padding: 13px 16px;
       font-size: 0.82rem;
       color: var(--ink-2);
       border-bottom: 1px solid var(--border);
@@ -831,6 +770,13 @@
       transition: color 0.12s;
     }
     .td-phone:hover { color: var(--ink); }
+
+    .td-notes {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-style: italic;
+      max-width: 180px;
+    }
 
     /* ── CHART ── */
     .chart-card {
@@ -892,13 +838,13 @@
       .stat-cell:nth-child(even) { border-right: none; padding-right: 0; }
       .stat-cell:nth-child(odd)  { border-right: 1px solid var(--border-md); }
       .stat-cell:last-child      { border-right: none; }
-      .date-nav { flex-wrap: wrap; }
+      .res-date-nav { flex-wrap: wrap; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ═══════════════════════════════════ LOGIN ═══════════════════════════════════ -->
+  <!-- ═══════════════════ LOGIN ═══════════════════ -->
   <div id="login-screen">
     <div class="login-wrap">
       <div class="login-brand">
@@ -919,7 +865,7 @@
           <input class="login-input" id="l-pass" type="password" autocomplete="current-password" placeholder="••••••••">
         </div>
 
-        <button class="login-btn" id="login-btn" onclick="doLogin()">Sign In</button>
+        <button class="login-btn" onclick="doLogin()">Sign In</button>
         <div class="login-error" id="login-error"></div>
       </div>
 
@@ -949,7 +895,7 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════ DASHBOARD ═══════════════════════════════ -->
+  <!-- ═══════════════════ DASHBOARD ═══════════════════ -->
   <div id="dashboard" style="display:none;">
 
     <!-- TOP BAR -->
@@ -969,21 +915,6 @@
       </div>
     </div>
 
-    <!-- DATE NAV -->
-    <div class="date-nav anim d1">
-      <button class="date-nav-btn" onclick="shiftDate(-1)">← Previous</button>
-      <div style="flex:1; text-align:center;">
-        <div class="date-display" id="date-display"></div>
-        <div class="date-display-sub" id="date-display-sub"></div>
-      </div>
-      <div class="date-input-wrap">
-        <div class="date-pick-btn">📅 Pick date</div>
-        <input class="date-native" type="date" id="date-picker" onchange="pickDate(this.value)">
-      </div>
-      <button class="date-nav-btn today-btn" onclick="goToday()">Today</button>
-      <button class="date-nav-btn" onclick="shiftDate(1)">Next →</button>
-    </div>
-
     <!-- HEADER -->
     <header class="header anim d1">
       <div>
@@ -999,11 +930,11 @@
       </div>
     </header>
 
-    <!-- STATS -->
+    <!-- STATS — always today -->
     <div class="stats-row anim d2">
       <div class="stat-cell">
         <div class="stat-num num-default" id="stat-calls">—</div>
-        <div class="stat-lbl">Calls</div>
+        <div class="stat-lbl">Calls Today</div>
       </div>
       <div class="stat-cell">
         <div class="stat-num num-default" id="stat-reservations">—</div>
@@ -1015,7 +946,7 @@
       </div>
       <div class="stat-cell">
         <div class="stat-num num-default" id="stat-covers">—</div>
-        <div class="stat-lbl">Covers Booked</div>
+        <div class="stat-lbl">Covers Today</div>
       </div>
       <div class="stat-cell">
         <div class="stat-num num-red" id="stat-escalations">—</div>
@@ -1024,12 +955,12 @@
       </div>
     </div>
 
-    <!-- SEAT AVAILABILITY -->
-    <div class="seat-card anim d3" id="seat-card">
+    <!-- SEAT AVAILABILITY — always today -->
+    <div class="seat-card anim d3">
       <div class="seat-left">
         <div class="seat-header">
-          <span class="seat-title" id="seat-title">Seat Availability</span>
-          <div class="seat-numbers" id="seat-numbers">
+          <span class="seat-title">Seat Availability — Today</span>
+          <div class="seat-numbers">
             <div class="seat-num-item">
               <span class="seat-num-val num-default" id="seat-available">—</span>
               <span class="seat-num-lbl">Available</span>
@@ -1051,7 +982,7 @@
       </div>
 
       <div class="seat-editor">
-        <span class="seat-editor-label" id="seat-editor-label">Capacity</span>
+        <span class="seat-editor-label">Today's Capacity</span>
         <div class="seat-editor-row">
           <input class="seat-input" id="seat-input" type="number" min="1" max="999" placeholder="—">
           <button class="seat-save-btn" id="seat-save-btn" onclick="saveCapacity()">Save</button>
@@ -1060,11 +991,11 @@
       </div>
     </div>
 
-    <!-- ALERTS -->
+    <!-- ALERTS — always today -->
     <div class="alerts-grid anim d4">
       <div class="card">
         <div class="card-head">
-          <span class="card-head-label">Allergy Alerts</span>
+          <span class="card-head-label">Allergy Alerts — Today</span>
           <span class="badge badge-red" id="allergy-badge">—</span>
         </div>
         <div class="card-body" id="allergy-body"></div>
@@ -1072,18 +1003,27 @@
 
       <div class="card">
         <div class="card-head">
-          <span class="card-head-label">Human Escalations</span>
+          <span class="card-head-label">Human Escalations — Today</span>
           <span class="badge badge-amber" id="esc-badge">—</span>
         </div>
         <div class="card-body" id="esc-body"></div>
       </div>
     </div>
 
-    <!-- RESERVATIONS TABLE -->
+    <!-- RESERVATIONS — browsable by date -->
     <div class="tbl-outer anim d5">
       <div class="sec">
-        <span class="sec-lbl" id="res-section-label">Reservations</span>
+        <span class="sec-lbl">Reservations</span>
         <div class="sec-line"></div>
+        <div class="res-date-nav">
+          <button class="rdn-btn" onclick="shiftResDate(-1)">←</button>
+          <div class="rdn-date-wrap">
+            <span class="rdn-label" id="res-date-label">Today</span>
+            <input class="rdn-date-native" type="date" id="res-date-picker" onchange="pickResDate(this.value)">
+          </div>
+          <button class="rdn-btn" onclick="shiftResDate(1)">→</button>
+          <button class="rdn-btn active" id="res-today-btn" onclick="goResToday()">Today</button>
+        </div>
       </div>
       <table>
         <thead>
@@ -1093,6 +1033,7 @@
             <th>Guests</th>
             <th>Allergies</th>
             <th>WhatsApp</th>
+            <th>Notes</th>
           </tr>
         </thead>
         <tbody id="res-tbody"></tbody>
@@ -1124,9 +1065,9 @@
     const SUPABASE_KEY = '%%SUPABASE_KEY%%';
     const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // ══════════════════════════════════════════════════════════════
-    //  AUTH  — hardcoded demo credentials
-    // ══════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════
+    //  AUTH
+    // ══════════════════════════════════════════════════
     const USERS = {
       'admin':     { password: 'admin2024',     role: 'admin',  clientName: null               },
       'flour':     { password: 'flour2024',     role: 'client', clientName: 'Flour Pastificio' },
@@ -1134,7 +1075,7 @@
       'osteria':   { password: 'osteria2024',   role: 'client', clientName: 'Osteria del Vino' },
     };
 
-    let session = null; // { username, role, clientName }
+    let session = null;
 
     function doLogin() {
       const username = document.getElementById('l-user').value.trim().toLowerCase();
@@ -1153,9 +1094,9 @@
       document.getElementById('dashboard').style.display = '';
 
       document.getElementById('session-user').textContent = username;
-      const roleBadge = document.getElementById('session-role-badge');
-      roleBadge.textContent = session.role;
-      roleBadge.className   = `session-role ${session.role}`;
+      const rb = document.getElementById('session-role-badge');
+      rb.textContent = session.role;
+      rb.className   = `session-role ${session.role}`;
 
       init();
     }
@@ -1170,76 +1111,63 @@
       if (weeklyChart) { weeklyChart.destroy(); weeklyChart = null; }
     }
 
-    // allow Enter key on login form
     document.getElementById('l-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
     document.getElementById('l-user').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
-    // ══════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════
     //  DATE HELPERS
-    // ══════════════════════════════════════════════════════════════
-    const realToday = new Date();
-    realToday.setHours(0, 0, 0, 0);
+    // ══════════════════════════════════════════════════
+    const TODAY_DATE = new Date();
+    TODAY_DATE.setHours(0, 0, 0, 0);
 
     const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
     const isoDate = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const TODAY = isoDate(TODAY_DATE);
 
-    let selectedDate = new Date(realToday); // mutable — changes when user navigates
+    // Reservation browse date — independent of stats
+    let resDate = new Date(TODAY_DATE);
 
-    function updateDateNav() {
-      const TODAY_ISO = isoDate(realToday);
-      const sel_ISO   = isoDate(selectedDate);
-      const isToday   = sel_ISO === TODAY_ISO;
+    function updateResDateNav() {
+      const iso     = isoDate(resDate);
+      const isToday = iso === TODAY;
 
-      const longLabel = selectedDate.toLocaleDateString('en-GB', {
-        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-      });
-      document.getElementById('date-display').textContent = longLabel;
-      document.getElementById('date-display-sub').textContent = isToday ? '— Today —' : '';
-      document.getElementById('date-picker').value = sel_ISO;
+      const label = isToday
+        ? 'Today'
+        : resDate.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 
-      // Update seat card label
-      document.getElementById('seat-title').textContent =
-        `Seat Availability — ${isToday ? 'Today' : selectedDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`;
-      document.getElementById('seat-editor-label').textContent =
-        isToday ? 'Today\'s Capacity' : 'Capacity';
-
-      // Update reservations section label
-      document.getElementById('res-section-label').textContent =
-        isToday ? 'Reservations — Today'
-        : `Reservations — ${selectedDate.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}`;
-
-      // Header date
-      document.getElementById('hdr-date').textContent = longLabel;
+      document.getElementById('res-date-label').textContent = label;
+      document.getElementById('res-date-picker').value = iso;
+      document.getElementById('res-today-btn').className = isToday ? 'rdn-btn active' : 'rdn-btn';
     }
 
-    function shiftDate(n) {
-      selectedDate = addDays(selectedDate, n);
-      updateDateNav();
-      if (currentClientId) loadClient(currentClientId);
+    function shiftResDate(n) {
+      resDate = addDays(resDate, n);
+      updateResDateNav();
+      if (currentClientId) loadReservations(currentClientId);
     }
 
-    function goToday() {
-      selectedDate = new Date(realToday);
-      updateDateNav();
-      if (currentClientId) loadClient(currentClientId);
+    function goResToday() {
+      resDate = new Date(TODAY_DATE);
+      updateResDateNav();
+      if (currentClientId) loadReservations(currentClientId);
     }
 
-    function pickDate(val) {
+    function pickResDate(val) {
       if (!val) return;
-      selectedDate = new Date(val + 'T00:00:00');
-      updateDateNav();
-      if (currentClientId) loadClient(currentClientId);
+      resDate = new Date(val + 'T00:00:00');
+      updateResDateNav();
+      if (currentClientId) loadReservations(currentClientId);
     }
 
-    // ══════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════
     //  STATE
-    // ══════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════
     let currentClientId = null;
     let weeklyChart     = null;
 
-    // ══════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════
     //  CHART
-    // ══════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════
     function renderChart(weekly) {
       const labels = weekly.map(w =>
         new Date(w.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' })
@@ -1301,10 +1229,10 @@
       });
     }
 
-    // ══════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════
     //  SEAT AVAILABILITY
-    // ══════════════════════════════════════════════════════════════
-    function renderSeats(seatRow, bookedCount) {
+    // ══════════════════════════════════════════════════
+    function renderSeats(seatRow, bookedToday) {
       const totalEl  = document.getElementById('seat-total');
       const bookedEl = document.getElementById('seat-booked');
       const availEl  = document.getElementById('seat-available');
@@ -1312,7 +1240,7 @@
       const statusEl = document.getElementById('seat-status');
       const inputEl  = document.getElementById('seat-input');
 
-      bookedEl.textContent = bookedCount;
+      bookedEl.textContent = bookedToday;
 
       if (!seatRow || !seatRow.total_seats) {
         totalEl.textContent    = '—';
@@ -1326,8 +1254,8 @@
       }
 
       const total     = seatRow.total_seats;
-      const available = Math.max(0, total - bookedCount);
-      const pct       = Math.min(100, Math.round((bookedCount / total) * 100));
+      const available = Math.max(0, total - bookedToday);
+      const pct       = Math.min(100, Math.round((bookedToday / total) * 100));
 
       totalEl.textContent  = total;
       availEl.textContent  = available;
@@ -1337,180 +1265,185 @@
       if (pct >= 100) {
         barEl.style.background = 'var(--red)';
         statusEl.className     = 'seat-status full';
-        statusEl.textContent   = 'Fully booked — AI is blocking new reservations for this date.';
+        statusEl.textContent   = 'Fully booked — AI is blocking new reservations for today.';
       } else if (pct >= 80) {
         barEl.style.background = 'var(--amber)';
         statusEl.className     = 'seat-status warn';
-        statusEl.textContent   = `Almost full — ${available} seat${available !== 1 ? 's' : ''} remaining.`;
+        statusEl.textContent   = `Almost full — ${available} seat${available !== 1 ? 's' : ''} remaining today.`;
       } else {
         barEl.style.background = 'var(--green)';
         statusEl.className     = 'seat-status ok';
-        statusEl.textContent   = `${available} seat${available !== 1 ? 's' : ''} available (${100 - pct}% capacity remaining).`;
+        statusEl.textContent   = `${available} seat${available !== 1 ? 's' : ''} available today (${100 - pct}% capacity remaining).`;
       }
     }
 
     async function saveCapacity() {
       if (!currentClientId) return;
-      const input  = document.getElementById('seat-input');
-      const btn    = document.getElementById('seat-save-btn');
-      const msg    = document.getElementById('seat-save-msg');
-      const val    = parseInt(input.value, 10);
-      const SELISO = isoDate(selectedDate);
+      const input = document.getElementById('seat-input');
+      const btn   = document.getElementById('seat-save-btn');
+      const msg   = document.getElementById('seat-save-msg');
+      const val   = parseInt(input.value, 10);
 
       if (!val || val < 1) { msg.style.color = 'var(--red)'; msg.textContent = 'Enter a valid number'; return; }
 
-      btn.disabled = true;
+      btn.disabled    = true;
       btn.textContent = 'Saving…';
 
       const { error } = await db.from('seat_availability').upsert(
-        { client_id: currentClientId, date: SELISO, total_seats: val },
+        { client_id: currentClientId, date: TODAY, total_seats: val },
         { onConflict: 'client_id,date' }
       );
 
-      btn.disabled = false;
+      btn.disabled    = false;
       btn.textContent = 'Save';
 
       if (error) {
-        msg.style.color = 'var(--red)';
-        msg.textContent = 'Error saving';
+        msg.style.color  = 'var(--red)';
+        msg.textContent  = 'Error saving';
       } else {
-        msg.style.color = 'var(--green)';
-        msg.textContent = 'Saved ✓';
+        msg.style.color  = 'var(--green)';
+        msg.textContent  = 'Saved ✓';
         setTimeout(() => { msg.textContent = ''; }, 2500);
-        const { data: resData } = await db.from('reservations').select('guests').eq('client_id', currentClientId).eq('date', SELISO);
+        const { data: resData } = await db.from('reservations').select('guests').eq('client_id', currentClientId).eq('date', TODAY);
         const booked = (resData || []).reduce((s, r) => s + (r.guests || 0), 0);
         renderSeats({ total_seats: val }, booked);
       }
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  RENDER DASHBOARD
-    // ══════════════════════════════════════════════════════════════
-    function renderDashboard({ client, stats, allergyAlerts, escalations, reservations, weekly, seats }) {
-      document.getElementById('client-name').textContent    = client.name;
-      document.getElementById('client-address').textContent = client.address || '';
-      document.getElementById('agent-badge-text').textContent = `${client.agent_name || 'AI'}, AI Receptionist`;
+    // ══════════════════════════════════════════════════
+    //  RENDER RESERVATIONS (browsable date)
+    // ══════════════════════════════════════════════════
+    async function loadReservations(clientId) {
+      const iso    = isoDate(resDate);
+      const { data } = await db.from('reservations').select('*').eq('client_id', clientId).eq('date', iso).order('time');
+      const rows = data || [];
+      const tbody = document.getElementById('res-tbody');
 
-      const s = stats || {};
-      document.getElementById('stat-calls').textContent        = s.calls_handled    != null ? s.calls_handled    : '—';
-      document.getElementById('stat-reservations').textContent = s.reservations_made != null ? s.reservations_made : '—';
-      document.getElementById('stat-conversion').textContent   = (s.calls_handled && s.reservations_made != null)
-        ? `${Math.round((s.reservations_made / s.calls_handled) * 100)}%` : '—';
-      document.getElementById('stat-covers').textContent       = reservations.reduce((sum, r) => sum + (r.guests || 0), 0) || '—';
-      document.getElementById('stat-escalations').textContent  = s.escalations != null ? s.escalations : '—';
-
-      // Seat availability — booked = sum of guests from selected date's reservations
-      const bookedCount = reservations.reduce((sum, r) => sum + (r.guests || 0), 0);
-      renderSeats(seats, bookedCount);
-
-      // Allergy alerts
-      document.getElementById('allergy-badge').textContent = `${allergyAlerts.length} flagged`;
-      document.getElementById('allergy-body').innerHTML = allergyAlerts.length
-        ? allergyAlerts.map(a => `
-            <div class="allergy-row">
-              <div>
-                <div class="allergy-name">${a.name} <span class="allergy-time">${a.time || ''}</span></div>
-                <div class="allergy-phone">${a.phone || ''}</div>
-              </div>
-              <span class="red-pill">${a.allergy}</span>
-            </div>`).join('')
-        : '<div class="no-items">No allergy alerts for this date</div>';
-
-      // Escalations
-      document.getElementById('esc-badge').textContent = `${escalations.length} pending`;
-      document.getElementById('esc-body').innerHTML = escalations.length
-        ? escalations.map(e => `
-            <div class="esc-row">
-              <div class="esc-top">
-                <div>
-                  <div class="esc-name">${e.name}</div>
-                  <div class="esc-phone">${e.phone || ''}</div>
-                </div>
-                <span class="esc-type-pill">${e.type}</span>
-              </div>
-              <div class="esc-note">${e.note}</div>
-              <div class="esc-ts">Received ${e.received}</div>
-            </div>`).join('')
-        : '<div class="no-items">No pending escalations</div>';
-
-      // Reservations table — only the selected date
-      const tbody  = document.getElementById('res-tbody');
-      const sorted = [...reservations].sort((a, b) => (a.time || '').localeCompare(b.time || ''));
-
-      tbody.innerHTML = sorted.length
-        ? sorted.map(r => {
-            const wa = String(r.phone || '').replace(/\D/g, '');
-            const al = (r.allergy || '').trim();
+      tbody.innerHTML = rows.length
+        ? rows.map(r => {
+            const wa  = String(r.phone || '').replace(/\D/g, '');
+            const al  = (r.allergy || '').trim();
+            const nm  = r.guest_name || r.name || '—';
+            const nt  = r.notes || '';
             return `<tr>
-              <td class="td-name">${r.guest_name || r.name || '—'}</td>
+              <td class="td-name">${nm}</td>
               <td>${r.time || '—'}</td>
-              <td>${r.guests || '—'}</td>
+              <td>${r.guests != null ? r.guests : '—'}</td>
               <td>${al ? `<span class="td-allergy-pill">${al}</span>` : `<span class="td-none">—</span>`}</td>
               <td>${r.phone ? `<a class="td-phone" href="https://wa.me/${wa}" target="_blank">${r.phone}</a>` : `<span class="td-none">—</span>`}</td>
+              <td class="td-notes">${nt || `<span class="td-none">—</span>`}</td>
             </tr>`;
           }).join('')
-        : `<tr><td colspan="5" style="text-align:center; color:var(--muted); font-style:italic; padding:22px 0;">No reservations for this date</td></tr>`;
-
-      renderChart(weekly);
+        : `<tr><td colspan="6" style="text-align:center; color:var(--muted); font-style:italic; padding:24px 0;">No reservations for this date</td></tr>`;
     }
 
-    // ══════════════════════════════════════════════════════════════
-    //  LOAD CLIENT DATA
-    // ══════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════
+    //  LOAD CLIENT — stats/alerts/seats always TODAY
+    // ══════════════════════════════════════════════════
     async function loadClient(clientId) {
       currentClientId = clientId;
-      const SELISO    = isoDate(selectedDate);
-      const sevenAgo  = isoDate(addDays(selectedDate, -6));
+      const sevenAgo  = isoDate(addDays(TODAY_DATE, -6));
 
       const [statsRes, allergyRes, escRes, resRes, weeklyRes, seatRes] = await Promise.all([
-        db.from('daily_stats')      .select('*').eq('client_id', clientId).eq('date', SELISO).maybeSingle(),
-        db.from('allergy_alerts')   .select('*').eq('client_id', clientId).eq('date', SELISO),
-        db.from('escalations')      .select('*').eq('client_id', clientId).eq('date', SELISO),
-        db.from('reservations')     .select('*').eq('client_id', clientId).eq('date', SELISO).order('time'),
-        db.from('weekly_metrics')   .select('*').eq('client_id', clientId).gte('date', sevenAgo).lte('date', SELISO).order('date'),
-        db.from('seat_availability').select('*').eq('client_id', clientId).eq('date', SELISO).maybeSingle(),
+        db.from('daily_stats')      .select('*').eq('client_id', clientId).eq('date', TODAY).maybeSingle(),
+        db.from('allergy_alerts')   .select('*').eq('client_id', clientId).eq('date', TODAY),
+        db.from('escalations')      .select('*').eq('client_id', clientId).eq('date', TODAY),
+        db.from('reservations')     .select('*').eq('client_id', clientId).eq('date', TODAY).order('time'),
+        db.from('weekly_metrics')   .select('*').eq('client_id', clientId).gte('date', sevenAgo).lte('date', TODAY).order('date'),
+        db.from('seat_availability').select('*').eq('client_id', clientId).eq('date', TODAY).maybeSingle(),
       ]);
 
       const sel = document.getElementById('client-select');
       const opt = sel.selectedOptions[0];
 
-      renderDashboard({
-        client:        { name: opt ? opt.textContent : '', address: opt ? opt.dataset.address : '', agent_name: opt ? opt.dataset.agent : 'AI' },
-        stats:         statsRes.data,
-        allergyAlerts: allergyRes.data  || [],
-        escalations:   escRes.data      || [],
-        reservations:  resRes.data      || [],
-        weekly:        weeklyRes.data   || [],
-        seats:         seatRes.data,
-      });
+      // Header
+      document.getElementById('client-name').textContent    = opt ? opt.textContent : '';
+      document.getElementById('client-address').textContent = opt ? (opt.dataset.address || '') : '';
+      document.getElementById('agent-badge-text').textContent = `${opt ? (opt.dataset.agent || 'AI') : 'AI'}, AI Receptionist`;
+      document.getElementById('hdr-date').textContent =
+        TODAY_DATE.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+      // Stats
+      const s = statsRes.data || {};
+      const calls = s.calls_handled    != null ? s.calls_handled    : null;
+      const res   = s.reservations_made != null ? s.reservations_made : null;
+      const escs  = s.escalations       != null ? s.escalations       : null;
+
+      document.getElementById('stat-calls').textContent       = calls != null ? calls : '—';
+      document.getElementById('stat-reservations').textContent = res  != null ? res   : '—';
+      document.getElementById('stat-conversion').textContent  = (calls && res != null)
+        ? `${Math.round((res / calls) * 100)}%` : '—';
+
+      // Covers today = sum of guests from today's reservations
+      const todayRes    = resRes.data || [];
+      const coversToday = todayRes.reduce((sum, r) => sum + (r.guests || 0), 0);
+      document.getElementById('stat-covers').textContent      = coversToday || '—';
+      document.getElementById('stat-escalations').textContent = escs != null ? escs : '—';
+
+      // Seat availability
+      renderSeats(seatRes.data, coversToday);
+
+      // Allergy alerts
+      const alerts = allergyRes.data || [];
+      document.getElementById('allergy-badge').textContent = `${alerts.length} flagged`;
+      document.getElementById('allergy-body').innerHTML = alerts.length
+        ? alerts.map(a => `
+            <div class="allergy-row">
+              <div>
+                <div class="allergy-name">${a.name || a.guest_name || '—'} <span class="allergy-time">${a.time || ''}</span></div>
+                <div class="allergy-phone">${a.phone || ''}</div>
+              </div>
+              <span class="red-pill">${a.allergy}</span>
+            </div>`).join('')
+        : '<div class="no-items">No allergy alerts today</div>';
+
+      // Escalations
+      const escsData = escRes.data || [];
+      document.getElementById('esc-badge').textContent = `${escsData.length} pending`;
+      document.getElementById('esc-body').innerHTML = escsData.length
+        ? escsData.map(e => `
+            <div class="esc-row">
+              <div class="esc-top">
+                <div>
+                  <div class="esc-name">${e.name || '—'}</div>
+                  <div class="esc-phone">${e.phone || ''}</div>
+                </div>
+                <span class="esc-type-pill">${e.type || 'Other'}</span>
+              </div>
+              <div class="esc-note">${e.note || ''}</div>
+              <div class="esc-ts">Received ${e.received || ''}</div>
+            </div>`).join('')
+        : '<div class="no-items">No pending escalations</div>';
+
+      // Reservations for currently selected res date
+      await loadReservations(clientId);
+
+      // Weekly chart
+      renderChart(weeklyRes.data || []);
     }
 
-    // ══════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════
     //  INIT
-    // ══════════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════
     async function init() {
       const statusMsg = document.getElementById('status-msg');
       const errorMsg  = document.getElementById('error-msg');
       const sel       = document.getElementById('client-select');
       const labelEl   = document.getElementById('client-bar-label');
 
-      updateDateNav();
-
-      let clients;
+      updateResDateNav();
 
       if (session.role === 'admin') {
-        // Admin: fetch all clients
         const { data, error } = await db.from('clients').select('*').order('name');
         if (error || !data?.length) {
           statusMsg.style.display = 'none';
           errorMsg.style.display  = '';
-          errorMsg.textContent = error ? `Supabase error: ${error.message}` : 'No clients found. Run supabase_setup.sql first.';
+          errorMsg.textContent = error ? `Supabase error: ${error.message}` : 'No clients found.';
           return;
         }
-        clients = data;
 
         sel.innerHTML = '';
-        for (const c of clients) {
+        for (const c of data) {
           const opt = document.createElement('option');
           opt.value           = c.id;
           opt.textContent     = c.name;
@@ -1519,23 +1452,20 @@
           sel.appendChild(opt);
         }
         statusMsg.style.display = 'none';
-        sel.style.display = '';
-        labelEl.textContent = 'Client';
+        sel.style.display       = '';
+        labelEl.textContent     = 'Client';
         sel.addEventListener('change', () => loadClient(sel.value));
-        await loadClient(clients[0].id);
+        await loadClient(data[0].id);
 
       } else {
-        // Client: fetch only their client
         const { data, error } = await db.from('clients').select('*').eq('name', session.clientName).maybeSingle();
         if (error || !data) {
           statusMsg.style.display = 'none';
           errorMsg.style.display  = '';
-          errorMsg.textContent = `Client "${session.clientName}" not found in database.`;
+          errorMsg.textContent    = `Client "${session.clientName}" not found.`;
           return;
         }
-        clients = [data];
 
-        // Populate the select with one hidden option so loadClient can read it
         const opt = document.createElement('option');
         opt.value           = data.id;
         opt.textContent     = data.name;
@@ -1543,7 +1473,6 @@
         opt.dataset.agent   = data.agent_name || 'AI';
         sel.appendChild(opt);
 
-        // Show client name as label, hide dropdown
         statusMsg.style.display = 'none';
         sel.style.display       = 'none';
         labelEl.textContent     = data.name;
