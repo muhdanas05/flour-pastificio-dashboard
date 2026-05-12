@@ -822,9 +822,6 @@
 
     /* ── RESPONSIVE ── */
 
-    /* Table: always constrained so overflow-x:auto works */
-    .tbl-outer { width: 100%; max-width: 100%; }
-
     @media (max-width: 1100px) {
       #dashboard { padding: 32px 40px 100px; }
       .stats-row { grid-template-columns: repeat(3, 1fr); gap: 36px 0; }
@@ -834,98 +831,112 @@
       .seat-editor { align-items: flex-start; }
     }
 
+    /* ── TABLET ── */
     @media (max-width: 860px) {
-      #dashboard { padding: 20px 20px 80px; }
+      #dashboard { padding: 20px 16px 80px; }
 
-      /* header: stack name above date/badge */
-      .header { flex-direction: column; align-items: flex-start; gap: 12px; padding-bottom: 20px; margin-bottom: 32px; }
-      .header-right { flex-direction: row; align-items: center; gap: 12px; }
+      .header { flex-direction: column; align-items: flex-start; gap: 10px; padding-bottom: 18px; margin-bottom: 28px; }
+      .header-right { flex-direction: row; align-items: center; gap: 10px; }
 
-      /* stats: 2 columns */
-      .stats-row { grid-template-columns: 1fr 1fr; gap: 28px 0; }
-      .stat-num { font-size: 3rem; }
+      .stats-row { grid-template-columns: 1fr 1fr; gap: 24px 0; }
+      .stat-num { font-size: 2.8rem; }
+      .stat-cell { padding-right: 16px; }
+      .stat-cell + .stat-cell { padding-left: 16px; }
       .stat-cell:nth-child(even) { border-right: none; padding-right: 0; }
       .stat-cell:nth-child(odd)  { border-right: 1px solid var(--border-md); }
       .stat-cell:last-child      { border-right: none; }
 
-      /* alerts: single column */
       .alerts-grid { grid-template-columns: 1fr; }
 
-      /* reservations section row: wrap date nav below label */
       .sec { flex-wrap: wrap; row-gap: 8px; }
-      .sec-line { min-width: 16px; }
-      .res-date-nav { flex-wrap: wrap; }
+      .sec-line { display: none; }
+      .res-date-nav { width: 100%; flex-wrap: wrap; }
 
-      /* table: scroll within its box, not the page */
-      .tbl-outer { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      table { min-width: 500px; }
+      /* Table edge-to-edge: bleed out of the 16px padding */
+      .tbl-outer {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-left: -16px;
+        margin-right: -16px;
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+      table { min-width: 500px; width: max-content; }
 
-      /* chart */
-      .chart-card { padding: 20px 18px 18px; }
+      .chart-card { padding: 20px 16px 16px; }
       .chart-head { flex-direction: column; gap: 8px; }
+      #weeklyChart { max-height: 160px; }
     }
 
+    /* ── MOBILE ── */
     @media (max-width: 600px) {
-      #dashboard { padding: 12px 12px 56px; }
+      #dashboard { padding: 12px 14px 56px; }
 
-      /* top bar: stack into two rows */
-      .top-bar { flex-direction: column; align-items: stretch; gap: 8px; padding-bottom: 12px; margin-bottom: 16px; }
+      /* top bar: two rows */
+      .top-bar { flex-direction: column; align-items: stretch; gap: 8px; padding-bottom: 12px; margin-bottom: 14px; }
       .top-bar-left { flex-wrap: wrap; gap: 8px; }
       .top-bar-right { justify-content: space-between; }
       .client-select { min-width: 0; width: 100%; }
+      .status-msg { font-size: 0.72rem; }
 
-      /* header */
-      .wordmark { font-size: 1.55rem; }
-      .header { margin-bottom: 24px; }
+      .wordmark { font-size: 1.45rem; }
+      .wordmark-address { font-size: 0.62rem; }
+      .header { margin-bottom: 20px; padding-bottom: 16px; }
+      .hdr-date { font-size: 0.82rem; }
 
-      /* stats */
-      .stats-row { gap: 20px 0; margin-bottom: 18px; }
-      .stat-num { font-size: 2.5rem; }
+      .stats-row { gap: 18px 0; margin-bottom: 16px; }
+      .stat-num { font-size: 2.4rem; }
       .stat-cell { padding-right: 14px; }
       .stat-cell + .stat-cell { padding-left: 14px; }
-      .stat-lbl { font-size: 0.51rem; }
+      .stat-lbl { font-size: 0.5rem; margin-top: 8px; }
+      .stat-sub { font-size: 0.57rem; }
 
-      /* seat card */
-      .seat-card { padding: 14px 16px; gap: 14px; }
+      .seat-card { padding: 14px 14px; gap: 14px; margin-bottom: 18px; }
       .seat-header { flex-direction: column; align-items: flex-start; gap: 8px; }
       .seat-numbers { gap: 12px; }
+      .seat-num-val { font-size: 1.25rem; }
 
-      /* alerts */
-      .alerts-grid { margin-bottom: 28px; gap: 10px; }
+      .alerts-grid { gap: 10px; margin-bottom: 28px; }
       .card-head { padding: 10px 14px; }
       .card-body { padding: 0 14px; }
+      .allergy-name { font-size: 0.82rem; }
+      .esc-name { font-size: 0.82rem; }
+      .esc-note { font-size: 0.7rem; }
 
-      /* section: remove divider line, date nav takes full width */
-      .sec-line { display: none; }
-      .res-date-nav { width: 100%; }
-
-      /* table: tighter min-width for small phones */
-      table { min-width: 460px; }
-      th { padding: 0 10px 10px; font-size: 0.52rem; }
-      td { padding: 10px; font-size: 0.78rem; }
+      /* Reservations: section label row */
+      .tbl-outer { margin-bottom: 32px; margin-left: -14px; margin-right: -14px; padding-left: 14px; padding-right: 14px; }
+      table { min-width: 440px; width: max-content; }
+      th { padding: 0 10px 10px; font-size: 0.5rem; }
+      td { padding: 10px 10px; font-size: 0.76rem; }
       th:first-child, td:first-child { padding-left: 0; }
+      .td-name { font-size: 0.82rem; }
 
-      /* chart */
       .chart-card { padding: 14px 12px 12px; }
-      #weeklyChart { max-height: 150px; }
+      #weeklyChart { max-height: 140px; }
+      .chart-title { font-size: 0.88rem; }
+      .legend { gap: 12px; }
 
       /* login */
       .login-card { padding: 24px 18px 20px; }
-      .login-hints { padding: 12px 14px; }
+      .login-hints { padding: 12px; }
       .login-hint-row { flex-wrap: wrap; gap: 4px 8px; }
       .hint-creds { order: 3; width: 100%; }
     }
 
+    /* ── SMALL PHONE ── */
     @media (max-width: 400px) {
       #dashboard { padding: 10px 10px 44px; }
       .stat-num { font-size: 2rem; }
       .stat-cell { padding-right: 10px; }
+      .stat-cell + .stat-child { padding-left: 10px; }
       .stat-cell + .stat-cell { padding-left: 10px; }
-      .wordmark { font-size: 1.35rem; }
-      table { min-width: 420px; }
+      .wordmark { font-size: 1.25rem; }
+      .tbl-outer { margin-left: -10px; margin-right: -10px; padding-left: 10px; padding-right: 10px; }
+      table { min-width: 400px; }
+      th { padding: 0 8px 8px; }
+      td { padding: 9px 8px; }
       .login-card { padding: 20px 14px 18px; }
-      .rdn-btn { font-size: 0.62rem; padding: 4px 8px; }
-      .rdn-label { font-size: 0.76rem; }
+      .rdn-btn { font-size: 0.6rem; padding: 3px 8px; }
     }
   </style>
 </head>
