@@ -34,7 +34,8 @@
       --border-lg:   rgba(160, 82, 45, 0.20);
     }
 
-    html { font-size: 16px; }
+    html { font-size: 16px; overflow-x: hidden; }
+    body { overflow-x: hidden; }
 
     body {
       background: var(--bg);
@@ -820,6 +821,10 @@
     #weeklyChart { max-height: 200px; }
 
     /* ── RESPONSIVE ── */
+
+    /* Table: always constrained so overflow-x:auto works */
+    .tbl-outer { width: 100%; max-width: 100%; }
+
     @media (max-width: 1100px) {
       #dashboard { padding: 32px 40px 100px; }
       .stats-row { grid-template-columns: repeat(3, 1fr); gap: 36px 0; }
@@ -830,83 +835,97 @@
     }
 
     @media (max-width: 860px) {
-      #dashboard { padding: 24px 24px 80px; }
-      .stats-row { grid-template-columns: 1fr 1fr; gap: 32px 0; }
-      .stat-num { font-size: 3.2rem; }
-      .alerts-grid { grid-template-columns: 1fr; }
-      .chart-card { padding: 24px 20px 20px; }
+      #dashboard { padding: 20px 20px 80px; }
+
+      /* header: stack name above date/badge */
+      .header { flex-direction: column; align-items: flex-start; gap: 12px; padding-bottom: 20px; margin-bottom: 32px; }
+      .header-right { flex-direction: row; align-items: center; gap: 12px; }
+
+      /* stats: 2 columns */
+      .stats-row { grid-template-columns: 1fr 1fr; gap: 28px 0; }
+      .stat-num { font-size: 3rem; }
       .stat-cell:nth-child(even) { border-right: none; padding-right: 0; }
       .stat-cell:nth-child(odd)  { border-right: 1px solid var(--border-md); }
       .stat-cell:last-child      { border-right: none; }
+
+      /* alerts: single column */
+      .alerts-grid { grid-template-columns: 1fr; }
+
+      /* reservations section row: wrap date nav below label */
+      .sec { flex-wrap: wrap; row-gap: 8px; }
+      .sec-line { min-width: 16px; }
       .res-date-nav { flex-wrap: wrap; }
 
-      /* header stacks vertically */
-      .header { flex-direction: column; align-items: flex-start; gap: 14px; padding-bottom: 24px; margin-bottom: 36px; }
-      .header-right { align-items: flex-start; flex-direction: row; gap: 12px; }
-
-      /* reservations section: date nav wraps below label */
-      .sec { flex-wrap: wrap; row-gap: 10px; }
-      .sec-line { min-width: 20px; }
-
-      /* table horizontally scrollable */
+      /* table: scroll within its box, not the page */
       .tbl-outer { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      table { min-width: 520px; }
+      table { min-width: 500px; }
 
-      /* chart head stacks */
-      .chart-head { flex-direction: column; gap: 10px; }
+      /* chart */
+      .chart-card { padding: 20px 18px 18px; }
+      .chart-head { flex-direction: column; gap: 8px; }
     }
 
-    @media (max-width: 560px) {
-      #dashboard { padding: 14px 14px 60px; }
+    @media (max-width: 600px) {
+      #dashboard { padding: 12px 12px 56px; }
 
-      /* top bar: stack client selector + session/logout on separate rows */
-      .top-bar { flex-direction: column; align-items: stretch; gap: 10px; padding-bottom: 14px; margin-bottom: 20px; }
+      /* top bar: stack into two rows */
+      .top-bar { flex-direction: column; align-items: stretch; gap: 8px; padding-bottom: 12px; margin-bottom: 16px; }
       .top-bar-left { flex-wrap: wrap; gap: 8px; }
       .top-bar-right { justify-content: space-between; }
       .client-select { min-width: 0; width: 100%; }
 
-      /* stats: keep 2-col, reduce padding + font */
-      .stats-row { gap: 22px 0; margin-bottom: 20px; }
-      .stat-num { font-size: 2.6rem; }
-      .stat-cell { padding-right: 16px; }
-      .stat-cell + .stat-cell { padding-left: 16px; }
-      .stat-lbl { font-size: 0.52rem; margin-top: 8px; }
+      /* header */
+      .wordmark { font-size: 1.55rem; }
+      .header { margin-bottom: 24px; }
+
+      /* stats */
+      .stats-row { gap: 20px 0; margin-bottom: 18px; }
+      .stat-num { font-size: 2.5rem; }
+      .stat-cell { padding-right: 14px; }
+      .stat-cell + .stat-cell { padding-left: 14px; }
+      .stat-lbl { font-size: 0.51rem; }
 
       /* seat card */
-      .seat-card { padding: 16px 18px; gap: 18px; }
-      .seat-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-      .seat-numbers { gap: 14px; }
+      .seat-card { padding: 14px 16px; gap: 14px; }
+      .seat-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .seat-numbers { gap: 12px; }
 
       /* alerts */
-      .alerts-grid { margin-bottom: 36px; }
-      .card-body { padding: 0 16px; }
-      .card-head { padding: 11px 16px; }
+      .alerts-grid { margin-bottom: 28px; gap: 10px; }
+      .card-head { padding: 10px 14px; }
+      .card-body { padding: 0 14px; }
 
-      /* section date nav: full-width below section label */
+      /* section: remove divider line, date nav takes full width */
       .sec-line { display: none; }
       .res-date-nav { width: 100%; }
 
-      /* table min-width tighter on small phones */
-      table { min-width: 440px; }
+      /* table: tighter min-width for small phones */
+      table { min-width: 460px; }
+      th { padding: 0 10px 10px; font-size: 0.52rem; }
+      td { padding: 10px; font-size: 0.78rem; }
+      th:first-child, td:first-child { padding-left: 0; }
 
       /* chart */
-      .chart-card { padding: 16px 14px 14px; }
-      #weeklyChart { max-height: 160px; }
+      .chart-card { padding: 14px 12px 12px; }
+      #weeklyChart { max-height: 150px; }
 
       /* login */
-      .login-card { padding: 28px 20px 22px; }
-      .login-hints { padding: 14px 14px; }
+      .login-card { padding: 24px 18px 20px; }
+      .login-hints { padding: 12px 14px; }
       .login-hint-row { flex-wrap: wrap; gap: 4px 8px; }
-      .hint-creds { order: 3; width: 100%; padding-top: 2px; }
+      .hint-creds { order: 3; width: 100%; }
     }
 
     @media (max-width: 400px) {
-      #dashboard { padding: 12px 12px 48px; }
-      .stat-num { font-size: 2.2rem; }
-      .stat-cell { padding-right: 12px; }
-      .stat-cell + .stat-cell { padding-left: 12px; }
-      .wordmark { font-size: 1.5rem; }
-      .login-card { padding: 24px 16px 20px; }
+      #dashboard { padding: 10px 10px 44px; }
+      .stat-num { font-size: 2rem; }
+      .stat-cell { padding-right: 10px; }
+      .stat-cell + .stat-cell { padding-left: 10px; }
+      .wordmark { font-size: 1.35rem; }
+      table { min-width: 420px; }
+      .login-card { padding: 20px 14px 18px; }
+      .rdn-btn { font-size: 0.62rem; padding: 4px 8px; }
+      .rdn-label { font-size: 0.76rem; }
     }
   </style>
 </head>
