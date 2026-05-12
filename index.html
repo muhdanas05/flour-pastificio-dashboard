@@ -839,6 +839,74 @@
       .stat-cell:nth-child(odd)  { border-right: 1px solid var(--border-md); }
       .stat-cell:last-child      { border-right: none; }
       .res-date-nav { flex-wrap: wrap; }
+
+      /* header stacks vertically */
+      .header { flex-direction: column; align-items: flex-start; gap: 14px; padding-bottom: 24px; margin-bottom: 36px; }
+      .header-right { align-items: flex-start; flex-direction: row; gap: 12px; }
+
+      /* reservations section: date nav wraps below label */
+      .sec { flex-wrap: wrap; row-gap: 10px; }
+      .sec-line { min-width: 20px; }
+
+      /* table horizontally scrollable */
+      .tbl-outer { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      table { min-width: 520px; }
+
+      /* chart head stacks */
+      .chart-head { flex-direction: column; gap: 10px; }
+    }
+
+    @media (max-width: 560px) {
+      #dashboard { padding: 14px 14px 60px; }
+
+      /* top bar: stack client selector + session/logout on separate rows */
+      .top-bar { flex-direction: column; align-items: stretch; gap: 10px; padding-bottom: 14px; margin-bottom: 20px; }
+      .top-bar-left { flex-wrap: wrap; gap: 8px; }
+      .top-bar-right { justify-content: space-between; }
+      .client-select { min-width: 0; width: 100%; }
+
+      /* stats: keep 2-col, reduce padding + font */
+      .stats-row { gap: 22px 0; margin-bottom: 20px; }
+      .stat-num { font-size: 2.6rem; }
+      .stat-cell { padding-right: 16px; }
+      .stat-cell + .stat-cell { padding-left: 16px; }
+      .stat-lbl { font-size: 0.52rem; margin-top: 8px; }
+
+      /* seat card */
+      .seat-card { padding: 16px 18px; gap: 18px; }
+      .seat-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .seat-numbers { gap: 14px; }
+
+      /* alerts */
+      .alerts-grid { margin-bottom: 36px; }
+      .card-body { padding: 0 16px; }
+      .card-head { padding: 11px 16px; }
+
+      /* section date nav: full-width below section label */
+      .sec-line { display: none; }
+      .res-date-nav { width: 100%; }
+
+      /* table min-width tighter on small phones */
+      table { min-width: 440px; }
+
+      /* chart */
+      .chart-card { padding: 16px 14px 14px; }
+      #weeklyChart { max-height: 160px; }
+
+      /* login */
+      .login-card { padding: 28px 20px 22px; }
+      .login-hints { padding: 14px 14px; }
+      .login-hint-row { flex-wrap: wrap; gap: 4px 8px; }
+      .hint-creds { order: 3; width: 100%; padding-top: 2px; }
+    }
+
+    @media (max-width: 400px) {
+      #dashboard { padding: 12px 12px 48px; }
+      .stat-num { font-size: 2.2rem; }
+      .stat-cell { padding-right: 12px; }
+      .stat-cell + .stat-cell { padding-left: 12px; }
+      .wordmark { font-size: 1.5rem; }
+      .login-card { padding: 24px 16px 20px; }
     }
   </style>
 </head>
