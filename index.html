@@ -3,1163 +3,220 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Voice AI Dashboard</title>
-
+  <title>Sala Smart — Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:          #F0E6D3;
-      --surface:     #FFFDF8;
-      --surface-2:   #F5DEB3;
-      --ink:         #1A1A1A;
-      --ink-2:       #4A3A2E;
-      --muted:       #8A7A6A;
-      --copper:      #C5963A;
-      --copper-dim:  rgba(197, 150, 58, 0.12);
-      --red:         #C0392B;
-      --red-dim:     rgba(192, 57, 43, 0.10);
-      --green:       #2D6A4F;
-      --green-dim:   rgba(45, 106, 79, 0.10);
-      --amber:       #E67E22;
-      --amber-dim:   rgba(230, 126, 34, 0.10);
-      --border:      rgba(160, 82, 45, 0.09);
-      --border-md:   rgba(160, 82, 45, 0.13);
-      --border-lg:   rgba(160, 82, 45, 0.20);
-    }
-
-    html { font-size: 16px; overflow-x: hidden; }
-    body { overflow-x: hidden; }
-
-    body {
-      background: var(--bg);
-      color: var(--ink);
-      font-family: 'Inter', system-ui, sans-serif;
-      font-weight: 300;
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-      line-height: 1.6;
-    }
-
-    /* ══════════════════════════════════════════════
-       LOGIN SCREEN
-    ══════════════════════════════════════════════ */
-    #login-screen {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      background: var(--bg);
-    }
-
-    .login-wrap { width: 100%; max-width: 420px; }
-
-    .login-brand { text-align: center; margin-bottom: 40px; }
-
-    .login-wordmark {
-      font-family: 'Fraunces', Georgia, serif;
-      font-size: 2rem;
-      font-weight: 400;
-      letter-spacing: -0.01em;
-      color: var(--ink);
-      line-height: 1;
-    }
-
-    .login-sub {
-      font-size: 0.7rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      color: var(--muted);
-      margin-top: 10px;
-    }
-
-    .login-card {
-      background: var(--surface);
-      border: 1px solid var(--border-lg);
-      border-radius: 14px;
-      padding: 40px 36px 32px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
-    }
-
-    .login-title {
-      font-family: 'Fraunces', Georgia, serif;
-      font-style: italic;
-      font-size: 1.05rem;
-      font-weight: 300;
-      color: var(--ink-2);
-      margin-bottom: 28px;
-    }
-
-    .login-field { margin-bottom: 16px; }
-
-    .login-label {
-      display: block;
-      font-size: 0.58rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--muted);
-      margin-bottom: 7px;
-    }
-
-    .login-input {
-      width: 100%;
-      padding: 11px 14px;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 400;
-      color: var(--ink);
-      background: var(--bg);
-      border: 1px solid var(--border-lg);
-      border-radius: 8px;
-      transition: border-color 0.15s, box-shadow 0.15s;
-    }
-    .login-input:focus {
-      outline: none;
-      border-color: var(--copper);
-      box-shadow: 0 0 0 3px var(--copper-dim);
-    }
-
-    .login-btn {
-      width: 100%;
-      margin-top: 8px;
-      padding: 12px;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 500;
-      letter-spacing: 0.04em;
-      color: var(--surface);
-      background: var(--copper);
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s;
-    }
-    .login-btn:hover  { opacity: 0.88; }
-    .login-btn:active { transform: scale(0.99); }
-
-    .login-error {
-      margin-top: 14px;
-      font-size: 0.78rem;
-      color: var(--red);
-      text-align: center;
-      min-height: 18px;
-    }
-
-    .login-hints {
-      margin-top: 28px;
-      padding: 16px 18px;
-      background: var(--copper-dim);
-      border: 1px solid rgba(197,150,58,0.18);
-      border-radius: 8px;
-    }
-
-    .login-hints-title {
-      font-size: 0.58rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--copper);
-      margin-bottom: 10px;
-    }
-
-    .login-hint-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 5px 0;
-      border-bottom: 1px solid rgba(197,150,58,0.12);
-      gap: 12px;
-    }
-    .login-hint-row:last-child { border-bottom: none; }
-
-    .hint-role  { font-size: 0.67rem; color: var(--ink-2); font-weight: 500; }
-    .hint-creds { font-family: 'Inter', monospace; font-size: 0.62rem; color: var(--muted); }
-
-    .hint-badge {
-      font-size: 0.52rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      padding: 2px 7px;
-      border-radius: 4px;
-      flex-shrink: 0;
-    }
-    .hint-badge.admin  { background: var(--copper-dim); color: var(--copper); border: 1px solid rgba(197,150,58,0.22); }
-    .hint-badge.client { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(45,106,79,0.22);  }
-
-    /* ══════════════════════════════════════════════
-       DASHBOARD
-    ══════════════════════════════════════════════ */
-    #dashboard { padding: 36px 72px 120px; }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .anim { opacity: 0; animation: fadeUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-    .d1 { animation-delay: 0.04s; }
-    .d2 { animation-delay: 0.16s; }
-    .d3 { animation-delay: 0.28s; }
-    .d4 { animation-delay: 0.42s; }
-    .d5 { animation-delay: 0.56s; }
-    .d6 { animation-delay: 0.68s; }
-
-    /* ── TOP BAR ── */
-    .top-bar {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 28px;
-      padding-bottom: 18px;
-      border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
-
-    .top-bar-left {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      flex: 1;
-      min-width: 0;
-    }
-
-    .top-bar-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-
-    .top-label {
-      font-size: 0.57rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.17em;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-
-    .client-select {
-      appearance: none;
-      -webkit-appearance: none;
-      background: var(--surface);
-      border: 1px solid var(--border-lg);
-      border-radius: 7px;
-      padding: 8px 36px 8px 14px;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.84rem;
-      font-weight: 500;
-      color: var(--ink);
-      cursor: pointer;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A7A6A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-      transition: border-color 0.15s;
-      min-width: 200px;
-    }
-    .client-select:hover { border-color: var(--muted); }
-    .client-select:focus { outline: 2px solid var(--copper); outline-offset: 2px; border-color: transparent; }
-
-    .status-msg { font-size: 0.78rem; color: var(--muted); font-style: italic; }
-    .error-msg  { font-size: 0.78rem; color: var(--red); }
-
-    .session-pill {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 12px;
-      background: var(--surface);
-      border: 1px solid var(--border-lg);
-      border-radius: 20px;
-      font-size: 0.62rem;
-      font-weight: 500;
-      color: var(--ink-2);
-    }
-
-    .session-role {
-      font-size: 0.52rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
-    .session-role.admin  { background: var(--copper-dim); color: var(--copper); }
-    .session-role.client { background: var(--green-dim);  color: var(--green); }
-
-    .logout-btn {
-      padding: 7px 14px;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.68rem;
-      font-weight: 500;
-      color: var(--muted);
-      background: transparent;
-      border: 1px solid var(--border-lg);
-      border-radius: 7px;
-      cursor: pointer;
-      transition: color 0.15s, border-color 0.15s;
-    }
-    .logout-btn:hover { color: var(--ink); border-color: var(--muted); }
-
-    /* ── HEADER ── */
-    .header {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      padding-bottom: 32px;
-      margin-bottom: 52px;
-      border-bottom: 1px solid var(--border-lg);
-    }
-
-    .wordmark {
-      font-family: 'Fraunces', Georgia, serif;
-      font-size: 1.9rem;
-      font-weight: 400;
-      letter-spacing: -0.01em;
-      color: var(--ink);
-      line-height: 1;
-    }
-
-    .wordmark-address {
-      font-size: 0.68rem;
-      font-weight: 400;
-      color: var(--muted);
-      margin-top: 8px;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-
-    .header-right {
-      text-align: right;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 10px;
-    }
-
-    .hdr-date {
-      font-family: 'Fraunces', Georgia, serif;
-      font-style: italic;
-      font-size: 0.9rem;
-      font-weight: 300;
-      color: var(--ink-2);
-    }
-
-    .agent-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 0.59rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.13em;
-      color: var(--green);
-      padding: 5px 13px;
-      border-radius: 20px;
-      border: 1px solid rgba(45, 106, 79, 0.25);
-      background: var(--green-dim);
-    }
-
-    .agent-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--green);
-      flex-shrink: 0;
-      box-shadow: 0 0 6px rgba(45, 106, 79, 0.55);
-    }
-
-    /* ── STATS ── */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      margin-bottom: 28px;
-    }
-
-    .stat-cell {
-      padding-right: 36px;
-      border-right: 1px solid var(--border-md);
-    }
-    .stat-cell:first-child  { padding-left: 0; }
-    .stat-cell:last-child   { border-right: none; padding-right: 0; }
-    .stat-cell + .stat-cell { padding-left: 36px; }
-
-    .stat-num {
-      font-family: 'Fraunces', Georgia, serif;
-      font-size: 4rem;
-      font-weight: 300;
-      line-height: 1;
-      letter-spacing: -0.03em;
-    }
-
-    .num-default { color: var(--ink); }
-    .num-copper  { color: var(--copper); }
-    .num-red     { color: var(--red); }
-
-    .stat-lbl {
-      font-size: 0.57rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.17em;
-      color: var(--muted);
-      margin-top: 12px;
-    }
-
-    .stat-sub {
-      font-size: 0.62rem;
-      color: var(--red);
-      margin-top: 4px;
-      font-weight: 400;
-      opacity: 0.8;
-    }
-
-    /* ── SEAT CARD ── */
-    .seat-card {
-      background: var(--surface);
-      border-radius: 10px;
-      border: 1px solid var(--border-md);
-      padding: 20px 28px;
-      margin-bottom: 28px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-      display: flex;
-      align-items: center;
-      gap: 32px;
-    }
-
-    .seat-left { flex: 1; min-width: 0; }
-
-    .seat-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-      gap: 16px;
-    }
-
-    .seat-title {
-      font-size: 0.57rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.17em;
-      color: var(--muted);
-    }
-
-    .seat-numbers {
-      font-size: 0.72rem;
-      color: var(--ink-2);
-      display: flex;
-      gap: 20px;
-    }
-
-    .seat-num-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-    .seat-num-val  { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 300; line-height: 1; }
-    .seat-num-lbl  { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); }
-
-    .seat-bar-wrap {
-      height: 8px;
-      background: var(--border-md);
-      border-radius: 99px;
-      overflow: hidden;
-      flex: 1;
-    }
-
-    .seat-bar-fill {
-      height: 100%;
-      border-radius: 99px;
-      transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s;
-    }
-
-    .seat-status { font-size: 0.68rem; font-weight: 500; margin-top: 8px; }
-    .seat-status.ok   { color: var(--green); }
-    .seat-status.warn { color: var(--amber); }
-    .seat-status.full { color: var(--red); }
-
-    .seat-editor {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-
-    .seat-editor-label {
-      font-size: 0.55rem;
-      text-transform: uppercase;
-      letter-spacing: 0.13em;
-      color: var(--muted);
-    }
-
-    .seat-editor-row { display: flex; align-items: center; gap: 8px; }
-
-    .seat-input {
-      width: 72px;
-      padding: 6px 10px;
-      font-family: 'Fraunces', serif;
-      font-size: 1.1rem;
-      font-weight: 300;
-      color: var(--ink);
-      background: var(--bg);
-      border: 1px solid var(--border-lg);
-      border-radius: 6px;
-      text-align: center;
-      transition: border-color 0.15s;
-    }
-    .seat-input:focus { outline: 2px solid var(--copper); outline-offset: 2px; border-color: transparent; }
-
-    .seat-save-btn {
-      padding: 6px 14px;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.72rem;
-      font-weight: 500;
-      color: var(--surface);
-      background: var(--copper);
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: opacity 0.15s;
-    }
-    .seat-save-btn:hover { opacity: 0.85; }
-    .seat-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .seat-save-msg { font-size: 0.62rem; color: var(--green); height: 14px; }
-
-    /* ── ALERTS GRID ── */
-    .alerts-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 52px;
-    }
-
-    .card {
-      background: var(--surface);
-      border-radius: 10px;
-      border: 1px solid var(--border-md);
-      overflow: hidden;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.03);
-    }
-
-    .card-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 13px 22px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .card-head-label {
-      font-size: 0.57rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.17em;
-      color: var(--muted);
-    }
-
-    .badge {
-      font-size: 0.56rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      padding: 3px 9px;
-      border-radius: 4px;
-    }
-
-    .badge-red   { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(192,57,43,0.18); }
-    .badge-amber { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(230,126,34,0.18); }
-
-    .card-body { padding: 0 22px; }
-
-    .no-items {
-      padding: 22px 0;
-      font-size: 0.78rem;
-      color: var(--muted);
-      font-style: italic;
-      text-align: center;
-    }
-
-    /* ── ALLERGY ROWS ── */
-    .allergy-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 0;
-      border-bottom: 1px solid var(--border);
-      gap: 16px;
-    }
-    .allergy-row:last-child { border-bottom: none; }
-
-    .allergy-name {
-      font-size: 0.88rem;
-      font-weight: 500;
-      color: var(--ink);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .allergy-time  { font-size: 0.67rem; color: var(--muted); font-weight: 400; }
-    .allergy-phone { font-size: 0.67rem; color: var(--copper); margin-top: 3px; font-weight: 400; }
-
-    .red-pill {
-      font-size: 0.56rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      padding: 4px 10px;
-      border-radius: 4px;
-      background: var(--red-dim);
-      color: var(--red);
-      border: 1px solid rgba(192,57,43,0.18);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    /* ── ESCALATION ROWS ── */
-    .esc-row { padding: 14px 0; border-bottom: 1px solid var(--border); }
-    .esc-row:last-child { border-bottom: none; }
-
-    .esc-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 6px;
-    }
-
-    .esc-name  { font-size: 0.88rem; font-weight: 500; color: var(--ink); }
-    .esc-phone { font-size: 0.67rem; color: var(--copper); margin-top: 2px; font-weight: 400; }
-    .esc-note  { font-size: 0.75rem; color: var(--ink-2); line-height: 1.55; }
-    .esc-ts    { font-size: 0.61rem; color: var(--muted); margin-top: 6px; }
-
-    .esc-type-pill {
-      font-size: 0.52rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      padding: 3px 8px;
-      border-radius: 4px;
-      background: var(--amber-dim);
-      color: var(--amber);
-      border: 1px solid rgba(230,126,34,0.18);
-      white-space: nowrap;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
-
-    /* ── SECTION LABEL ── */
-    .sec { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
-    .sec-lbl {
-      font-size: 0.57rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-    .sec-line { flex: 1; height: 1px; background: var(--border-md); }
-
-    /* ── RESERVATION DATE NAV (inline in section header) ── */
-    .res-date-nav {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-    }
-
-    .rdn-btn {
-      padding: 4px 10px;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.68rem;
-      font-weight: 500;
-      color: var(--ink-2);
-      background: var(--surface);
-      border: 1px solid var(--border-lg);
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background 0.12s;
-      white-space: nowrap;
-    }
-    .rdn-btn:hover { background: var(--surface-2); }
-
-    .rdn-btn.active {
-      color: var(--copper);
-      border-color: rgba(197,150,58,0.30);
-      background: var(--copper-dim);
-    }
-
-    .rdn-label {
-      font-family: 'Fraunces', Georgia, serif;
-      font-style: italic;
-      font-size: 0.82rem;
-      font-weight: 300;
-      color: var(--ink);
-      padding: 0 6px;
-      white-space: nowrap;
-    }
-
-    .rdn-date-wrap { position: relative; }
-    .rdn-date-native {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-      width: 100%;
-      height: 100%;
-    }
-
-    /* ── TABLE ── */
-    .tbl-outer { margin-bottom: 52px; }
-
-    table { width: 100%; border-collapse: collapse; }
-    thead tr { border-bottom: 1px solid var(--border-lg); }
-
-    th {
-      padding: 0 16px 12px;
-      font-size: 0.56rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.17em;
-      color: var(--muted);
-      text-align: left;
-    }
-    th:first-child { padding-left: 0; }
-
-    td {
-      padding: 13px 16px;
-      font-size: 0.82rem;
-      color: var(--ink-2);
-      border-bottom: 1px solid var(--border);
-      vertical-align: middle;
-    }
-    td:first-child { padding-left: 0; }
-    tr:last-child td { border-bottom: none; }
-
-    tbody tr { transition: background 0.1s ease; }
-    tbody tr:hover td { background: rgba(0,0,0,0.02); }
-
-    .td-name { font-size: 0.88rem; font-weight: 500; color: var(--ink); }
-
-    .td-allergy-pill {
-      display: inline-block;
-      font-size: 0.55rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      padding: 3px 8px;
-      border-radius: 4px;
-      background: var(--red-dim);
-      color: var(--red);
-      border: 1px solid rgba(192,57,43,0.18);
-    }
-
-    .td-none { color: var(--muted); font-size: 0.78rem; }
-
-    .td-phone {
-      font-size: 0.75rem;
-      color: var(--copper);
-      text-decoration: none;
-      font-weight: 400;
-      transition: color 0.12s;
-    }
-    .td-phone:hover { color: var(--ink); }
-
-    .td-notes {
-      font-size: 0.72rem;
-      color: var(--muted);
-      font-style: italic;
-      max-width: 180px;
-    }
-
-    /* ── CHART ── */
-    .chart-card {
-      background: var(--surface);
-      border-radius: 10px;
-      border: 1px solid var(--border-md);
-      padding: 32px 40px 28px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.03);
-    }
-
-    .chart-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 28px;
-    }
-
-    .chart-title {
-      font-family: 'Fraunces', Georgia, serif;
-      font-style: italic;
-      font-size: 0.98rem;
-      font-weight: 300;
-      color: var(--ink-2);
-    }
-
-    .legend { display: flex; gap: 20px; padding-top: 3px; }
-    .leg {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 0.57rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--muted);
-    }
-    .leg-dot { width: 6px; height: 6px; border-radius: 50%; }
-    .dot-copper { background: var(--copper); }
-    .dot-amber  { background: var(--amber); }
-
-    #weeklyChart { max-height: 200px; }
-
-    /* ── RESPONSIVE ── */
-
-    @media (max-width: 1100px) {
-      #dashboard { padding: 32px 40px 100px; }
-      .stats-row { grid-template-columns: repeat(3, 1fr); gap: 36px 0; }
-      .stat-cell:nth-child(3) { border-right: none; padding-right: 0; }
-      .stat-cell:nth-child(4) { padding-left: 0; }
-      .seat-card { flex-direction: column; align-items: stretch; }
-      .seat-editor { align-items: flex-start; }
-    }
-
-    /* ── TABLET ── */
-    @media (max-width: 860px) {
-      #dashboard { padding: 20px 16px 80px; }
-
-      .header { flex-direction: column; align-items: flex-start; gap: 10px; padding-bottom: 18px; margin-bottom: 28px; }
-      .header-right { flex-direction: row; align-items: center; gap: 10px; }
-
-      .stats-row { grid-template-columns: 1fr 1fr; gap: 24px 0; }
-      .stat-num { font-size: 2.8rem; }
-      .stat-cell { padding-right: 16px; }
-      .stat-cell + .stat-cell { padding-left: 16px; }
-      .stat-cell:nth-child(even) { border-right: none; padding-right: 0; }
-      .stat-cell:nth-child(odd)  { border-right: 1px solid var(--border-md); }
-      .stat-cell:last-child      { border-right: none; }
-
-      .alerts-grid { grid-template-columns: 1fr; }
-
-      .sec { flex-wrap: wrap; row-gap: 8px; }
-      .sec-line { display: none; }
-      .res-date-nav { width: 100%; display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 4px; }
-      /* Hide scrollbar for date nav */
-      .res-date-nav::-webkit-scrollbar { display: none; }
-      .res-date-nav { -ms-overflow-style: none; scrollbar-width: none; }
-
-      /* Table edge-to-edge on tablet */
-      .tbl-outer {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        margin-left: -16px;
-        margin-right: -16px;
-        padding-left: 16px;
-        padding-right: 16px;
-      }
-      table { min-width: 500px; width: max-content; }
-
-      .chart-card { padding: 20px 16px 16px; }
-      .chart-head { flex-direction: column; gap: 8px; }
-      #weeklyChart { max-height: 160px; }
-    }
-
-    /* ── MOBILE ── */
-    @media (max-width: 600px) {
-      #dashboard { padding: 12px 14px 56px; }
-
-      /* top bar: two rows */
-      .top-bar { flex-direction: column; align-items: stretch; gap: 8px; padding-bottom: 12px; margin-bottom: 14px; }
-      .top-bar-left { flex-wrap: wrap; gap: 8px; }
-      .top-bar-right { justify-content: space-between; }
-      .client-select { min-width: 0; width: 100%; }
-      .status-msg { font-size: 0.72rem; }
-
-      .wordmark { font-size: 1.45rem; }
-      .wordmark-address { font-size: 0.62rem; }
-      .header { margin-bottom: 20px; padding-bottom: 16px; }
-      .hdr-date { font-size: 0.82rem; }
-
-      .stats-row { grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-      .stat-num { font-size: 2.2rem; }
-      .stat-cell { 
-        padding: 12px !important; 
-        border: 1px solid var(--border-md) !important; 
-        background: var(--surface); 
-        border-radius: 10px; 
-      }
-      .stat-lbl { font-size: 0.5rem; margin-top: 6px; }
-      .stat-sub { font-size: 0.57rem; }
-
-      .seat-card { padding: 14px; gap: 14px; margin-bottom: 18px; }
-      .seat-header { flex-direction: column; align-items: flex-start; gap: 8px; }
-      .seat-numbers { gap: 12px; flex-wrap: wrap; }
-      .seat-num-val { font-size: 1.25rem; }
-      .seat-editor-row { flex-wrap: wrap; }
-
-      .alerts-grid { gap: 12px; margin-bottom: 24px; }
-      .card-head { padding: 12px 14px; }
-      .card-body { padding: 0 14px; }
-      .allergy-name { font-size: 0.82rem; }
-      .esc-name { font-size: 0.82rem; }
-      .esc-note { font-size: 0.7rem; }
-
-      /* Reservations: convert table to cards */
-      .tbl-outer { margin-bottom: 32px; margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; overflow: visible; }
-      table, thead, tbody, th, td, tr { display: block; width: 100%; min-width: 0; }
-      thead { display: none; }
-      tbody { display: flex; flex-direction: column; gap: 12px; }
-      tbody tr { 
-        background: var(--surface); 
-        border: 1px solid var(--border-md); 
-        border-radius: 10px; 
-        padding: 12px 14px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-      }
-      tbody tr:hover td { background: transparent; }
-      td { 
-        padding: 5px 0; 
-        border-bottom: none; 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: flex-start; 
-        font-size: 0.8rem;
-        text-align: right;
-      }
-      td:first-child, td:last-child { padding: 5px 0; }
-      
-      /* Fake Headers */
-      td::before {
-        font-size: 0.55rem;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--muted);
-        margin-right: 12px;
-        flex-shrink: 0;
-        padding-top: 2px;
-        text-align: left;
-      }
-      td:nth-child(2)::before { content: "Time"; }
-      td:nth-child(3)::before { content: "Guests"; }
-      td:nth-child(4)::before { content: "Allergies"; }
-      td:nth-child(5)::before { content: "WhatsApp"; }
-      td:nth-child(6)::before { content: "Notes"; }
-
-      td:first-child { 
-        font-size: 0.95rem; 
-        font-weight: 500; 
-        color: var(--ink);
-        padding-bottom: 8px; 
-        margin-bottom: 6px; 
-        border-bottom: 1px solid var(--border); 
-        justify-content: flex-start;
-        text-align: left;
-      }
-      td:first-child::before { display: none; }
-      
-      .td-allergy-pill { font-size: 0.5rem; padding: 2px 6px; }
-
-      .chart-card { padding: 14px 12px 12px; }
-      #weeklyChart { max-height: 140px; }
-      .chart-title { font-size: 0.88rem; }
-      .legend { gap: 12px; }
-
-      /* login */
-      .login-card { padding: 24px 18px 20px; }
-      .login-hints { padding: 12px; }
-      .login-hint-row { flex-wrap: wrap; gap: 4px 8px; }
-      .hint-creds { order: 3; width: 100%; }
-    }
-
-    /* ── SMALL PHONE ── */
-    @media (max-width: 400px) {
-      #dashboard { padding: 10px 10px 44px; }
-      .stat-num { font-size: 1.8rem; }
-      .wordmark { font-size: 1.25rem; }
-      .login-card { padding: 20px 14px 18px; }
-      .rdn-btn { font-size: 0.6rem; padding: 3px 8px; }
-    }
-  </style>
+  <!--STYLES-->
 </head>
 <body>
 
-  <!-- ═══════════════════ LOGIN ═══════════════════ -->
-  <div id="login-screen">
-    <div class="login-wrap">
-      <div class="login-brand">
-        <div class="login-wordmark">Voice AI</div>
-        <div class="login-sub">Restaurant Dashboard</div>
+<!-- ═══════════════════ LOGIN ═══════════════════ -->
+<div id="login-screen">
+  <div class="login-wrap">
+    <div class="login-brand">
+      <div class="login-wordmark">Sala Smart</div>
+      <div class="login-sub">Restaurant Dashboard</div>
+    </div>
+
+    <div class="login-card">
+      <div class="login-title">Sign in to your account</div>
+
+      <div class="login-field">
+        <label class="login-label" for="l-user">Username</label>
+        <input class="login-input" id="l-user" type="text" autocomplete="username" placeholder="username">
+      </div>
+      <div class="login-field">
+        <label class="login-label" for="l-pass">Password</label>
+        <input class="login-input" id="l-pass" type="password" autocomplete="current-password" placeholder="••••••••">
       </div>
 
-      <div class="login-card">
-        <div class="login-title">Sign in to your account</div>
+      <button class="login-btn" onclick="doLogin()">Sign In</button>
+      <div class="login-error" id="login-error"></div>
+    </div>
 
-        <div class="login-field">
-          <label class="login-label" for="l-user">Username</label>
-          <input class="login-input" id="l-user" type="text" autocomplete="username" placeholder="username">
-        </div>
-
-        <div class="login-field">
-          <label class="login-label" for="l-pass">Password</label>
-          <input class="login-input" id="l-pass" type="password" autocomplete="current-password" placeholder="••••••••">
-        </div>
-
-        <button class="login-btn" onclick="doLogin()">Sign In</button>
-        <div class="login-error" id="login-error"></div>
+    <div class="login-hints">
+      <div class="login-hints-title">Demo credentials</div>
+      <div class="login-hint-row">
+        <span class="hint-role">Admin</span>
+        <span class="hint-creds">admin / admin2024</span>
+        <span class="hint-badge admin">Admin</span>
       </div>
-
-      <div class="login-hints">
-        <div class="login-hints-title">Demo credentials</div>
-        <div class="login-hint-row">
-          <span class="hint-role">Admin</span>
-          <span class="hint-creds">admin / admin2024</span>
-          <span class="hint-badge admin">Admin</span>
-        </div>
-        <div class="login-hint-row">
-          <span class="hint-role">Flour Pastificio</span>
-          <span class="hint-creds">flour / flour2024</span>
-          <span class="hint-badge client">Client</span>
-        </div>
-        <div class="login-hint-row">
-          <span class="hint-role">La Brasserie</span>
-          <span class="hint-creds">brasserie / brasserie2024</span>
-          <span class="hint-badge client">Client</span>
-        </div>
-        <div class="login-hint-row">
-          <span class="hint-role">The Harbour Grill</span>
-          <span class="hint-creds">harbour / harbour2024</span>
-          <span class="hint-badge client">Client</span>
-        </div>
+      <div class="login-hint-row">
+        <span class="hint-role">Flour Pastificio</span>
+        <span class="hint-creds">flour / flour2024</span>
+        <span class="hint-badge client">Client</span>
+      </div>
+      <div class="login-hint-row">
+        <span class="hint-role">La Brasserie</span>
+        <span class="hint-creds">brasserie / brasserie2024</span>
+        <span class="hint-badge client">Client</span>
+      </div>
+      <div class="login-hint-row">
+        <span class="hint-role">The Harbour Grill</span>
+        <span class="hint-creds">harbour / harbour2024</span>
+        <span class="hint-badge client">Client</span>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- ═══════════════════ DASHBOARD ═══════════════════ -->
-  <div id="dashboard" style="display:none;">
+<!-- ═══════════════════ DASHBOARD ═══════════════════ -->
+<div id="dashboard" style="display:none;">
 
-    <!-- TOP BAR -->
-    <div class="top-bar anim d1">
-      <div class="top-bar-left">
-        <span class="top-label" id="client-bar-label">Client</span>
-        <select class="client-select" id="client-select" style="display:none;"></select>
-        <span class="status-msg" id="status-msg">Loading…</span>
-        <span class="error-msg"  id="error-msg" style="display:none;"></span>
-      </div>
-      <div class="top-bar-right">
-        <div class="session-pill">
-          <span id="session-user"></span>
-          <span class="session-role" id="session-role-badge"></span>
-        </div>
-        <button class="logout-btn" onclick="doLogout()">Sign out</button>
-      </div>
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="top-label" id="client-bar-label">Client</span>
+      <select class="client-select" id="client-select" style="display:none;"></select>
+      <span class="status-msg" id="status-msg">Loading…</span>
+      <span class="error-msg"  id="error-msg" style="display:none;"></span>
     </div>
+    <div class="top-bar-right">
+      <div class="session-pill">
+        <span id="session-user"></span>
+        <span class="session-role" id="session-role-badge"></span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Sign out</button>
+    </div>
+  </div>
 
-    <!-- HEADER -->
-    <header class="header anim d1">
-      <div>
+  <!-- NAV TABS -->
+  <nav class="nav-tabs">
+    <button class="nav-tab active" data-view="overview">Overview</button>
+    <button class="nav-tab" data-view="reservations">Reservations</button>
+    <button class="nav-tab" data-view="settings">Settings</button>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <!-- RESTAURANT HEADER (shared across views) -->
+    <div class="view-header anim d1">
+      <div class="view-header-left">
         <div class="wordmark" id="client-name">—</div>
         <div class="wordmark-address" id="client-address"></div>
       </div>
-      <div class="header-right">
+      <div class="view-header-right">
         <div class="hdr-date" id="hdr-date"></div>
         <span class="agent-badge">
           <span class="agent-dot"></span>
           <span id="agent-badge-text">AI Receptionist</span>
         </span>
       </div>
-    </header>
-
-    <!-- STATS — always today -->
-    <div class="stats-row anim d2">
-      <div class="stat-cell">
-        <div class="stat-num num-default" id="stat-calls">—</div>
-        <div class="stat-lbl">Calls Today</div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-num num-default" id="stat-reservations">—</div>
-        <div class="stat-lbl">Reservations</div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-num num-copper" id="stat-conversion">—</div>
-        <div class="stat-lbl">Conversion</div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-num num-default" id="stat-covers">—</div>
-        <div class="stat-lbl">Covers Today</div>
-      </div>
-      <div class="stat-cell">
-        <div class="stat-num num-red" id="stat-escalations">—</div>
-        <div class="stat-lbl">Escalations</div>
-        <div class="stat-sub">Needs human review</div>
-      </div>
     </div>
 
-    <!-- SEAT AVAILABILITY — always today -->
-    <div class="seat-card anim d3">
-      <div class="seat-left">
-        <div class="seat-header">
-          <span class="seat-title">Seat Availability — Today</span>
-          <div class="seat-numbers">
-            <div class="seat-num-item">
-              <span class="seat-num-val num-default" id="seat-available">—</span>
-              <span class="seat-num-lbl">Available</span>
+    <!-- ══════════ VIEW: OVERVIEW ══════════ -->
+    <div id="view-overview">
+
+      <!-- Stats -->
+      <div class="stats-row anim d2">
+        <div class="stat-cell">
+          <div class="stat-num num-default" id="stat-reservations">—</div>
+          <div class="stat-lbl">Reservations Today</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num num-copper" id="stat-covers">—</div>
+          <div class="stat-lbl">Covers Today</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num num-red" id="stat-escalations">—</div>
+          <div class="stat-lbl">Escalations</div>
+          <div class="stat-sub">Needs human review</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-num num-default" id="stat-noshows">—</div>
+          <div class="stat-lbl">No-shows (7 days)</div>
+        </div>
+      </div>
+
+      <!-- Availability bar -->
+      <div class="avail-card anim d3">
+        <div class="avail-head">
+          <span class="avail-title">Seat Availability — Today</span>
+          <div class="avail-nums">
+            <div class="avail-num-item">
+              <span class="avail-num-val num-default" id="avail-available">—</span>
+              <span class="avail-num-lbl">Available</span>
             </div>
-            <div class="seat-num-item">
-              <span class="seat-num-val" id="seat-booked" style="color:var(--copper)">—</span>
-              <span class="seat-num-lbl">Booked</span>
+            <div class="avail-num-item">
+              <span class="avail-num-val" style="color:var(--copper)" id="avail-booked">—</span>
+              <span class="avail-num-lbl">Booked</span>
             </div>
-            <div class="seat-num-item">
-              <span class="seat-num-val" id="seat-total" style="color:var(--muted)">—</span>
-              <span class="seat-num-lbl">Total</span>
+            <div class="avail-num-item">
+              <span class="avail-num-val" style="color:var(--muted)" id="avail-total">—</span>
+              <span class="avail-num-lbl">Total</span>
             </div>
           </div>
         </div>
-        <div class="seat-bar-wrap">
-          <div class="seat-bar-fill" id="seat-bar" style="width:0%; background:var(--green);"></div>
+        <div class="avail-bar-wrap">
+          <div class="avail-bar-fill" id="avail-bar" style="width:0%;background:var(--green);"></div>
         </div>
-        <div class="seat-status ok" id="seat-status">Set today's capacity to enable overbooking protection</div>
+        <div class="avail-status ok" id="avail-status">Loading availability…</div>
       </div>
 
-      <div class="seat-editor">
-        <span class="seat-editor-label">Today's Capacity</span>
-        <div class="seat-editor-row">
-          <input class="seat-input" id="seat-input" type="number" min="1" max="999" placeholder="—">
-          <button class="seat-save-btn" id="seat-save-btn" onclick="saveCapacity()">Save</button>
+      <!-- Alerts grid: allergy flags + escalations -->
+      <div class="alerts-grid anim d4">
+        <div class="card">
+          <div class="card-head">
+            <span class="card-head-label">Allergy Flags — Today</span>
+            <span class="badge badge-red" id="allergy-badge">—</span>
+          </div>
+          <div class="card-body" id="allergy-body"></div>
         </div>
-        <div class="seat-save-msg" id="seat-save-msg"></div>
-      </div>
-    </div>
 
-    <!-- ALERTS — always today -->
-    <div class="alerts-grid anim d4">
-      <div class="card">
-        <div class="card-head">
-          <span class="card-head-label">Allergy Alerts — Today</span>
-          <span class="badge badge-red" id="allergy-badge">—</span>
+        <div class="card">
+          <div class="card-head">
+            <span class="card-head-label">Human Escalations</span>
+            <span class="badge badge-amber" id="esc-badge">—</span>
+          </div>
+          <div class="card-body" id="esc-body"></div>
         </div>
-        <div class="card-body" id="allergy-body"></div>
       </div>
 
-      <div class="card">
-        <div class="card-head">
-          <span class="card-head-label">Human Escalations — Today</span>
-          <span class="badge badge-amber" id="esc-badge">—</span>
+      <!-- Today's reservations table -->
+      <div class="tbl-outer anim d5">
+        <div class="sec"><span class="sec-lbl">Today's Reservations</span><div class="sec-line"></div></div>
+        <table>
+          <thead>
+            <tr>
+              <th>Guest</th>
+              <th>Time</th>
+              <th>Covers</th>
+              <th>Notes / Allergy</th>
+              <th>WhatsApp</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="today-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Weekly chart -->
+      <div class="anim d6">
+        <div class="sec"><span class="sec-lbl">Weekly Overview</span><div class="sec-line"></div></div>
+        <div class="chart-card">
+          <div class="chart-head">
+            <div class="chart-title">Reservations and covers, last 7 days</div>
+            <div class="legend">
+              <div class="leg"><div class="leg-dot dot-copper"></div>Reservations</div>
+              <div class="leg"><div class="leg-dot dot-green"></div>Covers</div>
+            </div>
+          </div>
+          <canvas id="weeklyChart"></canvas>
         </div>
-        <div class="card-body" id="esc-body"></div>
       </div>
-    </div>
 
-    <!-- RESERVATIONS — browsable by date -->
-    <div class="tbl-outer anim d5">
-      <div class="sec">
+    </div><!-- /view-overview -->
+
+    <!-- ══════════ VIEW: RESERVATIONS ══════════ -->
+    <div id="view-reservations" style="display:none;">
+
+      <!-- Controls row: date nav + filters + add button -->
+      <div class="sec" style="margin-bottom:14px;">
         <span class="sec-lbl">Reservations</span>
         <div class="sec-line"></div>
         <div class="res-date-nav">
@@ -1172,456 +229,194 @@
           <button class="rdn-btn active" id="res-today-btn" onclick="goResToday()">Today</button>
         </div>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Guest</th>
-            <th>Time</th>
-            <th>Guests</th>
-            <th>Allergies</th>
-            <th>WhatsApp</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody id="res-tbody"></tbody>
-      </table>
-    </div>
 
-    <!-- WEEKLY OVERVIEW -->
-    <div class="anim d6">
-      <div class="sec">
-        <span class="sec-lbl">Weekly Overview</span>
-        <div class="sec-line"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="all">All</button>
+          <button class="filter-tab" data-filter="confirmed">Confirmed</button>
+          <button class="filter-tab" data-filter="arrived">Arrived</button>
+          <button class="filter-tab" data-filter="no_show">No-show</button>
+          <button class="filter-tab" data-filter="cancelled">Cancelled</button>
+        </div>
+        <button class="btn-primary" onclick="openAddModal()">+ Add Reservation</button>
       </div>
-      <div class="chart-card">
-        <div class="chart-head">
-          <div class="chart-title">Calls and reservations, last 7 days</div>
-          <div class="legend">
-            <div class="leg"><div class="leg-dot dot-copper"></div>Calls</div>
-            <div class="leg"><div class="leg-dot dot-amber"></div>Reservations</div>
+
+      <div class="tbl-outer">
+        <table>
+          <thead>
+            <tr>
+              <th>Guest</th>
+              <th>Time</th>
+              <th>Covers</th>
+              <th>Phone</th>
+              <th>Notes / Allergy</th>
+              <th>Status</th>
+              <th>Source</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="res-tbody"></tbody>
+        </table>
+      </div>
+
+    </div><!-- /view-reservations -->
+
+    <!-- ══════════ VIEW: SETTINGS ══════════ -->
+    <div id="view-settings" style="display:none;">
+      <div class="settings-grid">
+
+        <!-- Restaurant Info -->
+        <div class="settings-card">
+          <div class="settings-card-head">
+            <span class="settings-card-title">Restaurant Info</span>
+            <span class="save-msg" id="info-save-msg"></span>
+          </div>
+          <div class="settings-card-body">
+            <div class="info-row">
+              <div class="info-field">
+                <label class="info-label">Restaurant Name</label>
+                <input class="info-input" id="set-name" type="text" placeholder="Restaurant name">
+              </div>
+              <div class="info-field">
+                <label class="info-label">Timezone</label>
+                <input class="info-input" id="set-tz" type="text" placeholder="Europe/Rome">
+              </div>
+            </div>
+            <div class="info-field">
+              <label class="info-label">Address</label>
+              <input class="info-input" id="set-address" type="text" placeholder="Address">
+            </div>
+            <div class="info-field">
+              <label class="info-label">Booking Mode</label>
+              <div class="mode-toggle">
+                <button class="mode-btn active" data-mode="seats" onclick="setBookingMode('seats')">Seats</button>
+                <button class="mode-btn" data-mode="tables" onclick="setBookingMode('tables')">Tables</button>
+              </div>
+            </div>
+            <div style="margin-top:16px;">
+              <button class="btn-primary" onclick="saveRestaurantInfo()">Save Info</button>
+            </div>
           </div>
         </div>
-        <canvas id="weeklyChart"></canvas>
+
+        <!-- Opening Hours -->
+        <div class="settings-card">
+          <div class="settings-card-head">
+            <span class="settings-card-title">Opening Hours</span>
+            <span class="save-msg" id="hours-save-msg"></span>
+          </div>
+          <div class="settings-card-body">
+            <div style="display:grid;grid-template-columns:90px 1fr 1fr 80px 40px;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--border);">
+              <span style="font-size:0.52rem;font-weight:500;text-transform:uppercase;letter-spacing:0.13em;color:var(--muted);">Day</span>
+              <span style="font-size:0.52rem;font-weight:500;text-transform:uppercase;letter-spacing:0.13em;color:var(--muted);">Opens</span>
+              <span style="font-size:0.52rem;font-weight:500;text-transform:uppercase;letter-spacing:0.13em;color:var(--muted);">Closes</span>
+              <span style="font-size:0.52rem;font-weight:500;text-transform:uppercase;letter-spacing:0.13em;color:var(--muted);">Max covers</span>
+              <span style="font-size:0.52rem;font-weight:500;text-transform:uppercase;letter-spacing:0.13em;color:var(--muted);">On</span>
+            </div>
+            <div class="hours-grid" id="hours-container"></div>
+            <div style="margin-top:16px;">
+              <button class="btn-primary" onclick="saveOpeningHours()">Save Hours</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Closed Dates -->
+        <div class="settings-card">
+          <div class="settings-card-head">
+            <span class="settings-card-title">Closed Dates</span>
+            <span class="save-msg" id="closures-save-msg"></span>
+          </div>
+          <div class="settings-card-body">
+            <div class="closure-list" id="closures-list"></div>
+            <div class="add-row">
+              <input class="add-input" type="date" id="new-closure-date">
+              <input class="add-input wide" type="text" id="new-closure-reason" placeholder="Reason (optional)">
+              <button class="btn-primary" onclick="addClosure()">Add</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tables (visible only in tables mode) -->
+        <div class="settings-card" id="tables-section" style="display:none;">
+          <div class="settings-card-head">
+            <span class="settings-card-title">Tables</span>
+            <span class="save-msg" id="tables-save-msg"></span>
+          </div>
+          <div class="settings-card-body">
+            <div class="tables-list" id="tables-list"></div>
+            <div class="add-row" style="margin-top:16px;">
+              <input class="add-input wide" type="text"   id="new-table-name" placeholder="Table name (e.g. Table 1)">
+              <input class="add-input"      type="number" id="new-table-cap"  placeholder="Seats" min="1" style="width:80px;">
+              <button class="btn-primary" onclick="addTable()">Add</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /settings-grid -->
+    </div><!-- /view-settings -->
+
+  </div><!-- /main-content -->
+</div><!-- /dashboard -->
+
+<!-- ══════════ ADD / EDIT RESERVATION MODAL ══════════ -->
+<div id="modal-backdrop" style="display:none;">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">New Reservation</div>
+
+    <div class="modal-field">
+      <label class="modal-label">Guest Name *</label>
+      <input class="modal-input" id="modal-name" type="text" placeholder="Full name">
+    </div>
+
+    <div class="modal-row">
+      <div class="modal-field">
+        <label class="modal-label">Date *</label>
+        <input class="modal-input" id="modal-date" type="date">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Time *</label>
+        <input class="modal-input" id="modal-time" type="time">
       </div>
     </div>
 
-  </div><!-- /#dashboard -->
+    <div class="modal-row">
+      <div class="modal-field">
+        <label class="modal-label">Covers *</label>
+        <input class="modal-input" id="modal-covers" type="number" min="1" max="99" value="2">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Phone / WhatsApp</label>
+        <input class="modal-input" id="modal-phone" type="tel" placeholder="+39 06 …">
+      </div>
+    </div>
 
-  <script>
-    const SUPABASE_URL = '%%SUPABASE_URL%%';
-    const SUPABASE_KEY = '%%SUPABASE_KEY%%';
-    const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <div class="modal-field">
+      <label class="modal-label">Notes / Allergies / Dietary</label>
+      <textarea class="modal-textarea" id="modal-notes" placeholder="e.g. Nut allergy — severe. Birthday dinner."></textarea>
+    </div>
 
-    // ══════════════════════════════════════════════════
-    //  AUTH
-    // ══════════════════════════════════════════════════
-    const USERS = {
-      'admin':    { password: 'admin2024',    role: 'admin',  clientName: null               },
-      'flour':    { password: 'flour2024',    role: 'client', clientName: 'Flour Pastificio' },
-      'brasserie':{ password: 'brasserie2024',role: 'client', clientName: 'La Brasserie'     },
-      'harbour':  { password: 'harbour2024',  role: 'client', clientName: 'The Harbour Grill'},
-    };
+    <div class="modal-field" id="modal-table-wrap" style="display:none;">
+      <label class="modal-label">Table Assignment</label>
+      <select class="modal-select" id="modal-table"></select>
+    </div>
 
-    let session = null;
+    <div class="modal-field" id="modal-status-wrap" style="display:none;">
+      <label class="modal-label">Status</label>
+      <select class="modal-select" id="modal-status">
+        <option value="confirmed">Confirmed</option>
+        <option value="arrived">Arrived</option>
+        <option value="no_show">No-show</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+    </div>
 
-    function doLogin() {
-      const username = document.getElementById('l-user').value.trim().toLowerCase();
-      const password = document.getElementById('l-pass').value;
-      const errEl    = document.getElementById('login-error');
-      errEl.textContent = '';
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" id="modal-save-btn" onclick="saveReservation()">Save</button>
+    </div>
+  </div>
+</div>
 
-      const user = USERS[username];
-      if (!user || user.password !== password) {
-        errEl.textContent = 'Incorrect username or password.';
-        return;
-      }
-
-      session = { username, role: user.role, clientName: user.clientName };
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('dashboard').style.display = '';
-
-      document.getElementById('session-user').textContent = username;
-      const rb = document.getElementById('session-role-badge');
-      rb.textContent = session.role;
-      rb.className   = `session-role ${session.role}`;
-
-      init();
-    }
-
-    function doLogout() {
-      session = null;
-      document.getElementById('dashboard').style.display    = 'none';
-      document.getElementById('login-screen').style.display = '';
-      document.getElementById('l-pass').value = '';
-      document.getElementById('login-error').textContent = '';
-      currentClientId = null;
-      if (weeklyChart) { weeklyChart.destroy(); weeklyChart = null; }
-    }
-
-    document.getElementById('l-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-    document.getElementById('l-user').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-
-    // ══════════════════════════════════════════════════
-    //  DATE HELPERS
-    // ══════════════════════════════════════════════════
-    const TODAY_DATE = new Date();
-    TODAY_DATE.setHours(0, 0, 0, 0);
-
-    const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
-    const isoDate = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const TODAY = isoDate(TODAY_DATE);
-
-    // Reservation browse date — independent of stats
-    let resDate = new Date(TODAY_DATE);
-
-    function updateResDateNav() {
-      const iso     = isoDate(resDate);
-      const isToday = iso === TODAY;
-
-      const label = isToday
-        ? 'Today'
-        : resDate.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-
-      document.getElementById('res-date-label').textContent = label;
-      document.getElementById('res-date-picker').value = iso;
-      document.getElementById('res-today-btn').className = isToday ? 'rdn-btn active' : 'rdn-btn';
-    }
-
-    function shiftResDate(n) {
-      resDate = addDays(resDate, n);
-      updateResDateNav();
-      if (currentClientId) loadReservations(currentClientId);
-    }
-
-    function goResToday() {
-      resDate = new Date(TODAY_DATE);
-      updateResDateNav();
-      if (currentClientId) loadReservations(currentClientId);
-    }
-
-    function pickResDate(val) {
-      if (!val) return;
-      resDate = new Date(val + 'T00:00:00');
-      updateResDateNav();
-      if (currentClientId) loadReservations(currentClientId);
-    }
-
-    // ══════════════════════════════════════════════════
-    //  STATE
-    // ══════════════════════════════════════════════════
-    let currentClientId = null;
-    let weeklyChart     = null;
-
-    // ══════════════════════════════════════════════════
-    //  CHART
-    // ══════════════════════════════════════════════════
-    function renderChart(weekly) {
-      const labels = weekly.map(w =>
-        new Date(w.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' })
-      );
-      if (weeklyChart) weeklyChart.destroy();
-      weeklyChart = new Chart(document.getElementById('weeklyChart').getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels,
-          datasets: [
-            {
-              label: 'Calls',
-              data: weekly.map(w => w.calls),
-              backgroundColor: 'rgba(197, 150, 58, 0.14)',
-              borderColor:     'rgba(197, 150, 58, 0.70)',
-              borderWidth: 1.5, borderRadius: 3, borderSkipped: false,
-            },
-            {
-              label: 'Reservations',
-              data: weekly.map(w => w.reservations),
-              backgroundColor: 'rgba(160, 82, 45, 0.13)',
-              borderColor:     'rgba(160, 82, 45, 0.65)',
-              borderWidth: 1.5, borderRadius: 3, borderSkipped: false,
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: true,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: '#FFFDF8',
-              borderColor: 'rgba(160, 82, 45, 0.18)',
-              borderWidth: 1,
-              titleColor: '#1A1A1A',
-              bodyColor: '#8A7A6A',
-              titleFont: { family: "'Inter', sans-serif", size: 11, weight: '500' },
-              bodyFont:  { family: "'Inter', sans-serif", size: 11, weight: '300' },
-              padding: 12, cornerRadius: 6,
-            }
-          },
-          scales: {
-            x: {
-              grid: { display: false },
-              ticks: { color: '#8A7A6A', font: { family: "'Inter', sans-serif", size: 11 } },
-              border: { display: false },
-            },
-            y: {
-              grid: { color: 'rgba(160, 82, 45, 0.07)' },
-              ticks: { color: '#8A7A6A', font: { family: "'Inter', sans-serif", size: 11 }, stepSize: 1 },
-              border: { display: false },
-              beginAtZero: true,
-            }
-          },
-          interaction: { mode: 'index', intersect: false },
-          animation: { duration: 600, easing: 'easeOutQuart' }
-        }
-      });
-    }
-
-    // ══════════════════════════════════════════════════
-    //  SEAT AVAILABILITY
-    // ══════════════════════════════════════════════════
-    function renderSeats(seatRow, bookedToday) {
-      const totalEl  = document.getElementById('seat-total');
-      const bookedEl = document.getElementById('seat-booked');
-      const availEl  = document.getElementById('seat-available');
-      const barEl    = document.getElementById('seat-bar');
-      const statusEl = document.getElementById('seat-status');
-      const inputEl  = document.getElementById('seat-input');
-
-      bookedEl.textContent = bookedToday;
-
-      if (!seatRow || !seatRow.total_seats) {
-        totalEl.textContent    = '—';
-        availEl.textContent    = '—';
-        barEl.style.width      = '0%';
-        barEl.style.background = 'var(--border-md)';
-        statusEl.className     = 'seat-status warn';
-        statusEl.textContent   = 'Capacity not set — AI may overbook. Set total seats to enable protection.';
-        inputEl.value = '';
-        return;
-      }
-
-      const total     = seatRow.total_seats;
-      const available = Math.max(0, total - bookedToday);
-      const pct       = Math.min(100, Math.round((bookedToday / total) * 100));
-
-      totalEl.textContent  = total;
-      availEl.textContent  = available;
-      inputEl.value        = total;
-      barEl.style.width    = pct + '%';
-
-      if (pct >= 100) {
-        barEl.style.background = 'var(--red)';
-        statusEl.className     = 'seat-status full';
-        statusEl.textContent   = 'Fully booked — AI is blocking new reservations for today.';
-      } else if (pct >= 80) {
-        barEl.style.background = 'var(--amber)';
-        statusEl.className     = 'seat-status warn';
-        statusEl.textContent   = `Almost full — ${available} seat${available !== 1 ? 's' : ''} remaining today.`;
-      } else {
-        barEl.style.background = 'var(--green)';
-        statusEl.className     = 'seat-status ok';
-        statusEl.textContent   = `${available} seat${available !== 1 ? 's' : ''} available today (${100 - pct}% capacity remaining).`;
-      }
-    }
-
-    async function saveCapacity() {
-      if (!currentClientId) return;
-      const input = document.getElementById('seat-input');
-      const btn   = document.getElementById('seat-save-btn');
-      const msg   = document.getElementById('seat-save-msg');
-      const val   = parseInt(input.value, 10);
-
-      if (!val || val < 1) { msg.style.color = 'var(--red)'; msg.textContent = 'Enter a valid number'; return; }
-
-      btn.disabled    = true;
-      btn.textContent = 'Saving…';
-
-      const { error } = await db.from('seat_availability').upsert(
-        { client_id: currentClientId, date: TODAY, total_seats: val },
-        { onConflict: 'client_id,date' }
-      );
-
-      btn.disabled    = false;
-      btn.textContent = 'Save';
-
-      if (error) {
-        msg.style.color  = 'var(--red)';
-        msg.textContent  = 'Error saving';
-      } else {
-        msg.style.color  = 'var(--green)';
-        msg.textContent  = 'Saved ✓';
-        setTimeout(() => { msg.textContent = ''; }, 2500);
-        const { data: resData } = await db.from('reservations').select('guests').eq('client_id', currentClientId).eq('date', TODAY);
-        const booked = (resData || []).reduce((s, r) => s + (r.guests || 0), 0);
-        renderSeats({ total_seats: val }, booked);
-      }
-    }
-
-    // ══════════════════════════════════════════════════
-    //  RENDER RESERVATIONS (browsable date)
-    // ══════════════════════════════════════════════════
-    async function loadReservations(clientId) {
-      const iso    = isoDate(resDate);
-      const { data } = await db.from('reservations').select('*').eq('client_id', clientId).eq('date', iso).order('time');
-      const rows = data || [];
-      const tbody = document.getElementById('res-tbody');
-
-      tbody.innerHTML = rows.length
-        ? rows.map(r => {
-            const wa  = String(r.phone || '').replace(/\D/g, '');
-            const al  = (r.allergy || '').trim();
-            const nm  = r.guest_name || r.name || '—';
-            const nt  = r.notes || '';
-            return `<tr>
-              <td class="td-name">${nm}</td>
-              <td>${r.time || '—'}</td>
-              <td>${r.guests != null ? r.guests : '—'}</td>
-              <td>${al ? `<span class="td-allergy-pill">${al}</span>` : `<span class="td-none">—</span>`}</td>
-              <td>${r.phone ? `<a class="td-phone" href="https://wa.me/${wa}" target="_blank">${r.phone}</a>` : `<span class="td-none">—</span>`}</td>
-              <td class="td-notes">${nt || `<span class="td-none">—</span>`}</td>
-            </tr>`;
-          }).join('')
-        : `<tr><td colspan="6" style="text-align:center; color:var(--muted); font-style:italic; padding:24px 0;">No reservations for this date</td></tr>`;
-    }
-
-    // ══════════════════════════════════════════════════
-    //  LOAD CLIENT — stats/alerts/seats always TODAY
-    // ══════════════════════════════════════════════════
-    async function loadClient(clientId) {
-      currentClientId = clientId;
-      const sevenAgo  = isoDate(addDays(TODAY_DATE, -6));
-
-      const [statsRes, allergyRes, escRes, resRes, weeklyRes, seatRes] = await Promise.all([
-        db.from('daily_stats')      .select('*').eq('client_id', clientId).eq('date', TODAY).maybeSingle(),
-        db.from('allergy_alerts')   .select('*').eq('client_id', clientId).eq('date', TODAY),
-        db.from('escalations')      .select('*').eq('client_id', clientId).eq('date', TODAY),
-        db.from('reservations')     .select('*').eq('client_id', clientId).eq('date', TODAY).order('time'),
-        db.from('weekly_metrics')   .select('*').eq('client_id', clientId).gte('date', sevenAgo).lte('date', TODAY).order('date'),
-        db.from('seat_availability').select('*').eq('client_id', clientId).eq('date', TODAY).maybeSingle(),
-      ]);
-
-      const sel = document.getElementById('client-select');
-      const opt = sel.selectedOptions[0];
-
-      // Header
-      document.getElementById('client-name').textContent    = opt ? opt.textContent : '';
-      document.getElementById('client-address').textContent = opt ? (opt.dataset.address || '') : '';
-      document.getElementById('agent-badge-text').textContent = `${opt ? (opt.dataset.agent || 'AI') : 'AI'}, AI Receptionist`;
-      document.getElementById('hdr-date').textContent =
-        TODAY_DATE.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-
-      // Stats — column names: calls_today, reservations, conversion_pct, covers_booked, escalations
-      const s = statsRes.data || {};
-      document.getElementById('stat-calls').textContent        = s.calls_today    != null ? s.calls_today    : '—';
-      document.getElementById('stat-reservations').textContent = s.reservations   != null ? s.reservations   : '—';
-      document.getElementById('stat-conversion').textContent   = s.conversion_pct != null ? `${s.conversion_pct}%` : '—';
-      document.getElementById('stat-covers').textContent       = s.covers_booked  != null ? s.covers_booked  : '—';
-      document.getElementById('stat-escalations').textContent  = s.escalations    != null ? s.escalations    : '—';
-
-      // Covers for seat availability = sum of guests from today's actual reservations
-      const todayRes    = resRes.data || [];
-      const coversToday = todayRes.reduce((sum, r) => sum + (r.guests || 0), 0);
-
-      // Seat availability
-      renderSeats(seatRes.data, coversToday);
-
-      // Allergy alerts
-      const alerts = allergyRes.data || [];
-      document.getElementById('allergy-badge').textContent = `${alerts.length} flagged`;
-      document.getElementById('allergy-body').innerHTML = alerts.length
-        ? alerts.map(a => `
-            <div class="allergy-row">
-              <div>
-                <div class="allergy-name">${a.name || a.guest_name || '—'} <span class="allergy-time">${a.time || ''}</span></div>
-                <div class="allergy-phone">${a.phone || ''}</div>
-              </div>
-              <span class="red-pill">${a.allergy}</span>
-            </div>`).join('')
-        : '<div class="no-items">No allergy alerts today</div>';
-
-      // Escalations
-      const escsData = escRes.data || [];
-      document.getElementById('esc-badge').textContent = `${escsData.length} pending`;
-      document.getElementById('esc-body').innerHTML = escsData.length
-        ? escsData.map(e => `
-            <div class="esc-row">
-              <div class="esc-top">
-                <div>
-                  <div class="esc-name">${e.name || '—'}</div>
-                  <div class="esc-phone">${e.phone || ''}</div>
-                </div>
-                <span class="esc-type-pill">${e.type || 'Other'}</span>
-              </div>
-              <div class="esc-note">${e.note || ''}</div>
-              <div class="esc-ts">Received ${e.received || ''}</div>
-            </div>`).join('')
-        : '<div class="no-items">No pending escalations</div>';
-
-      // Reservations for currently selected res date
-      await loadReservations(clientId);
-
-      // Weekly chart
-      renderChart(weeklyRes.data || []);
-    }
-
-    // ══════════════════════════════════════════════════
-    //  INIT
-    // ══════════════════════════════════════════════════
-    async function init() {
-      const statusMsg = document.getElementById('status-msg');
-      const errorMsg  = document.getElementById('error-msg');
-      const sel       = document.getElementById('client-select');
-      const labelEl   = document.getElementById('client-bar-label');
-
-      updateResDateNav();
-
-      if (session.role === 'admin') {
-        const { data, error } = await db.from('clients').select('*').order('name');
-        if (error || !data?.length) {
-          statusMsg.style.display = 'none';
-          errorMsg.style.display  = '';
-          errorMsg.textContent = error ? `Supabase error: ${error.message}` : 'No clients found.';
-          return;
-        }
-
-        sel.innerHTML = '';
-        for (const c of data) {
-          const opt = document.createElement('option');
-          opt.value           = c.id;
-          opt.textContent     = c.name;
-          opt.dataset.address = c.address || '';
-          opt.dataset.agent   = c.agent_name || 'AI';
-          sel.appendChild(opt);
-        }
-        statusMsg.style.display = 'none';
-        sel.style.display       = '';
-        labelEl.textContent     = 'Client';
-        sel.addEventListener('change', () => loadClient(sel.value));
-        await loadClient(data[0].id);
-
-      } else {
-        const { data, error } = await db.from('clients').select('*').eq('name', session.clientName).maybeSingle();
-        if (error || !data) {
-          statusMsg.style.display = 'none';
-          errorMsg.style.display  = '';
-          errorMsg.textContent    = `Client "${session.clientName}" not found.`;
-          return;
-        }
-
-        const opt = document.createElement('option');
-        opt.value           = data.id;
-        opt.textContent     = data.name;
-        opt.dataset.address = data.address || '';
-        opt.dataset.agent   = data.agent_name || 'AI';
-        sel.appendChild(opt);
-
-        statusMsg.style.display = 'none';
-        sel.style.display       = 'none';
-        labelEl.textContent     = data.name;
-
-        await loadClient(data.id);
-      }
-    }
-  </script>
+<!--SCRIPTS-->
 </body>
 </html>

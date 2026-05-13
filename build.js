@@ -24,9 +24,20 @@ if (!url || !key) {
 
 fs.mkdirSync(path.join(__dirname, 'dist'), { recursive: true });
 
-const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8')
-  .replace('%%SUPABASE_URL%%', url)
-  .replace('%%SUPABASE_KEY%%', key);
+// Read source files
+let html  = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
+const css = fs.readFileSync(path.join(__dirname, 'styles.css'), 'utf8');
+let   js  = fs.readFileSync(path.join(__dirname, 'app.js'),    'utf8');
+
+// Inject Supabase credentials into JS
+js = js
+  .replace("'%%SUPABASE_URL%%'", JSON.stringify(url))
+  .replace("'%%SUPABASE_KEY%%'", JSON.stringify(key));
+
+// Inline CSS and JS into HTML
+html = html
+  .replace('<!--STYLES-->', `<style>\n${css}\n</style>`)
+  .replace('<!--SCRIPTS-->', `<script>\n${js}\n</script>`);
 
 fs.writeFileSync(path.join(__dirname, 'dist', 'index.html'), html);
 

@@ -1,28 +1,29 @@
 -- ============================================================
 -- Run this in Supabase SQL Editor whenever seed data dates go stale.
--- Shifts all records so they're relative to today.
+-- Shifts all dates relative to today.
 -- ============================================================
 
--- Stats, alerts, escalations, seat availability → always today
-UPDATE daily_stats       SET date = CURRENT_DATE;
-UPDATE allergy_alerts    SET date = CURRENT_DATE;
-UPDATE escalations       SET date = CURRENT_DATE;
-UPDATE seat_availability SET date = CURRENT_DATE;
-
--- Reservations: preserve today / tomorrow / day-after spread per client
+-- Reservations: preserve today / tomorrow / day-after / yesterday spread per restaurant
 WITH min_dates AS (
-  SELECT client_id, MIN(date) AS min_date
+  SELECT restaurant_id, MIN(date) AS min_date
   FROM reservations
-  GROUP BY client_id
+  GROUP BY restaurant_id
 )
 UPDATE reservations r
 SET date = CURRENT_DATE + (r.date - m.min_date)
 FROM min_dates m
-WHERE r.client_id = m.client_id;
+WHERE r.restaurant_id = m.restaurant_id;
 
--- Weekly metrics: shift so the last day = today
-WITH max_date AS (
-  SELECT MAX(date) AS max_d FROM weekly_metrics
+-- Escalations: always today
+UPDATE escalations SET date = CURRENT_DATE;
+
+-- Closures: shift so they stay in the future relative to today
+WITH numbered AS (
+  SELECT id,
+    ROW_NUMBER() OVER (PARTITION BY restaurant_id ORDER BY date) AS rn
+  FROM closures
 )
-UPDATE weekly_metrics
-SET date = date + (CURRENT_DATE - (SELECT max_d FROM max_date));
+UPDATE closures c
+SET date = CURRENT_DATE + (n.rn * 7)
+FROM numbered n
+WHERE c.id = n.id;
