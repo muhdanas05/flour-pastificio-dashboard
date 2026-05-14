@@ -229,7 +229,7 @@ async function loadOverview() {
   document.getElementById('ov-res-count').textContent = sorted.length;
 
   if (sorted.length === 0) {
-    resBody.innerHTML = `<tr><td colspan="6" class="empty-state">No reservations today</td></tr>`;
+    resBody.innerHTML = `<tr><td colspan="7" class="empty-state">No reservations today</td></tr>`;
   } else {
     resBody.innerHTML = sorted.map(r => {
       const notes = r.notes ? (hasAllergyFlag(r.notes) ? allergyBadge() + esc(r.notes).slice(0,40) : esc(r.notes).slice(0,40)) : '<span style="color:var(--muted)">—</span>';
@@ -237,6 +237,7 @@ async function loadOverview() {
         <td class="td-time">${fmtTime(r.time)}</td>
         <td class="td-guest">${esc(r.customer_name)}</td>
         <td>${r.party_size}</td>
+        <td class="td-muted">${r.duration_minutes ?? 90} min</td>
         <td class="td-notes">${notes}</td>
         <td>${statusBadge(r.status)}</td>
         <td class="td-actions">
