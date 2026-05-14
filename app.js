@@ -23,7 +23,7 @@ const USERS = {
 let session      = null;   // { username, role, restaurantSlug }
 let restaurant   = null;   // full restaurants row
 let restaurants  = [];     // all restaurants (admin only)
-let resDate      = isoDate(new Date());
+let resDate      = null;   // set after isoDate is defined
 let resFilter    = 'all';
 let todayCapacity = 0;     // session-only slider value
 let selectedDayCap = null; // settings capacity editor — which day index is selected
@@ -31,7 +31,11 @@ let ohData       = [];     // opening_hours rows for current restaurant
 
 /* ─── Utility ──────────────────────────────────────────────────────────────── */
 function isoDate(d) {
-  return d.toISOString().split('T')[0];
+  // Use local time components — toISOString() converts to UTC and drifts by timezone offset
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 function addDays(iso, n) {
   const d = new Date(iso + 'T00:00:00');
@@ -74,6 +78,9 @@ function showToast(msg) {
   setTimeout(() => el.classList.remove('show'), 2800);
 }
 const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+// Initialise resDate here, after isoDate is defined
+resDate = isoDate(new Date());
 
 /* ─── Login ────────────────────────────────────────────────────────────────── */
 document.getElementById('btn-login').addEventListener('click', doLogin);

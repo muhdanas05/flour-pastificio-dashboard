@@ -170,24 +170,26 @@
 
     <!-- ── Reservations ───────────────────────────────────────────────── -->
     <div class="view" id="view-reservations">
-      <div class="page-header">
+
+      <div class="date-nav-bar">
         <div class="date-nav">
           <button class="date-nav-arrow" id="res-prev">&#8592;</button>
           <span class="date-nav-label" id="res-date-label">Today</span>
           <button class="date-nav-arrow" id="res-next">&#8594;</button>
           <button class="btn-today" id="res-today-btn">Today</button>
-          <label for="res-date-input" style="cursor:pointer;font-size:18px;color:var(--muted);" title="Pick date">&#128197;</label>
+          <label for="res-date-input" class="btn-cal-icon" title="Pick date">&#128197;</label>
           <input type="date" id="res-date-input">
         </div>
-        <button class="btn-primary" id="btn-add-res">+ Add Reservation</button>
-      </div>
-
-      <div class="filter-tabs" id="res-filter-tabs">
-        <button class="filter-tab active" data-filter="all">All</button>
-        <button class="filter-tab" data-filter="confirmed">Confirmed</button>
-        <button class="filter-tab" data-filter="arrived">Arrived</button>
-        <button class="filter-tab" data-filter="no_show">No-show</button>
-        <button class="filter-tab" data-filter="cancelled">Cancelled</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="filter-tabs" id="res-filter-tabs" style="margin-bottom:0;">
+            <button class="filter-tab active" data-filter="all">All</button>
+            <button class="filter-tab" data-filter="confirmed">Confirmed</button>
+            <button class="filter-tab" data-filter="arrived">Arrived</button>
+            <button class="filter-tab" data-filter="no_show">No-show</button>
+            <button class="filter-tab" data-filter="cancelled">Cancelled</button>
+          </div>
+          <button class="btn-primary" id="btn-add-res">+ Add Reservation</button>
+        </div>
       </div>
 
       <div class="card" style="padding:0 24px 24px;">

@@ -403,6 +403,17 @@ tbody td:first-child { padding-left: 0; }
 .btn-inline.danger:hover   { color: var(--red); border-color: rgba(192,57,43,0.35); background: rgba(192,57,43,0.06); }
 
 /* ─── Date navigator ─────────────────────────────────────────────────────── */
+.date-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  gap: 12px;
+}
 .date-nav {
   display: flex;
   align-items: center;
@@ -410,61 +421,83 @@ tbody td:first-child { padding-left: 0; }
 }
 .date-nav-label {
   font-family: 'Fraunces', serif;
-  font-size: 17px;
-  font-weight: 600;
-  min-width: 170px;
+  font-size: 20px;
+  font-weight: 700;
+  min-width: 200px;
   text-align: center;
+  color: var(--ink);
+  letter-spacing: -0.01em;
 }
 .date-nav-arrow {
-  background: transparent;
+  background: var(--bg);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--ink);
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 16px;
-  transition: border-color 0.12s, background 0.12s;
+  font-weight: 600;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
   cursor: pointer;
+  flex-shrink: 0;
 }
-.date-nav-arrow:hover { border-color: var(--copper-40); background: var(--copper-10); }
+.date-nav-arrow:hover {
+  border-color: var(--copper);
+  background: var(--copper-10);
+  color: var(--copper);
+}
 .btn-today {
-  background: transparent;
+  background: var(--bg);
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
   color: var(--muted);
-  padding: 5px 11px;
-  font-size: 12px;
-  font-weight: 500;
+  padding: 6px 13px;
+  font-size: 12.5px;
+  font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.12s, color 0.12s;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+  letter-spacing: 0.01em;
 }
-.btn-today:hover { border-color: var(--copper-40); color: var(--copper); }
+.btn-today:hover { border-color: var(--copper-40); color: var(--copper); background: var(--copper-10); }
+.btn-cal-icon {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  opacity: 0.55;
+  transition: opacity 0.12s;
+}
+.btn-cal-icon:hover { opacity: 1; }
 #res-date-input { opacity: 0; width: 0; height: 0; position: absolute; }
 
 /* ─── Filter tabs ────────────────────────────────────────────────────────── */
 .filter-tabs {
   display: flex;
-  gap: 0;
-  border-bottom: 2px solid var(--border);
-  margin-bottom: 20px;
+  gap: 4px;
+  margin-bottom: 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px;
 }
 .filter-tab {
   background: transparent;
   border: none;
-  padding: 9px 16px;
+  padding: 7px 16px;
   font-size: 13px;
   font-weight: 500;
   color: var(--muted);
   cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  transition: color 0.12s, border-color 0.12s;
+  border-radius: var(--radius-sm);
+  transition: color 0.12s, background 0.12s;
 }
-.filter-tab:hover { color: var(--ink); }
-.filter-tab.active { color: var(--copper); border-bottom-color: var(--copper); font-weight: 600; }
+.filter-tab:hover { color: var(--ink); background: var(--copper-10); }
+.filter-tab.active { color: var(--copper); background: var(--copper-10); font-weight: 600; }
 
 /* ─── Modal ──────────────────────────────────────────────────────────────── */
 #modal-overlay {
