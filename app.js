@@ -3,937 +3,769 @@
    Supabase credentials injected by build.js at deploy time.
 ============================================================ */
 
-const SUPABASE_URL = '%%SUPABASE_URL%%';
-const SUPABASE_KEY = '%%SUPABASE_KEY%%';
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+'use strict';
 
-/* ══════════════════════════════════════════════════════════
-   AUTH
-══════════════════════════════════════════════════════════ */
+/* ─── Supabase client ──────────────────────────────────────────────────────── */
+const SUPA_URL = '%%SUPABASE_URL%%';
+const SUPA_KEY = '%%SUPABASE_KEY%%';
+const { createClient } = supabase;
+const db = createClient(SUPA_URL, SUPA_KEY);
+
+/* ─── Auth config ──────────────────────────────────────────────────────────── */
 const USERS = {
-  'admin':    { password: 'admin2024',    role: 'admin',  restaurantSlug: null },
-  'flour':    { password: 'flour2024',    role: 'client', restaurantSlug: 'flour' },
-  'brasserie':{ password: 'brasserie2024',role: 'client', restaurantSlug: 'brasserie' },
-  'harbour':  { password: 'harbour2024',  role: 'client', restaurantSlug: 'harbour' },
+  'admin':     { password: 'admin2024',     role: 'admin',  restaurantSlug: null },
+  'flour':     { password: 'flour2024',     role: 'client', restaurantSlug: 'flour' },
+  'harbour':   { password: 'harbour2024',   role: 'client', restaurantSlug: 'harbour' },
+  'brasserie': { password: 'brasserie2024', role: 'client', restaurantSlug: 'brasserie' },
 };
 
-let session = null;
+/* ─── App state ────────────────────────────────────────────────────────────── */
+let session      = null;   // { username, role, restaurantSlug }
+let restaurant   = null;   // full restaurants row
+let restaurants  = [];     // all restaurants (admin only)
+let resDate      = isoDate(new Date());
+let resFilter    = 'all';
+let todayCapacity = 0;     // session-only slider value
+let selectedDayCap = null; // settings capacity editor — which day index is selected
+let ohData       = [];     // opening_hours rows for current restaurant
 
-function doLogin() {
-  const username = document.getElementById('l-user').value.trim().toLowerCase();
-  const password = document.getElementById('l-pass').value;
-  const errEl    = document.getElementById('login-error');
-  errEl.textContent = '';
-
-  const user = USERS[username];
-  if (!user || user.password !== password) {
-    errEl.textContent = 'Incorrect username or password.';
-    return;
-  }
-
-  session = { username, role: user.role, restaurantSlug: user.restaurantSlug };
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('dashboard').style.display    = 'flex';
-
-  document.getElementById('session-user').textContent = username;
-  const rb = document.getElementById('session-role-badge');
-  rb.textContent = session.role;
-  rb.className   = `session-role ${session.role}`;
-
-  init();
+/* ─── Utility ──────────────────────────────────────────────────────────────── */
+function isoDate(d) {
+  return d.toISOString().split('T')[0];
 }
-
-function doLogout() {
-  session = null;
-  currentRestaurantId = null;
-  currentRestaurant   = null;
-  if (weeklyChart) { weeklyChart.destroy(); weeklyChart = null; }
-  document.getElementById('dashboard').style.display    = 'none';
-  document.getElementById('login-screen').style.display = '';
-  document.getElementById('l-pass').value   = '';
-  document.getElementById('login-error').textContent = '';
+function addDays(iso, n) {
+  const d = new Date(iso + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  return isoDate(d);
 }
-
-document.getElementById('l-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-document.getElementById('l-user').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-
-/* ══════════════════════════════════════════════════════════
-   DATE HELPERS
-══════════════════════════════════════════════════════════ */
-const TODAY_DATE = new Date();
-TODAY_DATE.setHours(0, 0, 0, 0);
-
-const addDays  = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
-const isoDate  = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-const TODAY    = isoDate(TODAY_DATE);
-const DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-
-const fmtDate = d =>
-  new Date(d + 'T00:00:00').toLocaleDateString('en-GB',
-    { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-
-const fmtTime = t => t ? t.slice(0, 5) : '—';
-
-/* ══════════════════════════════════════════════════════════
-   ALLERGY DETECTION
-══════════════════════════════════════════════════════════ */
-const ALLERGY_KEYWORDS = ['allergy','allergic','intolerant','intolerance','coeliac','celiac',
-  'vegan','gluten','nut','shellfish','dairy','lactose','peanut','seafood'];
-
+function fmtTime(t) {
+  if (!t) return '';
+  const [h, m] = t.split(':');
+  const hr = parseInt(h, 10);
+  return `${hr.toString().padStart(2,'0')}:${m}`;
+}
+function fmtDate(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
+}
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+const ALLERGY_KEYWORDS = ['allergy','allergic','intolerant','intolerance','coeliac','celiac','nut','gluten','dairy','lactose','vegan','vegetarian','halal','kosher'];
 function hasAllergyFlag(notes) {
   if (!notes) return false;
   const n = notes.toLowerCase();
   return ALLERGY_KEYWORDS.some(k => n.includes(k));
 }
+function allergyBadge() {
+  return `<span class="allergy-flag">&#9888; Allergy</span>`;
+}
+function statusBadge(s) {
+  const labels = { confirmed:'Confirmed', arrived:'Arrived', no_show:'No-show', cancelled:'Cancelled' };
+  return `<span class="badge badge-${s}">${labels[s] ?? s}</span>`;
+}
+function sourceBadge(s) {
+  return `<span class="badge badge-${s}">${s === 'agent' ? 'Agent' : 'Manual'}</span>`;
+}
+function showToast(msg) {
+  const el = document.getElementById('save-msg');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
-/* ══════════════════════════════════════════════════════════
-   STATE
-══════════════════════════════════════════════════════════ */
-let currentRestaurantId = null;
-let currentRestaurant   = null;
-let weeklyChart         = null;
-let resDate             = new Date(TODAY_DATE);
-let activeFilter        = 'all';
-let editingReservation  = null; // null = add mode, object = edit mode
+/* ─── Login ────────────────────────────────────────────────────────────────── */
+document.getElementById('btn-login').addEventListener('click', doLogin);
+document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
-/* ══════════════════════════════════════════════════════════
-   HASH ROUTER
-══════════════════════════════════════════════════════════ */
-const VIEWS = ['overview', 'reservations', 'settings'];
-
-function navigate(view) {
-  if (!VIEWS.includes(view)) view = 'overview';
-  history.pushState(null, '', '#' + view);
-  renderView(view);
+function doLogin() {
+  const username = document.getElementById('login-user').value.trim().toLowerCase();
+  const password = document.getElementById('login-pass').value;
+  const errEl    = document.getElementById('login-error');
+  const user     = USERS[username];
+  if (!user || user.password !== password) {
+    errEl.textContent = 'Incorrect username or password.';
+    return;
+  }
+  errEl.textContent = '';
+  session = { username, role: user.role, restaurantSlug: user.restaurantSlug };
+  sessionStorage.setItem('sala_session', JSON.stringify(session));
+  bootApp();
 }
 
-function renderView(view) {
-  VIEWS.forEach(v => {
-    const el = document.getElementById('view-' + v);
-    if (el) el.style.display = (v === view) ? '' : 'none';
-  });
-  document.querySelectorAll('.nav-tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.view === view);
-  });
-
-  if (!currentRestaurantId) return;
-
-  if (view === 'overview')      loadOverview();
-  if (view === 'reservations')  { updateResDateNav(); loadReservations(); }
-  if (view === 'settings')      loadSettings();
+function doLogout() {
+  session = null;
+  restaurant = null;
+  sessionStorage.removeItem('sala_session');
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
 }
 
-window.addEventListener('popstate', () => {
-  const view = (location.hash || '#overview').slice(1);
-  renderView(view);
-});
+document.getElementById('btn-logout').addEventListener('click', doLogout);
 
-document.querySelectorAll('.nav-tab').forEach(tab => {
-  tab.addEventListener('click', () => navigate(tab.dataset.view));
-});
-
-/* ══════════════════════════════════════════════════════════
-   INIT — called after login
-══════════════════════════════════════════════════════════ */
-async function init() {
-  const statusMsg = document.getElementById('status-msg');
-  const errorMsg  = document.getElementById('error-msg');
-  const sel       = document.getElementById('client-select');
-  const labelEl   = document.getElementById('client-bar-label');
-
-  statusMsg.style.display = '';
-  errorMsg.style.display  = 'none';
-  statusMsg.textContent   = 'Loading…';
+/* ─── Boot ─────────────────────────────────────────────────────────────────── */
+async function bootApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').classList.add('active');
 
   if (session.role === 'admin') {
-    const { data, error } = await db.from('restaurants').select('*').order('name');
-    if (error || !data?.length) {
-      statusMsg.style.display = 'none';
-      errorMsg.style.display  = '';
-      errorMsg.textContent = error ? `DB error: ${error.message}` : 'No restaurants found.';
-      return;
-    }
-
-    sel.innerHTML = '';
-    for (const r of data) {
-      const opt = document.createElement('option');
-      opt.value = r.id;
-      opt.textContent = r.name;
-      opt.dataset.slug    = r.slug || '';
-      opt.dataset.address = r.address || '';
-      opt.dataset.agent   = r.agent_name || 'AI';
-      opt.dataset.mode    = r.booking_mode || 'seats';
-      sel.appendChild(opt);
-    }
-    statusMsg.style.display = 'none';
-    sel.style.display       = '';
-    labelEl.textContent     = 'Client';
-    sel.onchange = () => switchRestaurant(sel.value);
-    await switchRestaurant(data[0].id);
-
+    const { data } = await db.from('restaurants').select('*').order('name');
+    restaurants = data ?? [];
+    setupAdminSelector();
   } else {
-    const { data, error } = await db.from('restaurants').select('*')
-      .eq('slug', session.restaurantSlug).maybeSingle();
-    if (error || !data) {
-      statusMsg.style.display = 'none';
-      errorMsg.style.display  = '';
-      errorMsg.textContent    = `Restaurant not found.`;
-      return;
-    }
-
-    const opt = document.createElement('option');
-    opt.value = data.id;
-    opt.textContent = data.name;
-    opt.dataset.slug    = data.slug || '';
-    opt.dataset.address = data.address || '';
-    opt.dataset.agent   = data.agent_name || 'AI';
-    opt.dataset.mode    = data.booking_mode || 'seats';
-    sel.appendChild(opt);
-
-    statusMsg.style.display = 'none';
-    sel.style.display       = 'none';
-    labelEl.textContent     = data.name;
-
-    await switchRestaurant(data.id);
-  }
-}
-
-async function switchRestaurant(id) {
-  currentRestaurantId = id;
-  const sel = document.getElementById('client-select');
-  const opt = Array.from(sel.options).find(o => o.value === id);
-  if (opt) sel.value = id;
-
-  // Load full restaurant record
-  const { data } = await db.from('restaurants').select('*').eq('id', id).maybeSingle();
-  currentRestaurant = data;
-
-  // Populate header
-  document.getElementById('client-name').textContent    = currentRestaurant?.name    || '—';
-  document.getElementById('client-address').textContent = currentRestaurant?.address || '';
-  document.getElementById('hdr-date').textContent =
-    TODAY_DATE.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  document.getElementById('agent-badge-text').textContent =
-    `${currentRestaurant?.agent_name || 'AI'}, AI Receptionist`;
-
-  // Go to overview
-  resDate = new Date(TODAY_DATE);
-  const view = (location.hash || '#overview').slice(1);
-  renderView(VIEWS.includes(view) ? view : 'overview');
-}
-
-/* ══════════════════════════════════════════════════════════
-   VIEW 1 — OVERVIEW
-══════════════════════════════════════════════════════════ */
-async function loadOverview() {
-  if (!currentRestaurantId) return;
-  const sevenAgo = isoDate(addDays(TODAY_DATE, -6));
-
-  const [resRes, escRes, weeklyRes, hoursRes] = await Promise.all([
-    db.from('reservations').select('*')
-      .eq('restaurant_id', currentRestaurantId)
-      .gte('date', isoDate(addDays(TODAY_DATE, -6)))
-      .lte('date', TODAY)
-      .order('date').order('time'),
-    db.from('escalations').select('*')
-      .eq('restaurant_id', currentRestaurantId)
-      .eq('resolved', false)
-      .order('date', { ascending: false }),
-    db.from('reservations').select('date,party_size,status')
-      .eq('restaurant_id', currentRestaurantId)
-      .gte('date', sevenAgo).lte('date', TODAY),
-    db.from('opening_hours').select('*')
-      .eq('restaurant_id', currentRestaurantId),
-  ]);
-
-  const allRes   = resRes.data  || [];
-  const escs     = escRes.data  || [];
-  const weekly   = weeklyRes.data || [];
-  const hours    = hoursRes.data  || [];
-
-  const todayRes = allRes.filter(r => r.date === TODAY && r.status !== 'cancelled');
-  const todayCovers = todayRes.reduce((s, r) => s + (r.party_size || 0), 0);
-
-  const noShowsWeek = weekly.filter(r => r.status === 'no_show').length;
-
-  // Stats
-  document.getElementById('stat-reservations').textContent = todayRes.length;
-  document.getElementById('stat-covers').textContent       = todayCovers;
-  document.getElementById('stat-escalations').textContent  = escs.length;
-  document.getElementById('stat-noshows').textContent      = noShowsWeek;
-
-  // Availability bar
-  const todayDow  = TODAY_DATE.getDay();
-  const todayHour = hours.find(h => h.day_of_week === todayDow && h.is_active);
-  renderAvailability(todayHour, todayCovers);
-
-  // Allergy flags from today's reservations
-  const allergyRes = todayRes.filter(r => hasAllergyFlag(r.notes));
-  renderAllergyFlags(allergyRes);
-
-  // Escalations panel
-  renderEscalations(escs);
-
-  // Today's reservations table
-  renderTodayTable(todayRes);
-
-  // Weekly chart — group by date
-  const chartData = buildWeeklyChartData(weekly, sevenAgo);
-  renderChart(chartData);
-}
-
-function renderAvailability(hourRow, bookedCovers) {
-  const availEl  = document.getElementById('avail-available');
-  const bookedEl = document.getElementById('avail-booked');
-  const totalEl  = document.getElementById('avail-total');
-  const barEl    = document.getElementById('avail-bar');
-  const statusEl = document.getElementById('avail-status');
-
-  bookedEl.textContent = bookedCovers;
-
-  if (!hourRow || !hourRow.max_covers) {
-    totalEl.textContent    = '—';
-    availEl.textContent    = '—';
-    barEl.style.width      = '0%';
-    barEl.style.background = 'var(--border-md)';
-    statusEl.className     = 'avail-status warn';
-    statusEl.textContent   = 'Opening hours not configured — go to Settings to set today\'s capacity.';
-    return;
+    const { data } = await db.from('restaurants').select('*').eq('slug', session.restaurantSlug).single();
+    restaurant = data;
+    document.getElementById('restaurant-select').style.display = 'none';
+    document.getElementById('restaurant-name-display').textContent = restaurant?.name ?? '';
   }
 
-  const total     = hourRow.max_covers;
-  const available = Math.max(0, total - bookedCovers);
-  const pct       = Math.min(100, Math.round((bookedCovers / total) * 100));
-
-  totalEl.textContent  = total;
-  availEl.textContent  = available;
-  barEl.style.width    = pct + '%';
-
-  if (pct >= 100) {
-    barEl.style.background = 'var(--red)';
-    statusEl.className     = 'avail-status full';
-    statusEl.textContent   = 'Fully booked — AI is blocking new reservations for today.';
-  } else if (pct >= 80) {
-    barEl.style.background = 'var(--amber)';
-    statusEl.className     = 'avail-status warn';
-    statusEl.textContent   = `Almost full — ${available} cover${available !== 1 ? 's' : ''} remaining.`;
-  } else {
-    barEl.style.background = 'var(--green)';
-    statusEl.className     = 'avail-status ok';
-    statusEl.textContent   = `${available} cover${available !== 1 ? 's' : ''} available today.`;
-  }
+  navigate(location.hash.replace('#','') || 'overview');
 }
 
-function renderAllergyFlags(rows) {
-  const badge = document.getElementById('allergy-badge');
-  const body  = document.getElementById('allergy-body');
-  badge.textContent = `${rows.length} flagged`;
-
-  if (!rows.length) {
-    body.innerHTML = '<div class="no-items">No allergy flags today</div>';
-    return;
-  }
-  body.innerHTML = rows.map(r => `
-    <div class="allergy-row">
-      <div>
-        <div class="allergy-name">${esc(r.customer_name)} <span class="allergy-time">${fmtTime(r.time)}</span></div>
-        <div class="allergy-phone">${r.customer_phone || ''}</div>
-      </div>
-      <span class="red-pill">${esc(r.notes)}</span>
-    </div>`).join('');
-}
-
-function renderEscalations(escs) {
-  const badge = document.getElementById('esc-badge');
-  const body  = document.getElementById('esc-body');
-  badge.textContent = `${escs.length} pending`;
-
-  if (!escs.length) {
-    body.innerHTML = '<div class="no-items">No pending escalations</div>';
-    return;
-  }
-  body.innerHTML = escs.map(e => `
-    <div class="esc-row" id="esc-${e.id}">
-      <div class="esc-top">
-        <div>
-          <div class="esc-name">${esc(e.customer_name || 'Unknown')}</div>
-          <div class="esc-phone">${e.customer_phone || ''}</div>
-        </div>
-        <span class="esc-type-pill">${esc(e.type || 'Other')}</span>
-      </div>
-      <div class="esc-note">${esc(e.note || '')}</div>
-      <div class="esc-ts">Received ${e.received_at || ''}</div>
-      <div class="esc-actions">
-        <button class="btn-icon resolve" onclick="resolveEscalation('${e.id}')">Mark resolved</button>
-      </div>
-    </div>`).join('');
-}
-
-function renderTodayTable(rows) {
-  const tbody = document.getElementById('today-tbody');
-  if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--muted);font-style:italic;padding:24px 0">No reservations today</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = rows.map(r => `
-    <tr>
-      <td class="td-name">${esc(r.customer_name)}</td>
-      <td>${fmtTime(r.time)}</td>
-      <td>${r.party_size}</td>
-      <td>${r.notes ? `<span class="red-pill" style="font-size:0.5rem">${esc(r.notes)}</span>` : '<span class="td-none">—</span>'}</td>
-      <td>${r.customer_phone ? `<a class="td-phone" href="https://wa.me/${r.customer_phone.replace(/\D/g,'')}" target="_blank">${esc(r.customer_phone)}</a>` : '<span class="td-none">—</span>'}</td>
-      <td><span class="status-badge ${r.status}">${r.status.replace('_',' ')}</span></td>
-      <td>
-        <div class="row-actions">
-          ${r.status === 'confirmed' ? `<button class="btn-icon arrived" onclick="setStatus('${r.id}','arrived','overview')">Arrived</button>` : ''}
-          ${r.status === 'confirmed' ? `<button class="btn-icon no-show" onclick="setStatus('${r.id}','no_show','overview')">No-show</button>` : ''}
-          <button class="btn-icon" onclick="openEditModal(${JSON.stringify(r).replace(/"/g,'&quot;')})">Edit</button>
-        </div>
-      </td>
-    </tr>`).join('');
-}
-
-function buildWeeklyChartData(rows, fromDate) {
-  const days = [];
-  for (let i = 0; i < 7; i++) {
-    const d = isoDate(addDays(new Date(fromDate + 'T00:00:00'), i));
-    const dayRows = rows.filter(r => r.date === d && r.status !== 'cancelled');
-    days.push({
-      date: d,
-      reservations: dayRows.length,
-      covers: dayRows.reduce((s, r) => s + (r.party_size || 0), 0),
-    });
-  }
-  return days;
-}
-
-/* ══════════════════════════════════════════════════════════
-   CHART
-══════════════════════════════════════════════════════════ */
-function renderChart(data) {
-  const labels = data.map(d =>
-    new Date(d.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' })
-  );
-  if (weeklyChart) weeklyChart.destroy();
-  weeklyChart = new Chart(document.getElementById('weeklyChart').getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Reservations',
-          data: data.map(d => d.reservations),
-          backgroundColor: 'rgba(197,150,58,0.14)',
-          borderColor:     'rgba(197,150,58,0.70)',
-          borderWidth: 1.5, borderRadius: 3, borderSkipped: false,
-        },
-        {
-          label: 'Covers',
-          data: data.map(d => d.covers),
-          backgroundColor: 'rgba(45,106,79,0.12)',
-          borderColor:     'rgba(45,106,79,0.60)',
-          borderWidth: 1.5, borderRadius: 3, borderSkipped: false,
-        },
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#FFFDF8',
-          borderColor: 'rgba(160,82,45,0.18)', borderWidth: 1,
-          titleColor: '#1A1A1A', bodyColor: '#8A7A6A',
-          titleFont: { family: "'Inter',sans-serif", size: 11, weight: '500' },
-          bodyFont:  { family: "'Inter',sans-serif", size: 11, weight: '300' },
-          padding: 12, cornerRadius: 6,
-        }
-      },
-      scales: {
-        x: { grid: { display: false }, ticks: { color: '#8A7A6A', font: { family: "'Inter',sans-serif", size: 11 } }, border: { display: false } },
-        y: { grid: { color: 'rgba(160,82,45,0.07)' }, ticks: { color: '#8A7A6A', font: { family: "'Inter',sans-serif", size: 11 }, stepSize: 1 }, border: { display: false }, beginAtZero: true },
-      },
-      interaction: { mode: 'index', intersect: false },
-      animation: { duration: 500, easing: 'easeOutQuart' },
-    }
+function setupAdminSelector() {
+  const sel = document.getElementById('restaurant-select');
+  sel.style.display = 'block';
+  document.getElementById('restaurant-name-display').style.display = 'none';
+  sel.innerHTML = restaurants.map(r => `<option value="${r.id}">${esc(r.name)}</option>`).join('');
+  restaurant = restaurants[0] ?? null;
+  sel.value = restaurant?.id ?? '';
+  sel.addEventListener('change', () => {
+    restaurant = restaurants.find(r => r.id === sel.value) ?? null;
+    renderCurrentView();
   });
 }
 
-/* ══════════════════════════════════════════════════════════
-   VIEW 2 — RESERVATIONS
-══════════════════════════════════════════════════════════ */
-
-// Date nav
-function updateResDateNav() {
-  const iso     = isoDate(resDate);
-  const isToday = iso === TODAY;
-  const label   = isToday ? 'Today' : fmtDate(iso);
-  document.getElementById('res-date-label').textContent = label;
-  document.getElementById('res-date-picker').value      = iso;
-  document.getElementById('res-today-btn').className    = isToday ? 'rdn-btn active' : 'rdn-btn';
+/* ─── Routing ──────────────────────────────────────────────────────────────── */
+function navigate(view) {
+  ['overview','reservations','settings'].forEach(v => {
+    document.getElementById(`view-${v}`).classList.toggle('active', v === view);
+    document.querySelector(`.nav-item[data-view="${v}"]`).classList.toggle('active', v === view);
+  });
+  location.hash = view;
+  renderCurrentView();
 }
 
-function shiftResDate(n) { resDate = addDays(resDate, n); updateResDateNav(); loadReservations(); }
-function goResToday()    { resDate = new Date(TODAY_DATE); updateResDateNav(); loadReservations(); }
-function pickResDate(v)  { if (!v) return; resDate = new Date(v + 'T00:00:00'); updateResDateNav(); loadReservations(); }
-
-async function loadReservations() {
-  if (!currentRestaurantId) return;
-  const iso = isoDate(resDate);
-
-  let q = db.from('reservations').select('*')
-    .eq('restaurant_id', currentRestaurantId)
-    .eq('date', iso)
-    .order('time');
-
-  if (activeFilter !== 'all') q = q.eq('status', activeFilter);
-
-  const { data } = await q;
-  renderReservationsTable(data || []);
+function renderCurrentView() {
+  const active = document.querySelector('.view.active')?.id?.replace('view-','');
+  if (active === 'overview')     loadOverview();
+  if (active === 'reservations') loadReservations();
+  if (active === 'settings')     loadSettings();
 }
 
-function setFilter(f) {
-  activeFilter = f;
-  document.querySelectorAll('.filter-tab').forEach(t =>
-    t.classList.toggle('active', t.dataset.filter === f));
-  loadReservations();
-}
+document.querySelectorAll('.nav-item[data-view]').forEach(el => {
+  el.addEventListener('click', () => navigate(el.dataset.view));
+});
 
-function renderReservationsTable(rows) {
-  const tbody = document.getElementById('res-tbody');
-  if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);font-style:italic;padding:24px 0">No reservations for this date</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = rows.map(r => `
-    <tr>
-      <td class="td-name">${esc(r.customer_name)}</td>
-      <td>${fmtTime(r.time)}</td>
-      <td>${r.party_size}</td>
-      <td>${r.customer_phone ? `<a class="td-phone" href="https://wa.me/${r.customer_phone.replace(/\D/g,'')}" target="_blank">${esc(r.customer_phone)}</a>` : '<span class="td-none">—</span>'}</td>
-      <td class="td-notes">${r.notes ? esc(r.notes) : '<span class="td-none">—</span>'}</td>
-      <td><span class="status-badge ${r.status}">${r.status.replace('_',' ')}</span></td>
-      <td><span class="source-badge ${r.source}">${r.source}</span></td>
-      <td>
-        <div class="row-actions">
-          ${r.status === 'confirmed' ? `<button class="btn-icon arrived" onclick="setStatus('${r.id}','arrived','reservations')">Arrived</button>` : ''}
-          ${r.status === 'confirmed' ? `<button class="btn-icon no-show" onclick="setStatus('${r.id}','no_show','reservations')">No-show</button>` : ''}
-          <button class="btn-icon" onclick="openEditModal(${JSON.stringify(r).replace(/"/g,'&quot;')})">Edit</button>
-          ${r.status !== 'cancelled' ? `<button class="btn-icon no-show" onclick="cancelReservation('${r.id}')">Cancel</button>` : ''}
-        </div>
-      </td>
-    </tr>`).join('');
-}
+window.addEventListener('hashchange', () => {
+  const v = location.hash.replace('#','');
+  if (['overview','reservations','settings'].includes(v)) navigate(v);
+});
 
-/* ══════════════════════════════════════════════════════════
-   RESERVATION MODAL (Add / Edit)
-══════════════════════════════════════════════════════════ */
-function openAddModal() {
-  editingReservation = null;
-  document.getElementById('modal-title').textContent  = 'New Reservation';
-  document.getElementById('modal-name').value         = '';
-  document.getElementById('modal-date').value         = isoDate(resDate);
-  document.getElementById('modal-time').value         = '';
-  document.getElementById('modal-covers').value       = '2';
-  document.getElementById('modal-phone').value        = '';
-  document.getElementById('modal-notes').value        = '';
-  document.getElementById('modal-status-wrap').style.display = 'none';
-  populateTableSelect(null);
-  showModal();
-}
+/* ─── Overview ─────────────────────────────────────────────────────────────── */
+async function loadOverview() {
+  if (!restaurant) return;
+  const today = isoDate(new Date());
 
-function openEditModal(r) {
-  editingReservation = r;
-  document.getElementById('modal-title').textContent  = 'Edit Reservation';
-  document.getElementById('modal-name').value         = r.customer_name  || '';
-  document.getElementById('modal-date').value         = r.date           || '';
-  document.getElementById('modal-time').value         = r.time ? r.time.slice(0,5) : '';
-  document.getElementById('modal-covers').value       = r.party_size     || 1;
-  document.getElementById('modal-phone').value        = r.customer_phone || '';
-  document.getElementById('modal-notes').value        = r.notes          || '';
-  document.getElementById('modal-status').value       = r.status         || 'confirmed';
-  document.getElementById('modal-status-wrap').style.display = '';
-  populateTableSelect(r.table_id);
-  showModal();
-}
+  document.getElementById('ov-date-label').textContent = fmtDate(today);
 
-async function populateTableSelect(selectedId) {
-  const wrap = document.getElementById('modal-table-wrap');
-  const sel  = document.getElementById('modal-table');
+  const [resResult, escResult, ohResult] = await Promise.all([
+    db.from('reservations')
+      .select('*')
+      .eq('restaurant_id', restaurant.id)
+      .eq('date', today),
+    db.from('escalations')
+      .select('*')
+      .eq('restaurant_id', restaurant.id)
+      .eq('resolved', false),
+    db.from('opening_hours')
+      .select('*')
+      .eq('restaurant_id', restaurant.id),
+  ]);
 
-  if (!currentRestaurant || currentRestaurant.booking_mode !== 'tables') {
-    wrap.style.display = 'none';
-    return;
+  const allRes = resResult.data ?? [];
+  const escs   = escResult.data ?? [];
+  ohData       = ohResult.data ?? [];
+
+  const activeRes   = allRes.filter(r => r.status !== 'cancelled');
+  const bookedCovers = activeRes.reduce((s, r) => s + (r.party_size ?? 0), 0);
+  const noShows     = allRes.filter(r => r.status === 'no_show').length;
+
+  // Capacity: use slider session value or today's opening_hours default
+  const todayDow = new Date().getDay();
+  const todayOH  = ohData.find(h => h.day_of_week === todayDow);
+  if (todayCapacity === 0) {
+    todayCapacity = todayOH?.max_covers ?? 80;
   }
 
-  wrap.style.display = '';
-  const { data } = await db.from('restaurant_tables').select('*')
-    .eq('restaurant_id', currentRestaurantId).eq('is_active', true).order('table_name');
+  // Sync slider
+  const slider = document.getElementById('capacity-slider');
+  slider.value = todayCapacity;
+  slider.max   = Math.max(300, todayCapacity + 50);
+  updateCapacityUI(bookedCovers, todayCapacity);
 
-  sel.innerHTML = '<option value="">No table assigned</option>' +
-    (data || []).map(t => `<option value="${t.id}" ${t.id === selectedId ? 'selected' : ''}>${esc(t.table_name)} (seats ${t.capacity})</option>`).join('');
-}
-
-function showModal() {
-  const bd = document.getElementById('modal-backdrop');
-  bd.style.display = 'flex';
-  requestAnimationFrame(() => bd.classList.add('open'));
-}
-
-function closeModal() {
-  const bd = document.getElementById('modal-backdrop');
-  bd.classList.remove('open');
-  setTimeout(() => { bd.style.display = 'none'; }, 200);
-}
-
-async function saveReservation() {
-  const name    = document.getElementById('modal-name').value.trim();
-  const date    = document.getElementById('modal-date').value;
-  const time    = document.getElementById('modal-time').value;
-  const covers  = parseInt(document.getElementById('modal-covers').value, 10);
-  const phone   = document.getElementById('modal-phone').value.trim();
-  const notes   = document.getElementById('modal-notes').value.trim();
-  const tableId = document.getElementById('modal-table')?.value || null;
-  const status  = document.getElementById('modal-status')?.value || 'confirmed';
-
-  if (!name || !date || !time || !covers) {
-    alert('Name, date, time and covers are required.');
-    return;
-  }
-
-  const payload = {
-    restaurant_id:  currentRestaurantId,
-    customer_name:  name,
-    date,
-    time,
-    party_size:     covers,
-    customer_phone: phone || null,
-    notes:          notes || null,
-    table_id:       tableId || null,
-    source:         editingReservation ? editingReservation.source : 'manual',
-    status,
+  slider.oninput = () => {
+    todayCapacity = parseInt(slider.value, 10);
+    updateCapacityUI(bookedCovers, todayCapacity);
   };
 
-  const btn = document.getElementById('modal-save-btn');
-  btn.disabled    = true;
-  btn.textContent = 'Saving…';
+  document.getElementById('btn-save-capacity').onclick = async () => {
+    if (!todayOH) { showToast('No opening hours set for today'); return; }
+    await db.from('opening_hours').update({ max_covers: todayCapacity }).eq('id', todayOH.id);
+    showToast('Default capacity saved');
+  };
 
-  let error;
-  if (editingReservation) {
-    ({ error } = await db.from('reservations').update(payload).eq('id', editingReservation.id));
+  // Stats
+  document.getElementById('stat-bookings').textContent    = activeRes.length;
+  document.getElementById('stat-covers').textContent      = bookedCovers;
+  document.getElementById('stat-slots').textContent       = Math.max(0, todayCapacity - bookedCovers);
+  document.getElementById('stat-escalations').textContent = escs.length;
+
+  // Today's reservations
+  const sorted = [...activeRes].sort((a,b) => a.time.localeCompare(b.time));
+  const resBody = document.getElementById('ov-res-body');
+  document.getElementById('ov-res-count').textContent = sorted.length;
+
+  if (sorted.length === 0) {
+    resBody.innerHTML = `<tr><td colspan="6" class="empty-state">No reservations today</td></tr>`;
   } else {
-    ({ error } = await db.from('reservations').insert(payload));
+    resBody.innerHTML = sorted.map(r => {
+      const notes = r.notes ? (hasAllergyFlag(r.notes) ? allergyBadge() + esc(r.notes).slice(0,40) : esc(r.notes).slice(0,40)) : '<span style="color:var(--muted)">—</span>';
+      return `<tr>
+        <td class="td-time">${fmtTime(r.time)}</td>
+        <td class="td-guest">${esc(r.customer_name)}</td>
+        <td>${r.party_size}</td>
+        <td class="td-notes">${notes}</td>
+        <td>${statusBadge(r.status)}</td>
+        <td class="td-actions">
+          <button class="btn-inline arrived" onclick="quickStatus('${r.id}','arrived')">Arrived</button>
+          <button class="btn-inline noshow" onclick="quickStatus('${r.id}','no_show')">No-show</button>
+          <button class="btn-inline" onclick="openEditModal('${r.id}')">Edit</button>
+        </td>
+      </tr>`;
+    }).join('');
   }
 
-  btn.disabled    = false;
-  btn.textContent = 'Save';
+  // Escalations
+  const escList  = document.getElementById('ov-esc-list');
+  const escCount = document.getElementById('ov-esc-count');
+  escCount.textContent = escs.length;
 
-  if (error) { alert('Error saving: ' + error.message); return; }
-
-  closeModal();
-  const activeView = (location.hash || '#overview').slice(1);
-  if (activeView === 'overview')     loadOverview();
-  if (activeView === 'reservations') loadReservations();
+  if (escs.length === 0) {
+    escList.innerHTML = `<div class="empty-state">No open escalations</div>`;
+  } else {
+    escList.innerHTML = escs.map(e => `
+      <div class="escalation-item">
+        <div class="escalation-info">
+          <div class="escalation-name">${esc(e.customer_name ?? 'Unknown')}</div>
+          <div class="escalation-meta">${esc(e.type ?? '')} &middot; ${esc(e.received_at ?? '')}</div>
+          ${e.note ? `<div class="escalation-note">${esc(e.note)}</div>` : ''}
+        </div>
+        <button class="btn-inline resolve" onclick="resolveEscalation('${e.id}')">Resolve</button>
+      </div>
+    `).join('');
+  }
 }
 
-/* ══════════════════════════════════════════════════════════
-   STATUS UPDATES
-══════════════════════════════════════════════════════════ */
-async function setStatus(id, status, refreshView) {
+function updateCapacityUI(booked, capacity) {
+  document.getElementById('cap-booked').textContent     = booked;
+  document.getElementById('cap-total').textContent      = capacity;
+  document.getElementById('cap-slider-val').textContent = capacity;
+  document.getElementById('stat-slots').textContent     = Math.max(0, capacity - booked);
+  const pct  = capacity > 0 ? Math.min(100, Math.round(booked / capacity * 100)) : 0;
+  const fill = document.getElementById('cap-fill');
+  fill.style.width = pct + '%';
+  fill.classList.toggle('full', pct >= 100);
+}
+
+async function quickStatus(id, status) {
   await db.from('reservations').update({ status }).eq('id', id);
-  if (refreshView === 'overview')     loadOverview();
-  if (refreshView === 'reservations') loadReservations();
-}
-
-async function cancelReservation(id) {
-  if (!confirm('Cancel this reservation?')) return;
-  await setStatus(id, 'cancelled', 'reservations');
+  loadOverview();
+  if (document.getElementById('view-reservations').classList.contains('active')) loadReservations();
 }
 
 async function resolveEscalation(id) {
   await db.from('escalations').update({ resolved: true }).eq('id', id);
-  const row = document.getElementById('esc-' + id);
-  if (row) row.remove();
-
-  // Update badge count
-  const body  = document.getElementById('esc-body');
-  const badge = document.getElementById('esc-badge');
-  const remaining = body.querySelectorAll('.esc-row').length;
-  badge.textContent = `${remaining} pending`;
-  if (!remaining) body.innerHTML = '<div class="no-items">No pending escalations</div>';
+  showToast('Escalation resolved');
+  loadOverview();
 }
 
-/* ══════════════════════════════════════════════════════════
-   VIEW 3 — SETTINGS
-══════════════════════════════════════════════════════════ */
-async function loadSettings() {
-  if (!currentRestaurantId) return;
+// Expose to inline onclick
+window.quickStatus       = quickStatus;
+window.resolveEscalation = resolveEscalation;
+window.openEditModal     = openEditModal;
 
-  const [hoursRes, closuresRes, tablesRes] = await Promise.all([
-    db.from('opening_hours').select('*').eq('restaurant_id', currentRestaurantId),
-    db.from('closures').select('*').eq('restaurant_id', currentRestaurantId).order('date'),
-    db.from('restaurant_tables').select('*').eq('restaurant_id', currentRestaurantId).order('table_name'),
-  ]);
+/* ─── Reservations view ─────────────────────────────────────────────────────── */
+// Date nav
+document.getElementById('res-prev').addEventListener('click', () => { resDate = addDays(resDate, -1); syncDateNav(); loadReservations(); });
+document.getElementById('res-next').addEventListener('click', () => { resDate = addDays(resDate, +1); syncDateNav(); loadReservations(); });
+document.getElementById('res-today-btn').addEventListener('click', () => { resDate = isoDate(new Date()); syncDateNav(); loadReservations(); });
+document.getElementById('res-date-input').addEventListener('change', e => { resDate = e.target.value; syncDateNav(); loadReservations(); });
 
-  renderRestaurantInfo();
-  renderOpeningHours(hoursRes.data || []);
-  renderClosures(closuresRes.data || []);
-  renderTablesSection(tablesRes.data || []);
+function syncDateNav() {
+  document.getElementById('res-date-label').textContent = fmtDate(resDate);
+  document.getElementById('res-date-input').value = resDate;
 }
 
-function renderRestaurantInfo() {
-  if (!currentRestaurant) return;
-  document.getElementById('set-name').value    = currentRestaurant.name    || '';
-  document.getElementById('set-address').value = currentRestaurant.address || '';
-  document.getElementById('set-tz').value      = currentRestaurant.timezone || '';
+// Filter tabs
+document.getElementById('res-filter-tabs').addEventListener('click', e => {
+  const tab = e.target.closest('.filter-tab');
+  if (!tab) return;
+  resFilter = tab.dataset.filter;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.toggle('active', t === tab));
+  renderReservationsTable(window._resRows ?? []);
+});
 
-  document.querySelectorAll('.mode-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.mode === (currentRestaurant.booking_mode || 'seats'));
+let _resRows = [];
+
+async function loadReservations() {
+  if (!restaurant) return;
+  syncDateNav();
+
+  const { data } = await db.from('reservations')
+    .select('*')
+    .eq('restaurant_id', restaurant.id)
+    .eq('date', resDate)
+    .order('time');
+
+  _resRows = data ?? [];
+  window._resRows = _resRows;
+  renderReservationsTable(_resRows);
+}
+
+function renderReservationsTable(rows) {
+  const body = document.getElementById('res-body');
+  const filtered = resFilter === 'all' ? rows : rows.filter(r => r.status === resFilter);
+
+  if (filtered.length === 0) {
+    body.innerHTML = `<tr><td colspan="9" class="empty-state" style="padding-top:24px;">No reservations found</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = filtered.map(r => {
+    const notes = r.notes
+      ? (hasAllergyFlag(r.notes) ? allergyBadge() + esc(r.notes).slice(0,35) : esc(r.notes).slice(0,35))
+      : '<span style="color:var(--muted)">—</span>';
+    return `<tr>
+      <td class="td-time">${fmtTime(r.time)}</td>
+      <td class="td-guest">${esc(r.customer_name)}</td>
+      <td class="td-muted">${esc(r.customer_phone ?? '—')}</td>
+      <td>${r.party_size}</td>
+      <td class="td-muted">${r.duration_minutes ?? 90} min</td>
+      <td class="td-notes">${notes}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td>${sourceBadge(r.source ?? 'manual')}</td>
+      <td class="td-actions">
+        <button class="btn-inline" onclick="openEditModal('${r.id}')">Edit</button>
+        ${r.status !== 'cancelled' ? `<button class="btn-inline danger" onclick="cancelReservation('${r.id}')">Cancel</button>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function cancelReservation(id) {
+  if (!confirm('Cancel this reservation?')) return;
+  await db.from('reservations').update({ status: 'cancelled' }).eq('id', id);
+  showToast('Reservation cancelled');
+  loadReservations();
+  if (document.getElementById('view-overview').classList.contains('active')) loadOverview();
+}
+window.cancelReservation = cancelReservation;
+
+document.getElementById('btn-add-res').addEventListener('click', () => openAddModal());
+
+/* ─── Reservation modal ─────────────────────────────────────────────────────── */
+async function openAddModal() {
+  document.getElementById('modal-title').textContent = 'Add Reservation';
+  document.getElementById('modal-res-id').value = '';
+  document.getElementById('f-name').value   = '';
+  document.getElementById('f-phone').value  = '';
+  document.getElementById('f-date').value   = resDate;
+  document.getElementById('f-time').value   = '';
+  document.getElementById('f-covers').value = 2;
+  document.getElementById('f-duration').value = 90;
+  document.getElementById('f-notes').value  = '';
+  document.getElementById('f-status-row').style.display = 'none';
+  document.getElementById('modal-error').textContent = '';
+  await loadTableDropdown(null);
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+async function openEditModal(id) {
+  const { data: r } = await db.from('reservations').select('*').eq('id', id).single();
+  if (!r) return;
+  document.getElementById('modal-title').textContent    = 'Edit Reservation';
+  document.getElementById('modal-res-id').value         = r.id;
+  document.getElementById('f-name').value               = r.customer_name ?? '';
+  document.getElementById('f-phone').value              = r.customer_phone ?? '';
+  document.getElementById('f-date').value               = r.date ?? '';
+  document.getElementById('f-time').value               = r.time ? r.time.slice(0,5) : '';
+  document.getElementById('f-covers').value             = r.party_size ?? 2;
+  document.getElementById('f-duration').value           = r.duration_minutes ?? 90;
+  document.getElementById('f-notes').value              = r.notes ?? '';
+  document.getElementById('f-status').value             = r.status ?? 'confirmed';
+  document.getElementById('f-status-row').style.display = 'block';
+  document.getElementById('modal-error').textContent    = '';
+  await loadTableDropdown(r.table_id);
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+async function loadTableDropdown(selectedTableId) {
+  const row = document.getElementById('f-table-row');
+  const sel = document.getElementById('f-table');
+  if (restaurant?.booking_mode !== 'tables') {
+    row.style.display = 'none';
+    return;
+  }
+  const { data: tables } = await db.from('restaurant_tables')
+    .select('*')
+    .eq('restaurant_id', restaurant.id)
+    .eq('is_active', true)
+    .order('table_name');
+  row.style.display = 'block';
+  sel.innerHTML = `<option value="">— No table assigned —</option>` +
+    (tables ?? []).map(t => `<option value="${t.id}" ${t.id === selectedTableId ? 'selected' : ''}>${esc(t.table_name)} (seats ${t.capacity})</option>`).join('');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal-cancel').addEventListener('click', closeModal);
+document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === document.getElementById('modal-overlay')) closeModal(); });
+
+document.getElementById('modal-save').addEventListener('click', saveReservation);
+
+async function saveReservation() {
+  const id      = document.getElementById('modal-res-id').value;
+  const name    = document.getElementById('f-name').value.trim();
+  const phone   = document.getElementById('f-phone').value.trim();
+  const date    = document.getElementById('f-date').value;
+  const time    = document.getElementById('f-time').value;
+  const covers  = parseInt(document.getElementById('f-covers').value, 10);
+  const dur     = parseInt(document.getElementById('f-duration').value, 10);
+  const notes   = document.getElementById('f-notes').value.trim();
+  const tableId = document.getElementById('f-table').value || null;
+  const status  = id ? (document.getElementById('f-status').value) : 'confirmed';
+  const errEl   = document.getElementById('modal-error');
+
+  if (!name)  { errEl.textContent = 'Guest name is required.'; return; }
+  if (!date)  { errEl.textContent = 'Date is required.'; return; }
+  if (!time)  { errEl.textContent = 'Time is required.'; return; }
+  if (!covers || covers < 1) { errEl.textContent = 'Covers must be at least 1.'; return; }
+
+  // Table conflict check (tables mode only)
+  if (restaurant?.booking_mode === 'tables' && tableId) {
+    const conflict = await checkTableConflict(tableId, date, time, dur, id);
+    if (conflict) { errEl.textContent = `Table conflict: another booking overlaps this time slot.`; return; }
+  }
+
+  errEl.textContent = '';
+  const payload = {
+    restaurant_id:   restaurant.id,
+    customer_name:   name,
+    customer_phone:  phone || null,
+    date,
+    time,
+    party_size:      covers,
+    duration_minutes: dur,
+    notes:           notes || null,
+    table_id:        tableId,
+    source:          id ? undefined : 'manual',
+    status,
+  };
+  if (!id) delete payload.status;
+
+  if (id) {
+    delete payload.source;
+    await db.from('reservations').update(payload).eq('id', id);
+    showToast('Reservation updated');
+  } else {
+    await db.from('reservations').insert(payload);
+    showToast('Reservation added');
+  }
+
+  closeModal();
+  loadReservations();
+  if (document.getElementById('view-overview').classList.contains('active')) loadOverview();
+}
+
+async function checkTableConflict(tableId, date, time, durationMins, excludeId) {
+  const { data: existing } = await db.from('reservations')
+    .select('id, time, duration_minutes')
+    .eq('restaurant_id', restaurant.id)
+    .eq('date', date)
+    .eq('table_id', tableId)
+    .neq('status', 'cancelled');
+
+  const newStart = timeToMins(time);
+  const newEnd   = newStart + durationMins;
+
+  return (existing ?? []).some(r => {
+    if (excludeId && r.id === excludeId) return false;
+    const exStart = timeToMins(r.time);
+    const exEnd   = exStart + (r.duration_minutes ?? 90);
+    return newStart < exEnd && newEnd > exStart;
   });
-
-  // Show/hide tables section based on mode
-  const tablesSection = document.getElementById('tables-section');
-  if (tablesSection) tablesSection.style.display =
-    currentRestaurant.booking_mode === 'tables' ? '' : 'none';
 }
 
-async function saveRestaurantInfo() {
-  const name    = document.getElementById('set-name').value.trim();
-  const address = document.getElementById('set-address').value.trim();
-  const tz      = document.getElementById('set-tz').value.trim();
-  const msg     = document.getElementById('info-save-msg');
-
-  const { error } = await db.from('restaurants').update({ name, address, timezone: tz })
-    .eq('id', currentRestaurantId);
-
-  if (error) { showSaveMsg(msg, 'Error: ' + error.message, false); return; }
-
-  currentRestaurant = { ...currentRestaurant, name, address, timezone: tz };
-  document.getElementById('client-name').textContent    = name;
-  document.getElementById('client-address').textContent = address;
-  showSaveMsg(msg, 'Saved ✓', true);
+function timeToMins(t) {
+  const [h, m] = t.split(':').map(Number);
+  return h * 60 + m;
 }
 
-async function setBookingMode(mode) {
-  document.querySelectorAll('.mode-btn').forEach(b =>
-    b.classList.toggle('active', b.dataset.mode === mode));
+/* ─── Settings view ─────────────────────────────────────────────────────────── */
+async function loadSettings() {
+  if (!restaurant) return;
+  document.getElementById('settings-rest-name').textContent = restaurant.name;
 
-  await db.from('restaurants').update({ booking_mode: mode }).eq('id', currentRestaurantId);
-  currentRestaurant = { ...currentRestaurant, booking_mode: mode };
+  // Info fields
+  document.getElementById('s-name').value     = restaurant.name ?? '';
+  document.getElementById('s-address').value  = restaurant.address ?? '';
+  document.getElementById('s-phone').value    = restaurant.phone_number ?? '';
+  document.getElementById('s-timezone').value = restaurant.timezone ?? '';
 
-  const tablesSection = document.getElementById('tables-section');
-  if (tablesSection) tablesSection.style.display = mode === 'tables' ? '' : 'none';
+  // Booking mode
+  const mode = restaurant.booking_mode ?? 'seats';
+  document.getElementById('mode-seats').classList.toggle('active', mode === 'seats');
+  document.getElementById('mode-tables').classList.toggle('active', mode === 'tables');
+  document.getElementById('tables-card').style.display = mode === 'tables' ? 'block' : 'none';
+
+  // Opening hours
+  const { data: oh } = await db.from('opening_hours').select('*').eq('restaurant_id', restaurant.id).order('day_of_week');
+  ohData = oh ?? [];
+  renderOpeningHours();
+
+  // Capacity grid
+  renderCapacityGrid();
+
+  // Closures
+  await loadClosures();
+
+  // Tables (if tables mode)
+  if (mode === 'tables') await loadTables();
 }
 
-function renderOpeningHours(rows) {
-  const container = document.getElementById('hours-container');
-  // Build a map: day_of_week → row
-  const map = {};
-  rows.forEach(r => { map[r.day_of_week] = r; });
+// Mode toggle
+document.getElementById('mode-seats').addEventListener('click', () => setBookingMode('seats'));
+document.getElementById('mode-tables').addEventListener('click', () => setBookingMode('tables'));
+function setBookingMode(mode) {
+  restaurant.booking_mode = mode;
+  document.getElementById('mode-seats').classList.toggle('active', mode === 'seats');
+  document.getElementById('mode-tables').classList.toggle('active', mode === 'tables');
+  document.getElementById('tables-card').style.display = mode === 'tables' ? 'block' : 'none';
+}
 
-  // Mon–Sun display order: 1,2,3,4,5,6,0
-  const order = [1,2,3,4,5,6,0];
+// Save info
+document.getElementById('btn-save-info').addEventListener('click', async () => {
+  const payload = {
+    name:         document.getElementById('s-name').value.trim(),
+    address:      document.getElementById('s-address').value.trim() || null,
+    phone_number: document.getElementById('s-phone').value.trim() || null,
+    timezone:     document.getElementById('s-timezone').value.trim() || null,
+    booking_mode: restaurant.booking_mode,
+  };
+  if (!payload.name) { showToast('Name cannot be empty'); return; }
+  await db.from('restaurants').update(payload).eq('id', restaurant.id);
+  restaurant = { ...restaurant, ...payload };
+  showToast('Restaurant info saved');
+  document.getElementById('settings-rest-name').textContent = restaurant.name;
+  // Update sidebar display
+  if (session.role === 'client') document.getElementById('restaurant-name-display').textContent = restaurant.name;
+});
 
-  container.innerHTML = order.map(dow => {
-    const h = map[dow] || {};
-    const active = h.is_active !== false;
-    return `
-    <div class="hours-row" data-dow="${dow}">
-      <span class="hours-day">${DAY_NAMES[dow].slice(0,3)}</span>
-      <input class="hours-input" type="time" value="${h.open_time  ? h.open_time.slice(0,5)  : ''}" ${!active?'disabled':''} placeholder="09:00">
-      <input class="hours-input" type="time" value="${h.close_time ? h.close_time.slice(0,5) : ''}" ${!active?'disabled':''} placeholder="22:00">
-      <input class="hours-covers" type="number" min="0" value="${h.max_covers || ''}" ${!active?'disabled':''} placeholder="60">
-      <label class="toggle">
-        <input type="checkbox" ${active?'checked':''} onchange="toggleHoursDay(this, ${dow})">
-        <span class="toggle-slider"></span>
+// Opening hours
+function renderOpeningHours() {
+  const grid = document.getElementById('oh-grid');
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  grid.innerHTML = days.map((day, i) => {
+    const oh = ohData.find(h => h.day_of_week === i) ?? { day_of_week: i, open_time: '12:00', close_time: '22:00', max_covers: 80, is_active: false };
+    return `<div class="oh-row" data-dow="${i}">
+      <span class="oh-day">${day}</span>
+      <label class="toggle-wrap" title="${oh.is_active ? 'Active':'Inactive'}">
+        <span class="toggle">
+          <input type="checkbox" class="oh-active" ${oh.is_active ? 'checked' : ''}>
+          <span class="toggle-track"></span>
+        </span>
       </label>
+      <input type="time" class="oh-open"  value="${oh.open_time?.slice(0,5) ?? '12:00'}">
+      <span class="oh-sep">–</span>
+      <input type="time" class="oh-close" value="${oh.close_time?.slice(0,5) ?? '22:00'}">
+      <input type="number" class="oh-covers" value="${oh.max_covers ?? 0}" min="0" placeholder="Covers">
     </div>`;
   }).join('');
 }
 
-function toggleHoursDay(checkbox, dow) {
-  const row = checkbox.closest('.hours-row');
-  row.querySelectorAll('input[type="time"], input[type="number"]').forEach(el => {
-    el.disabled = !checkbox.checked;
-  });
-}
-
-async function saveOpeningHours() {
-  const rows   = document.querySelectorAll('#hours-container .hours-row');
-  const msg    = document.getElementById('hours-save-msg');
-  const upserts = [];
-
-  rows.forEach(row => {
-    const dow      = parseInt(row.dataset.dow, 10);
-    const inputs   = row.querySelectorAll('input');
-    const open     = inputs[0].value;
-    const close    = inputs[1].value;
-    const covers   = parseInt(inputs[2].value, 10) || 0;
-    const active   = inputs[3].checked;
-
-    if (!open || !close) return;
-    upserts.push({
-      restaurant_id: currentRestaurantId,
+document.getElementById('btn-save-oh').addEventListener('click', async () => {
+  const rows = document.querySelectorAll('#oh-grid .oh-row');
+  const upserts = Array.from(rows).map(row => {
+    const dow = parseInt(row.dataset.dow, 10);
+    return {
+      restaurant_id: restaurant.id,
       day_of_week:   dow,
-      open_time:     open,
-      close_time:    close,
-      max_covers:    covers,
-      is_active:     active,
+      is_active:     row.querySelector('.oh-active').checked,
+      open_time:     row.querySelector('.oh-open').value || '12:00',
+      close_time:    row.querySelector('.oh-close').value || '22:00',
+      max_covers:    parseInt(row.querySelector('.oh-covers').value, 10) || 0,
+    };
+  });
+  await db.from('opening_hours').upsert(upserts, { onConflict: 'restaurant_id,day_of_week' });
+  const { data: oh } = await db.from('opening_hours').select('*').eq('restaurant_id', restaurant.id).order('day_of_week');
+  ohData = oh ?? [];
+  renderCapacityGrid();
+  showToast('Opening hours saved');
+});
+
+// Capacity grid (settings)
+function renderCapacityGrid() {
+  const grid = document.getElementById('day-cap-grid');
+  grid.innerHTML = DAY_NAMES.map((day, i) => {
+    const oh = ohData.find(h => h.day_of_week === i);
+    const active = oh?.is_active ?? false;
+    const cap = oh?.max_covers ?? 0;
+    return `<button class="day-cap-btn${!active ? ' inactive' : ''}${selectedDayCap === i ? ' selected' : ''}" data-dow="${i}">
+      <span class="dc-day">${day}</span>
+      <span class="dc-val">${active ? cap : '—'}</span>
+    </button>`;
+  }).join('');
+
+  grid.querySelectorAll('.day-cap-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dow = parseInt(btn.dataset.dow, 10);
+      selectedDayCap = dow;
+      const oh = ohData.find(h => h.day_of_week === dow);
+      const cap = oh?.max_covers ?? 0;
+      const slider = document.getElementById('settings-cap-slider');
+      slider.value = cap;
+      document.getElementById('settings-cap-val').textContent = cap;
+      document.getElementById('cap-editor-label').textContent = DAY_NAMES[dow];
+      document.getElementById('cap-editor').style.display = 'flex';
+      renderCapacityGrid();
     });
   });
-
-  const { error } = await db.from('opening_hours')
-    .upsert(upserts, { onConflict: 'restaurant_id,day_of_week' });
-
-  showSaveMsg(msg, error ? 'Error: ' + error.message : 'Saved ✓', !error);
 }
 
-function renderClosures(rows) {
-  const list = document.getElementById('closures-list');
-  if (!rows.length) {
-    list.innerHTML = '<div class="no-items" style="padding:14px 0">No closed dates configured</div>';
+document.getElementById('settings-cap-slider').addEventListener('input', e => {
+  document.getElementById('settings-cap-val').textContent = e.target.value;
+});
+
+document.getElementById('btn-save-day-cap').addEventListener('click', async () => {
+  if (selectedDayCap === null) return;
+  const cap = parseInt(document.getElementById('settings-cap-slider').value, 10);
+  const oh = ohData.find(h => h.day_of_week === selectedDayCap);
+  if (oh) {
+    await db.from('opening_hours').update({ max_covers: cap }).eq('id', oh.id);
+  } else {
+    await db.from('opening_hours').upsert({
+      restaurant_id: restaurant.id,
+      day_of_week:   selectedDayCap,
+      open_time:     '12:00',
+      close_time:    '22:00',
+      max_covers:    cap,
+      is_active:     false,
+    }, { onConflict: 'restaurant_id,day_of_week' });
+  }
+  const { data: updated } = await db.from('opening_hours').select('*').eq('restaurant_id', restaurant.id).order('day_of_week');
+  ohData = updated ?? [];
+  renderCapacityGrid();
+  showToast(`Capacity for ${DAY_NAMES[selectedDayCap]} saved`);
+});
+
+// Closures
+async function loadClosures() {
+  const { data } = await db.from('closures').select('*').eq('restaurant_id', restaurant.id).order('date');
+  const list = document.getElementById('closure-list');
+  if (!data || data.length === 0) {
+    list.innerHTML = `<div class="empty-state">No closed dates set</div>`;
     return;
   }
-  list.innerHTML = rows.map(c => `
-    <div class="closure-row" id="cl-${c.id}">
+  list.innerHTML = data.map(c => `
+    <div class="closure-item">
       <div>
-        <div class="closure-date">${fmtDate(c.date)}</div>
-        ${c.reason ? `<div class="closure-reason">${esc(c.reason)}</div>` : ''}
+        <span class="closure-date">${c.date}</span>
+        ${c.reason ? `<span class="closure-reason"> — ${esc(c.reason)}</span>` : ''}
       </div>
-      <button class="closure-remove" onclick="removeClosure('${c.id}')">Remove</button>
-    </div>`).join('');
+      <button class="btn-inline danger" onclick="deleteClosure('${c.id}')">Remove</button>
+    </div>
+  `).join('');
 }
 
-async function addClosure() {
-  const dateEl   = document.getElementById('new-closure-date');
-  const reasonEl = document.getElementById('new-closure-reason');
-  const msg      = document.getElementById('closures-save-msg');
+document.getElementById('btn-add-closure').addEventListener('click', async () => {
+  const date   = document.getElementById('closure-date-input').value;
+  const reason = document.getElementById('closure-reason-input').value.trim();
+  if (!date) { showToast('Select a date first'); return; }
+  await db.from('closures').upsert({ restaurant_id: restaurant.id, date, reason: reason || null }, { onConflict: 'restaurant_id,date' });
+  document.getElementById('closure-date-input').value   = '';
+  document.getElementById('closure-reason-input').value = '';
+  await loadClosures();
+  showToast('Closed date added');
+});
 
-  if (!dateEl.value) { showSaveMsg(msg, 'Pick a date', false); return; }
-
-  const { data, error } = await db.from('closures').insert({
-    restaurant_id: currentRestaurantId,
-    date:   dateEl.value,
-    reason: reasonEl.value.trim() || null,
-  }).select().single();
-
-  if (error) { showSaveMsg(msg, 'Error: ' + error.message, false); return; }
-
-  dateEl.value   = '';
-  reasonEl.value = '';
-  showSaveMsg(msg, 'Added ✓', true);
-
-  // Append to list
-  const list = document.getElementById('closures-list');
-  const noItems = list.querySelector('.no-items');
-  if (noItems) list.innerHTML = '';
-  list.insertAdjacentHTML('beforeend', `
-    <div class="closure-row" id="cl-${data.id}">
-      <div>
-        <div class="closure-date">${fmtDate(data.date)}</div>
-        ${data.reason ? `<div class="closure-reason">${esc(data.reason)}</div>` : ''}
-      </div>
-      <button class="closure-remove" onclick="removeClosure('${data.id}')">Remove</button>
-    </div>`);
-}
-
-async function removeClosure(id) {
+async function deleteClosure(id) {
   await db.from('closures').delete().eq('id', id);
-  const el = document.getElementById('cl-' + id);
-  if (el) el.remove();
-  const list = document.getElementById('closures-list');
-  if (!list.querySelector('.closure-row'))
-    list.innerHTML = '<div class="no-items" style="padding:14px 0">No closed dates configured</div>';
+  await loadClosures();
+  showToast('Closed date removed');
 }
+window.deleteClosure = deleteClosure;
 
-function renderTablesSection(rows) {
+// Tables
+async function loadTables() {
+  const { data } = await db.from('restaurant_tables').select('*').eq('restaurant_id', restaurant.id).order('table_name');
   const list = document.getElementById('tables-list');
-  if (!list) return;
-
-  if (!rows.length) {
-    list.innerHTML = '<div class="no-items" style="padding:14px 0">No tables configured</div>';
+  if (!data || data.length === 0) {
+    list.innerHTML = `<div class="empty-state">No tables set up</div>`;
     return;
   }
-  list.innerHTML = rows.map(t => `
-    <div class="table-row" id="tbl-${t.id}">
-      <div>
-        <div class="table-name">${esc(t.table_name)}</div>
-        <div class="table-cap">Seats ${t.capacity}</div>
-      </div>
-      <button class="table-remove" onclick="removeTable('${t.id}')">Remove</button>
-    </div>`).join('');
+  list.innerHTML = data.map(t => `
+    <div class="table-item">
+      <span class="table-name">${esc(t.table_name)}</span>
+      <span class="table-cap">Seats ${t.capacity}</span>
+      <label class="toggle-wrap">
+        <span class="toggle">
+          <input type="checkbox" ${t.is_active ? 'checked' : ''} onchange="toggleTable('${t.id}', this.checked)">
+          <span class="toggle-track"></span>
+        </span>
+      </label>
+      <button class="btn-inline danger" onclick="deleteTable('${t.id}')">Delete</button>
+    </div>
+  `).join('');
 }
 
-async function addTable() {
-  const nameEl = document.getElementById('new-table-name');
-  const capEl  = document.getElementById('new-table-cap');
-  const msg    = document.getElementById('tables-save-msg');
+document.getElementById('btn-add-table').addEventListener('click', async () => {
+  const name = document.getElementById('new-table-name').value.trim();
+  const cap  = parseInt(document.getElementById('new-table-cap').value, 10);
+  if (!name) { showToast('Enter a table name'); return; }
+  if (!cap || cap < 1) { showToast('Enter a valid capacity'); return; }
+  await db.from('restaurant_tables').insert({ restaurant_id: restaurant.id, table_name: name, capacity: cap, is_active: true });
+  document.getElementById('new-table-name').value = '';
+  document.getElementById('new-table-cap').value  = '';
+  await loadTables();
+  showToast('Table added');
+});
 
-  const name = nameEl.value.trim();
-  const cap  = parseInt(capEl.value, 10);
-
-  if (!name || !cap) { showSaveMsg(msg, 'Enter a name and capacity', false); return; }
-
-  const { data, error } = await db.from('restaurant_tables').insert({
-    restaurant_id: currentRestaurantId,
-    table_name: name,
-    capacity:   cap,
-    is_active:  true,
-  }).select().single();
-
-  if (error) { showSaveMsg(msg, 'Error: ' + error.message, false); return; }
-
-  nameEl.value = '';
-  capEl.value  = '';
-  showSaveMsg(msg, 'Added ✓', true);
-
-  const list    = document.getElementById('tables-list');
-  const noItems = list.querySelector('.no-items');
-  if (noItems) list.innerHTML = '';
-  list.insertAdjacentHTML('beforeend', `
-    <div class="table-row" id="tbl-${data.id}">
-      <div>
-        <div class="table-name">${esc(data.table_name)}</div>
-        <div class="table-cap">Seats ${data.capacity}</div>
-      </div>
-      <button class="table-remove" onclick="removeTable('${data.id}')">Remove</button>
-    </div>`);
+async function toggleTable(id, active) {
+  await db.from('restaurant_tables').update({ is_active: active }).eq('id', id);
 }
-
-async function removeTable(id) {
+async function deleteTable(id) {
+  if (!confirm('Delete this table?')) return;
   await db.from('restaurant_tables').delete().eq('id', id);
-  const el = document.getElementById('tbl-' + id);
-  if (el) el.remove();
-  const list = document.getElementById('tables-list');
-  if (!list.querySelector('.table-row'))
-    list.innerHTML = '<div class="no-items" style="padding:14px 0">No tables configured</div>';
+  await loadTables();
+  showToast('Table deleted');
 }
+window.toggleTable = toggleTable;
+window.deleteTable = deleteTable;
 
-/* ══════════════════════════════════════════════════════════
-   HELPERS
-══════════════════════════════════════════════════════════ */
-function esc(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
-}
-
-function showSaveMsg(el, text, ok) {
-  el.textContent  = text;
-  el.className    = `save-msg ${ok ? 'ok' : 'err'}`;
-  setTimeout(() => { el.textContent = ''; }, 3000);
-}
-
-// Close modal on backdrop click
-document.getElementById('modal-backdrop').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-
-// Filter tabs
-document.querySelectorAll('.filter-tab').forEach(t => {
-  t.addEventListener('click', () => setFilter(t.dataset.filter));
-});
+/* ─── Session restore ────────────────────────────────────────────────────────── */
+(function init() {
+  const saved = sessionStorage.getItem('sala_session');
+  if (saved) {
+    try {
+      session = JSON.parse(saved);
+      bootApp();
+    } catch(e) {
+      sessionStorage.removeItem('sala_session');
+    }
+  }
+})();

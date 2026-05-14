@@ -3,419 +3,377 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sala Smart — Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <title>Sala Smart</title>
   <!--STYLES-->
 </head>
 <body>
 
-<!-- ═══════════════════ LOGIN ═══════════════════ -->
+<!-- ─── Login ─────────────────────────────────────────────────────────────── -->
 <div id="login-screen">
-  <div class="login-wrap">
-    <div class="login-brand">
-      <div class="login-wordmark">Sala Smart</div>
-      <div class="login-sub">Restaurant Dashboard</div>
+  <div class="login-card">
+    <div class="login-logo">Sala Smart</div>
+    <div class="login-tagline">Restaurant management platform</div>
+    <div class="login-field">
+      <label for="login-user">Username</label>
+      <input type="text" id="login-user" placeholder="Enter username" autocomplete="username">
     </div>
-
-    <div class="login-card">
-      <div class="login-title">Sign in to your account</div>
-
-      <div class="login-field">
-        <label class="login-label" for="l-user">Username</label>
-        <input class="login-input" id="l-user" type="text" autocomplete="username" placeholder="username">
-      </div>
-      <div class="login-field">
-        <label class="login-label" for="l-pass">Password</label>
-        <input class="login-input" id="l-pass" type="password" autocomplete="current-password" placeholder="••••••••">
-      </div>
-
-      <button class="login-btn" onclick="doLogin()">Sign In</button>
-      <div class="login-error" id="login-error"></div>
+    <div class="login-field">
+      <label for="login-pass">Password</label>
+      <input type="password" id="login-pass" placeholder="Enter password" autocomplete="current-password">
     </div>
-
-    <div class="login-hints">
-      <div class="login-hints-title">Demo credentials</div>
-      <div class="login-hint-row">
-        <span class="hint-role">Admin</span>
-        <span class="hint-creds">admin / admin2024</span>
-        <span class="hint-badge admin">Admin</span>
-      </div>
-      <div class="login-hint-row">
-        <span class="hint-role">Flour Pastificio</span>
-        <span class="hint-creds">flour / flour2024</span>
-        <span class="hint-badge client">Client</span>
-      </div>
-      <div class="login-hint-row">
-        <span class="hint-role">La Brasserie</span>
-        <span class="hint-creds">brasserie / brasserie2024</span>
-        <span class="hint-badge client">Client</span>
-      </div>
-      <div class="login-hint-row">
-        <span class="hint-role">The Harbour Grill</span>
-        <span class="hint-creds">harbour / harbour2024</span>
-        <span class="hint-badge client">Client</span>
-      </div>
+    <button id="btn-login">Sign in</button>
+    <div class="login-error" id="login-error"></div>
+    <div class="login-demo">
+      <p>Demo credentials</p>
+      <div class="demo-cred"><span>Admin</span><code>admin / admin2024</code></div>
+      <div class="demo-cred"><span>Flour Pastificio</span><code>flour / flour2024</code></div>
+      <div class="demo-cred"><span>The Harbour Grill</span><code>harbour / harbour2024</code></div>
+      <div class="demo-cred"><span>La Brasserie</span><code>brasserie / brasserie2024</code></div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════ DASHBOARD ═══════════════════ -->
-<div id="dashboard" style="display:none;">
+<!-- ─── App shell ──────────────────────────────────────────────────────────── -->
+<div id="app">
 
-  <!-- TOP BAR -->
-  <div class="top-bar">
-    <div class="top-bar-left">
-      <span class="top-label" id="client-bar-label">Client</span>
-      <select class="client-select" id="client-select" style="display:none;"></select>
-      <span class="status-msg" id="status-msg">Loading…</span>
-      <span class="error-msg"  id="error-msg" style="display:none;"></span>
+  <!-- Sidebar -->
+  <nav id="sidebar">
+    <div class="sidebar-brand">
+      <h1>Sala Smart</h1>
+      <p>Management Platform</p>
     </div>
-    <div class="top-bar-right">
-      <div class="session-pill">
-        <span id="session-user"></span>
-        <span class="session-role" id="session-role-badge"></span>
+
+    <div class="sidebar-restaurant">
+      <label>Restaurant</label>
+      <!-- Admin: dropdown; Client: name display -->
+      <select id="restaurant-select" style="display:none"></select>
+      <div id="restaurant-name-display"></div>
+    </div>
+
+    <div class="sidebar-nav">
+      <div class="nav-item active" data-view="overview">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
+        Overview
       </div>
-      <button class="logout-btn" onclick="doLogout()">Sign out</button>
+      <div class="nav-item" data-view="reservations">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        Reservations
+      </div>
+      <div class="nav-item" data-view="settings">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        Settings
+      </div>
     </div>
-  </div>
 
-  <!-- NAV TABS -->
-  <nav class="nav-tabs">
-    <button class="nav-tab active" data-view="overview">Overview</button>
-    <button class="nav-tab" data-view="reservations">Reservations</button>
-    <button class="nav-tab" data-view="settings">Settings</button>
+    <div class="sidebar-footer">
+      <button id="btn-logout">Sign out</button>
+    </div>
   </nav>
 
-  <!-- MAIN CONTENT -->
-  <div class="main-content">
+  <!-- Main content -->
+  <main id="main">
 
-    <!-- RESTAURANT HEADER (shared across views) -->
-    <div class="view-header anim d1">
-      <div class="view-header-left">
-        <div class="wordmark" id="client-name">—</div>
-        <div class="wordmark-address" id="client-address"></div>
+    <!-- ── Overview ─────────────────────────────────────────────────────── -->
+    <div class="view active" id="view-overview">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Overview</div>
+          <div class="page-subtitle" id="ov-date-label"></div>
+        </div>
       </div>
-      <div class="view-header-right">
-        <div class="hdr-date" id="hdr-date"></div>
-        <span class="agent-badge">
-          <span class="agent-dot"></span>
-          <span id="agent-badge-text">AI Receptionist</span>
-        </span>
-      </div>
-    </div>
-
-    <!-- ══════════ VIEW: OVERVIEW ══════════ -->
-    <div id="view-overview">
 
       <!-- Stats -->
-      <div class="stats-row anim d2">
-        <div class="stat-cell">
-          <div class="stat-num num-default" id="stat-reservations">—</div>
-          <div class="stat-lbl">Reservations Today</div>
+      <div class="stats-grid">
+        <div class="stat-tile">
+          <div class="stat-label">Today's Bookings</div>
+          <div class="stat-value" id="stat-bookings">—</div>
         </div>
-        <div class="stat-cell">
-          <div class="stat-num num-copper" id="stat-covers">—</div>
-          <div class="stat-lbl">Covers Today</div>
+        <div class="stat-tile">
+          <div class="stat-label">Today's Covers</div>
+          <div class="stat-value copper" id="stat-covers">—</div>
         </div>
-        <div class="stat-cell">
-          <div class="stat-num num-red" id="stat-escalations">—</div>
-          <div class="stat-lbl">Escalations</div>
-          <div class="stat-sub">Needs human review</div>
+        <div class="stat-tile">
+          <div class="stat-label">Available Slots</div>
+          <div class="stat-value green" id="stat-slots">—</div>
         </div>
-        <div class="stat-cell">
-          <div class="stat-num num-default" id="stat-noshows">—</div>
-          <div class="stat-lbl">No-shows (7 days)</div>
-        </div>
-      </div>
-
-      <!-- Availability bar -->
-      <div class="avail-card anim d3">
-        <div class="avail-head">
-          <span class="avail-title">Seat Availability — Today</span>
-          <div class="avail-nums">
-            <div class="avail-num-item">
-              <span class="avail-num-val num-default" id="avail-available">—</span>
-              <span class="avail-num-lbl">Available</span>
-            </div>
-            <div class="avail-num-item">
-              <span class="avail-num-val" style="color:var(--copper)" id="avail-booked">—</span>
-              <span class="avail-num-lbl">Booked</span>
-            </div>
-            <div class="avail-num-item">
-              <span class="avail-num-val" style="color:var(--muted)" id="avail-total">—</span>
-              <span class="avail-num-lbl">Total</span>
-            </div>
-          </div>
-        </div>
-        <div class="avail-bar-wrap">
-          <div class="avail-bar-fill" id="avail-bar" style="width:0%;background:var(--green);"></div>
-        </div>
-        <div class="avail-status ok" id="avail-status">Loading availability…</div>
-      </div>
-
-      <!-- Alerts grid: allergy flags + escalations -->
-      <div class="alerts-grid anim d4">
-        <div class="card">
-          <div class="card-head">
-            <span class="card-head-label">Allergy Flags — Today</span>
-            <span class="badge badge-red" id="allergy-badge">—</span>
-          </div>
-          <div class="card-body" id="allergy-body"></div>
-        </div>
-
-        <div class="card">
-          <div class="card-head">
-            <span class="card-head-label">Human Escalations</span>
-            <span class="badge badge-amber" id="esc-badge">—</span>
-          </div>
-          <div class="card-body" id="esc-body"></div>
+        <div class="stat-tile">
+          <div class="stat-label">Open Escalations</div>
+          <div class="stat-value red" id="stat-escalations">—</div>
         </div>
       </div>
 
-      <!-- Today's reservations table -->
-      <div class="tbl-outer anim d5">
-        <div class="sec"><span class="sec-lbl">Today's Reservations</span><div class="sec-line"></div></div>
-        <table>
-          <thead>
-            <tr>
-              <th>Guest</th>
-              <th>Time</th>
-              <th>Covers</th>
-              <th>Notes / Allergy</th>
-              <th>WhatsApp</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="today-tbody"></tbody>
-        </table>
-      </div>
-
-      <!-- Weekly chart -->
-      <div class="anim d6">
-        <div class="sec"><span class="sec-lbl">Weekly Overview</span><div class="sec-line"></div></div>
-        <div class="chart-card">
-          <div class="chart-head">
-            <div class="chart-title">Reservations and covers, last 7 days</div>
-            <div class="legend">
-              <div class="leg"><div class="leg-dot dot-copper"></div>Reservations</div>
-              <div class="leg"><div class="leg-dot dot-green"></div>Covers</div>
-            </div>
+      <!-- Capacity card -->
+      <div class="card">
+        <div class="card-title">Today's Capacity</div>
+        <div class="capacity-block">
+          <div class="capacity-row">
+            <span><strong id="cap-booked">0</strong> covers booked</span>
+            <span>of <strong id="cap-total">0</strong> available</span>
           </div>
-          <canvas id="weeklyChart"></canvas>
+          <div class="progress-bar">
+            <div class="progress-fill" id="cap-fill" style="width:0%"></div>
+          </div>
+          <div class="slider-row">
+            <label for="capacity-slider">Today's capacity</label>
+            <input type="range" id="capacity-slider" min="0" max="300" step="1" value="80">
+            <span class="slider-val" id="cap-slider-val">80</span>
+            <button id="btn-save-capacity">Save as default</button>
+          </div>
         </div>
       </div>
 
-    </div><!-- /view-overview -->
-
-    <!-- ══════════ VIEW: RESERVATIONS ══════════ -->
-    <div id="view-reservations" style="display:none;">
-
-      <!-- Controls row: date nav + filters + add button -->
-      <div class="sec" style="margin-bottom:14px;">
-        <span class="sec-lbl">Reservations</span>
-        <div class="sec-line"></div>
-        <div class="res-date-nav">
-          <button class="rdn-btn" onclick="shiftResDate(-1)">←</button>
-          <div class="rdn-date-wrap">
-            <span class="rdn-label" id="res-date-label">Today</span>
-            <input class="rdn-date-native" type="date" id="res-date-picker" onchange="pickResDate(this.value)">
-          </div>
-          <button class="rdn-btn" onclick="shiftResDate(1)">→</button>
-          <button class="rdn-btn active" id="res-today-btn" onclick="goResToday()">Today</button>
+      <!-- Today's reservations -->
+      <div class="card">
+        <div class="card-title">
+          Today's Reservations
+          <span class="badge-count" id="ov-res-count">0</span>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Guest</th>
+                <th>Covers</th>
+                <th>Notes</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ov-res-body">
+              <tr><td colspan="6" class="empty-state">Loading…</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
-        <div class="filter-tabs">
-          <button class="filter-tab active" data-filter="all">All</button>
-          <button class="filter-tab" data-filter="confirmed">Confirmed</button>
-          <button class="filter-tab" data-filter="arrived">Arrived</button>
-          <button class="filter-tab" data-filter="no_show">No-show</button>
-          <button class="filter-tab" data-filter="cancelled">Cancelled</button>
+      <!-- Escalations -->
+      <div class="card">
+        <div class="card-title">
+          Open Escalations
+          <span class="badge-count" id="ov-esc-count">0</span>
         </div>
-        <button class="btn-primary" onclick="openAddModal()">+ Add Reservation</button>
-      </div>
-
-      <div class="tbl-outer">
-        <table>
-          <thead>
-            <tr>
-              <th>Guest</th>
-              <th>Time</th>
-              <th>Covers</th>
-              <th>Phone</th>
-              <th>Notes / Allergy</th>
-              <th>Status</th>
-              <th>Source</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="res-tbody"></tbody>
-        </table>
-      </div>
-
-    </div><!-- /view-reservations -->
-
-    <!-- ══════════ VIEW: SETTINGS ══════════ -->
-    <div id="view-settings" style="display:none;">
-      <div class="settings-grid">
-
-        <!-- Restaurant Info -->
-        <div class="settings-card">
-          <div class="settings-card-head">
-            <span class="settings-card-title">Restaurant Info</span>
-            <span class="save-msg" id="info-save-msg"></span>
-          </div>
-          <div class="settings-card-body">
-            <div class="info-row">
-              <div class="info-field">
-                <label class="info-label">Restaurant Name</label>
-                <input class="info-input" id="set-name" type="text" placeholder="Restaurant name">
-              </div>
-              <div class="info-field">
-                <label class="info-label">Timezone</label>
-                <input class="info-input" id="set-tz" type="text" placeholder="Europe/Rome">
-              </div>
-            </div>
-            <div class="info-field">
-              <label class="info-label">Address</label>
-              <input class="info-input" id="set-address" type="text" placeholder="Address">
-            </div>
-            <div class="info-field">
-              <label class="info-label">Booking Mode</label>
-              <div class="mode-toggle">
-                <button class="mode-btn active" data-mode="seats" onclick="setBookingMode('seats')">Seats</button>
-                <button class="mode-btn" data-mode="tables" onclick="setBookingMode('tables')">Tables</button>
-              </div>
-            </div>
-            <div style="margin-top:16px;">
-              <button class="btn-primary" onclick="saveRestaurantInfo()">Save Info</button>
-            </div>
-          </div>
+        <div class="escalation-list" id="ov-esc-list">
+          <div class="empty-state">No open escalations</div>
         </div>
-
-        <!-- Opening Hours -->
-        <div class="settings-card">
-          <div class="settings-card-head">
-            <span class="settings-card-title">Opening Hours</span>
-            <span class="save-msg" id="hours-save-msg"></span>
-          </div>
-          <div class="settings-card-body">
-            <div style="display:grid;grid-template-columns:90px 1fr 1fr 80px 40px;gap:8px;padding-bottom:8px;border-bottom:1px solid var(--border);">
-              <span style="font-size:0.52rem;font-weight:500;text-transform:uppercase;letter-spacing:0.13em;color:var(--muted);">Day</span>
-              <span style="font-size:0.52rem;font-weight:500;text-transform:uppercase;letter-spacing:0.13em;color:var(--muted);">Opens</span>
-              <span style="font-size:0.52rem;font-weight:500;text-transform:uppercase;letter-spacing:0.13em;color:var(--muted);">Closes</span>
-              <span style="font-size:0.52rem;font-weight:500;text-transform:uppercase;letter-spacing:0.13em;color:var(--muted);">Max covers</span>
-              <span style="font-size:0.52rem;font-weight:500;text-transform:uppercase;letter-spacing:0.13em;color:var(--muted);">On</span>
-            </div>
-            <div class="hours-grid" id="hours-container"></div>
-            <div style="margin-top:16px;">
-              <button class="btn-primary" onclick="saveOpeningHours()">Save Hours</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Closed Dates -->
-        <div class="settings-card">
-          <div class="settings-card-head">
-            <span class="settings-card-title">Closed Dates</span>
-            <span class="save-msg" id="closures-save-msg"></span>
-          </div>
-          <div class="settings-card-body">
-            <div class="closure-list" id="closures-list"></div>
-            <div class="add-row">
-              <input class="add-input" type="date" id="new-closure-date">
-              <input class="add-input wide" type="text" id="new-closure-reason" placeholder="Reason (optional)">
-              <button class="btn-primary" onclick="addClosure()">Add</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tables (visible only in tables mode) -->
-        <div class="settings-card" id="tables-section" style="display:none;">
-          <div class="settings-card-head">
-            <span class="settings-card-title">Tables</span>
-            <span class="save-msg" id="tables-save-msg"></span>
-          </div>
-          <div class="settings-card-body">
-            <div class="tables-list" id="tables-list"></div>
-            <div class="add-row" style="margin-top:16px;">
-              <input class="add-input wide" type="text"   id="new-table-name" placeholder="Table name (e.g. Table 1)">
-              <input class="add-input"      type="number" id="new-table-cap"  placeholder="Seats" min="1" style="width:80px;">
-              <button class="btn-primary" onclick="addTable()">Add</button>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /settings-grid -->
-    </div><!-- /view-settings -->
-
-  </div><!-- /main-content -->
-</div><!-- /dashboard -->
-
-<!-- ══════════ ADD / EDIT RESERVATION MODAL ══════════ -->
-<div id="modal-backdrop" style="display:none;">
-  <div class="modal">
-    <div class="modal-title" id="modal-title">New Reservation</div>
-
-    <div class="modal-field">
-      <label class="modal-label">Guest Name *</label>
-      <input class="modal-input" id="modal-name" type="text" placeholder="Full name">
-    </div>
-
-    <div class="modal-row">
-      <div class="modal-field">
-        <label class="modal-label">Date *</label>
-        <input class="modal-input" id="modal-date" type="date">
-      </div>
-      <div class="modal-field">
-        <label class="modal-label">Time *</label>
-        <input class="modal-input" id="modal-time" type="time">
       </div>
     </div>
 
-    <div class="modal-row">
-      <div class="modal-field">
-        <label class="modal-label">Covers *</label>
-        <input class="modal-input" id="modal-covers" type="number" min="1" max="99" value="2">
+    <!-- ── Reservations ───────────────────────────────────────────────── -->
+    <div class="view" id="view-reservations">
+      <div class="page-header">
+        <div class="date-nav">
+          <button class="date-nav-arrow" id="res-prev">&#8592;</button>
+          <span class="date-nav-label" id="res-date-label">Today</span>
+          <button class="date-nav-arrow" id="res-next">&#8594;</button>
+          <button class="btn-today" id="res-today-btn">Today</button>
+          <label for="res-date-input" style="cursor:pointer;font-size:18px;color:var(--muted);" title="Pick date">&#128197;</label>
+          <input type="date" id="res-date-input">
+        </div>
+        <button class="btn-primary" id="btn-add-res">+ Add Reservation</button>
       </div>
-      <div class="modal-field">
-        <label class="modal-label">Phone / WhatsApp</label>
-        <input class="modal-input" id="modal-phone" type="tel" placeholder="+39 06 …">
+
+      <div class="filter-tabs" id="res-filter-tabs">
+        <button class="filter-tab active" data-filter="all">All</button>
+        <button class="filter-tab" data-filter="confirmed">Confirmed</button>
+        <button class="filter-tab" data-filter="arrived">Arrived</button>
+        <button class="filter-tab" data-filter="no_show">No-show</button>
+        <button class="filter-tab" data-filter="cancelled">Cancelled</button>
+      </div>
+
+      <div class="card" style="padding:0 24px 24px;">
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Guest</th>
+                <th>Phone</th>
+                <th>Covers</th>
+                <th>Duration</th>
+                <th>Notes</th>
+                <th>Status</th>
+                <th>Source</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="res-body">
+              <tr><td colspan="9" class="empty-state" style="padding-top:24px;">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <div class="modal-field">
-      <label class="modal-label">Notes / Allergies / Dietary</label>
-      <textarea class="modal-textarea" id="modal-notes" placeholder="e.g. Nut allergy — severe. Birthday dinner."></textarea>
+    <!-- ── Settings ──────────────────────────────────────────────────── -->
+    <div class="view" id="view-settings">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Settings</div>
+          <div class="page-subtitle" id="settings-rest-name"></div>
+        </div>
+      </div>
+
+      <!-- Restaurant info -->
+      <div class="card">
+        <div class="card-title">Restaurant Info</div>
+        <div class="settings-row">
+          <label>Name</label>
+          <input type="text" id="s-name">
+        </div>
+        <div class="settings-row">
+          <label>Address</label>
+          <input type="text" id="s-address">
+        </div>
+        <div class="settings-row">
+          <label>Phone</label>
+          <input type="tel" id="s-phone">
+        </div>
+        <div class="settings-row">
+          <label>Timezone</label>
+          <input type="text" id="s-timezone" placeholder="Europe/Rome">
+        </div>
+        <div class="settings-row">
+          <label>Mode</label>
+          <div class="mode-toggle">
+            <button class="mode-btn active" id="mode-seats" data-mode="seats">Seats</button>
+            <button class="mode-btn" id="mode-tables" data-mode="tables">Tables</button>
+          </div>
+        </div>
+        <div style="margin-top:16px;">
+          <button class="btn-primary" id="btn-save-info">Save Info</button>
+        </div>
+      </div>
+
+      <!-- Capacity per day -->
+      <div class="card">
+        <div class="card-title">Capacity by Day</div>
+        <div class="day-capacity-grid" id="day-cap-grid"></div>
+        <div class="cap-editor" id="cap-editor" style="display:none;">
+          <label id="cap-editor-label">Mon</label>
+          <input type="range" id="settings-cap-slider" min="0" max="300" step="1" value="80">
+          <span class="cap-val" id="settings-cap-val">80</span>
+          <button class="btn-ghost" id="btn-save-day-cap">Save</button>
+        </div>
+      </div>
+
+      <!-- Opening hours -->
+      <div class="card">
+        <div class="card-title">Opening Hours</div>
+        <div class="oh-grid" id="oh-grid"></div>
+        <div style="margin-top:16px;">
+          <button class="btn-primary" id="btn-save-oh">Save All Hours</button>
+        </div>
+      </div>
+
+      <!-- Closed dates -->
+      <div class="card">
+        <div class="card-title">Closed Dates</div>
+        <div class="closure-list" id="closure-list"></div>
+        <div class="add-row">
+          <input type="date" id="closure-date-input">
+          <input type="text" id="closure-reason-input" placeholder="Reason (optional)" style="max-width:200px;">
+          <button class="btn-primary" id="btn-add-closure">Add</button>
+        </div>
+      </div>
+
+      <!-- Tables (tables mode only) -->
+      <div class="card" id="tables-card" style="display:none;">
+        <div class="card-title">Tables</div>
+        <div class="table-list" id="tables-list"></div>
+        <div class="add-row">
+          <input type="text" id="new-table-name" placeholder="Table name">
+          <input type="number" id="new-table-cap" placeholder="Capacity" min="1" style="max-width:100px;">
+          <button class="btn-primary" id="btn-add-table">Add Table</button>
+        </div>
+      </div>
     </div>
 
-    <div class="modal-field" id="modal-table-wrap" style="display:none;">
-      <label class="modal-label">Table Assignment</label>
-      <select class="modal-select" id="modal-table"></select>
-    </div>
+  </main>
+</div>
 
-    <div class="modal-field" id="modal-status-wrap" style="display:none;">
-      <label class="modal-label">Status</label>
-      <select class="modal-select" id="modal-status">
-        <option value="confirmed">Confirmed</option>
-        <option value="arrived">Arrived</option>
-        <option value="no_show">No-show</option>
-        <option value="cancelled">Cancelled</option>
-      </select>
+<!-- ─── Reservation modal ──────────────────────────────────────────────────── -->
+<div id="modal-overlay">
+  <div id="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">Add Reservation</span>
+      <button class="modal-close" id="modal-close">&times;</button>
     </div>
-
+    <div class="modal-body">
+      <input type="hidden" id="modal-res-id">
+      <div class="form-cols">
+        <div class="form-row">
+          <label>Guest Name *</label>
+          <input type="text" id="f-name" placeholder="Full name">
+        </div>
+        <div class="form-row">
+          <label>Phone</label>
+          <input type="tel" id="f-phone" placeholder="+39 …">
+        </div>
+      </div>
+      <div class="form-cols">
+        <div class="form-row">
+          <label>Date *</label>
+          <input type="date" id="f-date">
+        </div>
+        <div class="form-row">
+          <label>Time *</label>
+          <input type="time" id="f-time">
+        </div>
+      </div>
+      <div class="form-cols">
+        <div class="form-row">
+          <label>Covers *</label>
+          <input type="number" id="f-covers" min="1" max="99" value="2">
+        </div>
+        <div class="form-row">
+          <label>Duration</label>
+          <select id="f-duration">
+            <option value="60">60 min</option>
+            <option value="90" selected>90 min</option>
+            <option value="120">120 min</option>
+            <option value="150">150 min</option>
+            <option value="180">180 min</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" id="f-table-row" style="display:none;">
+        <label>Table</label>
+        <select id="f-table">
+          <option value="">— No table assigned —</option>
+        </select>
+      </div>
+      <div class="form-row" id="f-status-row" style="display:none;">
+        <label>Status</label>
+        <select id="f-status">
+          <option value="confirmed">Confirmed</option>
+          <option value="arrived">Arrived</option>
+          <option value="no_show">No-show</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Notes / Allergies</label>
+        <textarea id="f-notes" placeholder="Dietary needs, occasions, allergies…"></textarea>
+      </div>
+      <div class="modal-error" id="modal-error"></div>
+    </div>
     <div class="modal-footer">
-      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
-      <button class="btn-primary" id="modal-save-btn" onclick="saveReservation()">Save</button>
+      <button class="btn-ghost" id="modal-cancel">Cancel</button>
+      <button class="btn-primary" id="modal-save">Save Reservation</button>
     </div>
   </div>
 </div>
+
+<!-- ─── Toast ──────────────────────────────────────────────────────────────── -->
+<div class="save-msg" id="save-msg"></div>
 
 <!--SCRIPTS-->
 </body>
