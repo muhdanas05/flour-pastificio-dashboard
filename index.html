@@ -305,38 +305,45 @@
 <div id="modal-overlay">
   <div id="modal">
     <div class="modal-header">
-      <span class="modal-title" id="modal-title">Add Reservation</span>
+      <div>
+        <div class="modal-title" id="modal-title">Add Reservation</div>
+        <div class="modal-subtitle" id="modal-subtitle">Fill in the details below</div>
+      </div>
       <button class="modal-close" id="modal-close">&times;</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="modal-res-id">
+
+      <div class="modal-section-label">Guest</div>
       <div class="form-cols">
         <div class="form-row">
-          <label>Guest Name *</label>
-          <input type="text" id="f-name" placeholder="Full name">
+          <label>Name <span class="req">*</span></label>
+          <input type="text" id="f-name" placeholder="Full name" autocomplete="off">
         </div>
         <div class="form-row">
           <label>Phone</label>
-          <input type="tel" id="f-phone" placeholder="+39 …">
+          <input type="tel" id="f-phone" placeholder="+39 …" autocomplete="off">
         </div>
       </div>
+
+      <div class="modal-section-label">Booking</div>
       <div class="form-cols">
         <div class="form-row">
-          <label>Date *</label>
+          <label>Date <span class="req">*</span></label>
           <input type="date" id="f-date">
         </div>
         <div class="form-row">
-          <label>Time *</label>
+          <label>Time <span class="req">*</span></label>
           <input type="time" id="f-time">
         </div>
       </div>
       <div class="form-cols">
         <div class="form-row">
-          <label>Covers *</label>
+          <label>Covers <span class="req">*</span></label>
           <input type="number" id="f-covers" min="1" max="99" value="2">
         </div>
         <div class="form-row">
-          <label>Duration</label>
+          <label>Estimated Duration</label>
           <select id="f-duration">
             <option value="60">60 min</option>
             <option value="90" selected>90 min</option>
@@ -347,7 +354,7 @@
         </div>
       </div>
       <div class="form-row" id="f-table-row" style="display:none;">
-        <label>Table</label>
+        <label>Table Assignment</label>
         <select id="f-table">
           <option value="">— No table assigned —</option>
         </select>
@@ -361,14 +368,15 @@
           <option value="cancelled">Cancelled</option>
         </select>
       </div>
+      <div class="modal-section-label">Notes &amp; Allergies</div>
       <div class="form-row">
-        <label>Notes / Allergies</label>
-        <textarea id="f-notes" placeholder="Dietary needs, occasions, allergies…"></textarea>
+        <label>Notes</label>
+        <textarea id="f-notes" placeholder="e.g. Shellfish allergy, birthday celebration, high chair needed…"></textarea>
       </div>
       <div class="modal-error" id="modal-error"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn-ghost" id="modal-cancel">Cancel</button>
+      <button class="btn-ghost" id="modal-cancel">Discard</button>
       <button class="btn-primary" id="modal-save">Save Reservation</button>
     </div>
   </div>

@@ -300,13 +300,23 @@ window.openEditModal     = openEditModal;
 
 /* ─── Reservations view ─────────────────────────────────────────────────────── */
 // Date nav
-document.getElementById('res-prev').addEventListener('click', () => { resDate = addDays(resDate, -1); syncDateNav(); loadReservations(); });
-document.getElementById('res-next').addEventListener('click', () => { resDate = addDays(resDate, +1); syncDateNav(); loadReservations(); });
-document.getElementById('res-today-btn').addEventListener('click', () => { resDate = isoDate(new Date()); syncDateNav(); loadReservations(); });
-document.getElementById('res-date-input').addEventListener('change', e => { resDate = e.target.value; syncDateNav(); loadReservations(); });
+function changeDate(n) {
+  resDate = n === 0 ? isoDate(new Date()) : addDays(resDate, n);
+  syncDateNav();
+  loadReservations();
+}
+
+document.getElementById('res-prev').addEventListener('click', () => changeDate(-1));
+document.getElementById('res-next').addEventListener('click', () => changeDate(+1));
+document.getElementById('res-today-btn').addEventListener('click', () => changeDate(0));
+document.getElementById('res-date-input').addEventListener('change', e => {
+  if (e.target.value) { resDate = e.target.value; syncDateNav(); loadReservations(); }
+});
 
 function syncDateNav() {
-  document.getElementById('res-date-label').textContent = fmtDate(resDate);
+  const label = document.getElementById('res-date-label');
+  const today = isoDate(new Date());
+  label.textContent = fmtDate(resDate) + (resDate === today ? ' — Today' : '');
   document.getElementById('res-date-input').value = resDate;
 }
 
@@ -325,11 +335,20 @@ async function loadReservations() {
   if (!restaurant) return;
   syncDateNav();
 
-  const { data } = await db.from('reservations')
+  document.getElementById('res-body').innerHTML =
+    `<tr><td colspan="9" class="empty-state" style="padding-top:24px;">Loading…</td></tr>`;
+
+  const { data, error } = await db.from('reservations')
     .select('*')
     .eq('restaurant_id', restaurant.id)
     .eq('date', resDate)
     .order('time');
+
+  if (error) {
+    document.getElementById('res-body').innerHTML =
+      `<tr><td colspan="9" class="empty-state" style="padding-top:24px;color:var(--red);">Failed to load — ${error.message}</td></tr>`;
+    return;
+  }
 
   _resRows = data ?? [];
   window._resRows = _resRows;

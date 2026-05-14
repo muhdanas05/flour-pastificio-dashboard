@@ -534,14 +534,35 @@ tbody td:first-child { padding-left: 0; }
 }
 .modal-footer .btn-ghost { color: var(--muted); }
 .modal-footer .btn-primary { padding: 10px 22px; font-size: 14px; }
+.modal-subtitle {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.modal-section-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--copper);
+  margin: 18px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-section-label:first-of-type { margin-top: 0; }
+.req { color: var(--copper); font-size: 13px; }
 .modal-error {
   color: var(--red);
   font-size: 12.5px;
-  margin-top: 6px;
+  margin-top: 8px;
   margin-bottom: 4px;
   min-height: 18px;
   font-weight: 500;
+  background: rgba(192,57,43,0.06);
+  border-radius: var(--radius-sm);
+  padding: 0 10px;
 }
+.modal-error:not(:empty) { padding: 8px 12px; }
 
 /* ─── Form elements ──────────────────────────────────────────────────────── */
 .form-row { margin-bottom: 14px; }
