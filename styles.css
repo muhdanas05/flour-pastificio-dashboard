@@ -473,7 +473,7 @@ tbody td:first-child { padding-left: 0; }
   transition: opacity 0.12s;
 }
 .btn-cal-icon:hover { opacity: 1; }
-#res-date-input { opacity: 0; width: 0; height: 0; position: absolute; }
+#res-date-input, #calls-date-input { opacity: 0; width: 24px; height: 24px; margin-left: -24px; position: relative; z-index: 2; cursor: pointer; }
 
 /* ─── Filter tabs ────────────────────────────────────────────────────────── */
 .filter-tabs {
@@ -948,6 +948,7 @@ tbody td:first-child { padding-left: 0; }
     z-index: 200;
     border-top: 1px solid rgba(255,255,255,0.1);
     background: var(--ink);
+    overflow: visible;
   }
   
   .sidebar-brand { display: none; }
@@ -1024,7 +1025,7 @@ tbody td:first-child { padding-left: 0; }
   .date-nav { flex-wrap: wrap; justify-content: center; }
   .date-nav-bar > div:last-child { flex-direction: column; align-items: stretch !important; gap: 10px; }
   .date-nav-label { min-width: auto; font-size: 15px; flex: 1; text-align: center; }
-  .filter-tabs { width: 100%; overflow-x: auto; white-space: nowrap; margin-bottom: 0 !important; }
+  .filter-tabs { width: 100%; display: flex !important; flex-direction: row !important; overflow-x: auto; white-space: nowrap; margin-bottom: 0 !important; }
   #btn-add-res { width: 100%; }
 
   .add-row { flex-direction: column; align-items: stretch; gap: 10px; }
