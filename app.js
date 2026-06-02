@@ -52,6 +52,11 @@ function fmtDate(iso) {
   const d = new Date(iso + 'T00:00:00');
   return d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
 }
+function fmtDateShort(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return `${d}.${m}.${y.slice(2)}`;
+}
 function esc(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -168,6 +173,7 @@ function renderCurrentView() {
 document.querySelectorAll('.nav-item[data-view]').forEach(el => {
   el.addEventListener('click', () => navigate(el.dataset.view));
 });
+window.navigate = navigate;
 
 window.addEventListener('hashchange', () => {
   const v = location.hash.replace('#','');
@@ -232,7 +238,7 @@ async function loadOverview() {
 
   const [resResult, escResult, ohResult] = await Promise.all([
     db.from('reservations')
-      .select('*')
+      .select('*, restaurant_tables(table_name)')
       .eq('restaurant_id', restaurant.id)
       .eq('date', today),
     db.from('escalations')
@@ -296,24 +302,34 @@ async function loadOverview() {
   const sorted = [...activeRes].sort((a,b) => a.time.localeCompare(b.time));
   const resBody = document.getElementById('ov-res-body');
   document.getElementById('ov-res-count').textContent = sorted.length;
+  // Colonna Table visibile solo in modalità "tavoli"
+  resBody.closest('table')?.classList.toggle('show-table-col', restaurant?.booking_mode === 'tables');
+  // "See all" sempre visibile quando c'è almeno una prenotazione
+  const seeAll = document.getElementById('ov-see-all');
+  if (seeAll) seeAll.style.display = sorted.length > 0 ? 'flex' : 'none';
 
   if (sorted.length === 0) {
-    resBody.innerHTML = `<tr><td colspan="7" class="empty-state">No reservations today</td></tr>`;
+    resBody.innerHTML = `<tr><td colspan="10" class="empty-state">No reservations today</td></tr>`;
   } else {
-    resBody.innerHTML = sorted.map(r => {
+    resBody.innerHTML = sorted.slice(0, 3).map(r => {
       const notes = r.notes ? (hasAllergyFlag(r.notes) ? allergyBadge() + esc(r.notes).slice(0,40) : esc(r.notes).slice(0,40)) : '<span style="color:var(--muted)">—</span>';
-      const guestArg = `'${r.customer_id ?? ''}','${(r.customer_phone || '').replace(/'/g, "\\'")}'`;
+      const guestArg = `'${r.customer_id ?? ''}','${(r.customer_phone || '').replace(/'/g, "\\'")}','${esc(r.customer_name ?? '').replace(/'/g, "\\'")}'`;
+      const tableName = r.restaurant_tables?.table_name ?? '—';
       return `<tr>
         <td class="td-time">${fmtTime(r.time)}</td>
         <td class="td-guest"><span class="guest-link" onclick="openGuestProfile(${guestArg})">${esc(r.customer_name)}</span>${noShowFlagHTML(r)}</td>
         <td>${r.party_size}</td>
-        <td class="td-muted">${r.duration_minutes ?? 90} min</td>
-        <td class="td-notes">${notes}</td>
+        <td class="td-muted col-table">${esc(tableName)}</td>
+        <td class="td-muted col-duration">${r.duration_minutes ?? 90} min</td>
+        <td class="td-notes" data-fulltext="${esc(r.notes ?? '')}">${notes}</td>
+        <td>${reminderCellHTML(r)}</td>
+        <td>${sourceBadge(r.source ?? 'manual')}</td>
         <td>${statusBadge(r.status)}</td>
         <td class="td-actions">
           <button class="btn-inline arrived" onclick="quickStatus('${r.id}','arrived')">Arrived</button>
           <button class="btn-inline noshow" onclick="quickStatus('${r.id}','no_show')">No-show</button>
-          <button class="btn-inline" onclick="openEditModal('${r.id}')">Edit</button>
+          <button class="btn-inline edit" onclick="openEditModal('${r.id}')" title="Edit">Edit</button>
+          ${r.status !== 'cancelled' ? `<button class="btn-inline danger" onclick="cancelReservation('${r.id}')" title="Cancel">Cancel</button>` : ''}
         </td>
       </tr>`;
     }).join('');
@@ -344,7 +360,7 @@ function updateRevenueTile(covers) {
   const avg = Number(restaurant?.avg_spend_per_cover ?? 35);
   const revenue = covers * avg;
   document.getElementById('stat-revenue').textContent = fmtMoney(revenue);
-  document.getElementById('stat-revenue-meta').textContent = `@ ${fmtMoney(avg)}/cover`;
+  document.getElementById('stat-revenue-meta').textContent = `${fmtMoney(avg)}/cover`;
 }
 
 /* ─── Time-slot occupancy ─────────────────────────────────────────────────── */
@@ -469,11 +485,11 @@ async function loadReservations() {
   syncDateNav();
 
   document.getElementById('res-body').innerHTML =
-    `<tr><td colspan="10" class="empty-state" style="padding-top:24px;">Loading…</td></tr>`;
+    `<tr><td colspan="11" class="empty-state" style="padding-top:24px;">Loading…</td></tr>`;
 
   const [resQ] = await Promise.all([
     db.from('reservations')
-      .select('*')
+      .select('*, restaurant_tables(table_name)')
       .eq('restaurant_id', restaurant.id)
       .eq('date', resDate)
       .order('time'),
@@ -482,7 +498,7 @@ async function loadReservations() {
 
   if (resQ.error) {
     document.getElementById('res-body').innerHTML =
-      `<tr><td colspan="10" class="empty-state" style="padding-top:24px;color:var(--red);">Failed to load — ${resQ.error.message}</td></tr>`;
+      `<tr><td colspan="11" class="empty-state" style="padding-top:24px;color:var(--red);">Failed to load — ${resQ.error.message}</td></tr>`;
     return;
   }
 
@@ -505,10 +521,11 @@ function reminderCellHTML(r) {
 
 function renderReservationsTable(rows) {
   const body = document.getElementById('res-body');
+  body.closest('table')?.classList.toggle('show-table-col', restaurant?.booking_mode === 'tables');
   const filtered = resFilter === 'all' ? rows : rows.filter(r => r.status === resFilter);
 
   if (filtered.length === 0) {
-    body.innerHTML = `<tr><td colspan="10" class="empty-state" style="padding-top:24px;">No reservations found</td></tr>`;
+    body.innerHTML = `<tr><td colspan="11" class="empty-state" style="padding-top:24px;">No reservations found</td></tr>`;
     return;
   }
 
@@ -516,20 +533,24 @@ function renderReservationsTable(rows) {
     const notes = r.notes
       ? (hasAllergyFlag(r.notes) ? allergyBadge() + esc(r.notes).slice(0,35) : esc(r.notes).slice(0,35))
       : '<span style="color:var(--muted)">—</span>';
-    const guestArg = `'${r.customer_id ?? ''}','${(r.customer_phone || '').replace(/'/g, "\\'")}'`;
+    const guestArg = `'${r.customer_id ?? ''}','${(r.customer_phone || '').replace(/'/g, "\\'")}','${esc(r.customer_name ?? '').replace(/'/g, "\\'")}'`;
+    const tableName = r.restaurant_tables?.table_name ?? '—';
     return `<tr>
       <td class="td-time">${fmtTime(r.time)}</td>
       <td class="td-guest"><span class="guest-link" onclick="openGuestProfile(${guestArg})">${esc(r.customer_name)}</span>${noShowFlagHTML(r)}</td>
-      <td class="td-muted">${esc(r.customer_phone ?? '—')}</td>
+      <td class="td-muted col-phone">${esc(r.customer_phone ?? '—')}</td>
       <td>${r.party_size}</td>
-      <td class="td-muted">${r.duration_minutes ?? 90} min</td>
-      <td class="td-notes">${notes}</td>
-      <td>${statusBadge(r.status)}</td>
-      <td>${sourceBadge(r.source ?? 'manual')}</td>
+      <td class="td-muted col-table">${esc(tableName)}</td>
+      <td class="td-muted col-duration">${r.duration_minutes ?? 90} min</td>
+      <td class="td-notes" data-fulltext="${esc(r.notes ?? '')}">${notes}</td>
       <td>${reminderCellHTML(r)}</td>
+      <td>${sourceBadge(r.source ?? 'manual')}</td>
+      <td>${statusBadge(r.status)}</td>
       <td class="td-actions">
-        <button class="btn-inline" onclick="openEditModal('${r.id}')">Edit</button>
-        ${r.status !== 'cancelled' ? `<button class="btn-inline danger" onclick="cancelReservation('${r.id}')">Cancel</button>` : ''}
+        <button class="btn-inline arrived" onclick="quickStatus('${r.id}','arrived')">Arrived</button>
+        <button class="btn-inline noshow" onclick="quickStatus('${r.id}','no_show')">No-show</button>
+        <button class="btn-inline edit" onclick="openEditModal('${r.id}')" title="Edit">Edit</button>
+        ${r.status !== 'cancelled' ? `<button class="btn-inline danger" onclick="cancelReservation('${r.id}')" title="Cancel">Cancel</button>` : ''}
       </td>
     </tr>`;
   }).join('');
@@ -564,6 +585,7 @@ async function cancelReservation(id) {
 window.cancelReservation = cancelReservation;
 
 document.getElementById('btn-add-res').addEventListener('click', () => openAddModal());
+document.getElementById('btn-add-res-ov')?.addEventListener('click', () => openAddModal());
 
 /* ─── Reservation modal ─────────────────────────────────────────────────────── */
 async function openAddModal() {
@@ -934,7 +956,7 @@ async function loadTables() {
           <span class="toggle-track"></span>
         </span>
       </label>
-      <button class="btn-inline danger" onclick="deleteTable('${t.id}')">Delete</button>
+      <button class="btn-trash" onclick="deleteTable('${t.id}')" title="Delete" aria-label="Delete"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
     </div>
   `).join('');
 }
@@ -1014,7 +1036,7 @@ document.getElementById('esc-modal-resolve').addEventListener('click', async () 
    ═══════════════════════════════════════════════════════════════════════════ */
 let _activeCustomerId = null;
 
-async function openGuestProfile(customerId, fallbackPhone) {
+async function openGuestProfile(customerId, fallbackPhone, fallbackName) {
   let customer = null;
 
   if (customerId) {
@@ -1030,7 +1052,7 @@ async function openGuestProfile(customerId, fallbackPhone) {
     customer = data;
   }
   if (!customer) {
-    customer = { id: null, name: 'Unknown guest', phone: fallbackPhone, staff_notes: '' };
+    customer = { id: null, name: fallbackName || 'Unknown guest', phone: fallbackPhone, staff_notes: '' };
   }
   _activeCustomerId = customer.id;
 
@@ -1098,7 +1120,7 @@ async function openGuestProfile(customerId, fallbackPhone) {
   } else {
     histBody.innerHTML = history.map(r => `
       <tr>
-        <td>${r.date}</td>
+        <td style="white-space:nowrap;">${fmtDateShort(r.date)}</td>
         <td>${fmtTime(r.time)}</td>
         <td>${r.party_size}</td>
         <td>${statusBadge(r.status)}</td>

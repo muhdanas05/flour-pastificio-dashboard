@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sala Smart MVP</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <!--STYLES-->
 </head>
 <body>
@@ -94,29 +95,45 @@
           <div class="page-title">Overview</div>
           <div class="page-subtitle" id="ov-date-label"></div>
         </div>
+        <button class="btn-primary" id="btn-add-res-ov">+ Add Reservation</button>
       </div>
 
       <!-- Stats -->
       <div class="stats-grid stats-grid-5">
-        <div class="stat-tile">
-          <div class="stat-label">Today's Bookings</div>
+        <div class="stat-tile stat-tile--bookings">
+          <div class="stat-tile-top">
+            <div class="stat-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/><text x="12" y="18" font-family="Inter, sans-serif" font-size="8" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">15</text></svg></div>
+            <div class="stat-label">Today's Bookings</div>
+          </div>
           <div class="stat-value" id="stat-bookings">—</div>
         </div>
-        <div class="stat-tile">
-          <div class="stat-label">Today's Covers</div>
+        <div class="stat-tile stat-tile--covers">
+          <div class="stat-tile-top">
+            <div class="stat-icon-wrap"><span class="stat-emoji">🍽️</span></div>
+            <div class="stat-label">Today's Covers</div>
+          </div>
           <div class="stat-value copper" id="stat-covers">—</div>
         </div>
-        <div class="stat-tile">
-          <div class="stat-label">Available Slots</div>
+        <div class="stat-tile stat-tile--slots">
+          <div class="stat-tile-top">
+            <div class="stat-icon-wrap"><span class="stat-emoji">🪑</span></div>
+            <div class="stat-label">Available Slots</div>
+          </div>
           <div class="stat-value green" id="stat-slots">—</div>
         </div>
-        <div class="stat-tile">
-          <div class="stat-label">Projected Revenue</div>
+        <div class="stat-tile stat-tile--revenue">
+          <div class="stat-tile-top">
+            <div class="stat-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 3h7l-1.5 4h-4z"/><path d="M14 7c3 1.6 5 4.6 5 8a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4c0-3.4 2-6.4 5-8"/><text x="12" y="17.8" font-family="Inter, sans-serif" font-size="8" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">€</text></svg></div>
+            <div class="stat-label">Projected Revenue</div>
+          </div>
           <div class="stat-value copper" id="stat-revenue">—</div>
-          <div class="stat-subtext" id="stat-revenue-meta">@ €35/cover</div>
+          <div class="stat-subtext" id="stat-revenue-meta">€35/cover</div>
         </div>
-        <div class="stat-tile">
-          <div class="stat-label">Open Escalations</div>
+        <div class="stat-tile stat-tile--escalations">
+          <div class="stat-tile-top">
+            <div class="stat-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div class="stat-label">Open Escalations</div>
+          </div>
           <div class="stat-value red" id="stat-escalations">—</div>
         </div>
       </div>
@@ -144,25 +161,11 @@
       <!-- Time-slot occupancy -->
       <div class="card">
         <div class="card-title">Today by Time Slot</div>
-        <div class="slot-list" id="slot-occupancy">
-          <div class="empty-state">No opening hours set for today</div>
+        <div class="slot-chart-wrap">
+          <canvas id="slot-chart"></canvas>
         </div>
-      </div>
-
-      <!-- No-show breakdown -->
-      <div class="card">
-        <div class="card-title">No-show Rate (last 30 days)</div>
-        <div class="noshow-stats" id="noshow-stats">
-          <div class="noshow-stat">
-            <div class="ns-label">Agent bookings</div>
-            <div class="ns-value" id="ns-agent">—</div>
-            <div class="ns-meta" id="ns-agent-meta">&nbsp;</div>
-          </div>
-          <div class="noshow-stat">
-            <div class="ns-label">Manual bookings</div>
-            <div class="ns-value" id="ns-manual">—</div>
-            <div class="ns-meta" id="ns-manual-meta">&nbsp;</div>
-          </div>
+        <div class="slot-list" id="slot-occupancy" style="display:none">
+          <div class="empty-state">No opening hours set for today</div>
         </div>
       </div>
 
@@ -179,16 +182,43 @@
                 <th>Time</th>
                 <th>Guest</th>
                 <th>Covers</th>
-                <th>Duration</th>
+                <th class="col-table">Table</th>
+                <th class="col-duration">Duration</th>
                 <th>Notes</th>
+                <th>Reminder</th>
+                <th>Source</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody id="ov-res-body">
-              <tr><td colspan="7" class="empty-state">Loading…</td></tr>
+              <tr><td colspan="10" class="empty-state">Loading…</td></tr>
             </tbody>
           </table>
+        </div>
+        <div class="see-all-wrap" id="ov-see-all" style="display:none;">
+          <button class="btn-see-all" onclick="navigate('reservations')">See all reservations &rarr;</button>
+        </div>
+      </div>
+
+      <!-- No-show breakdown -->
+      <div class="card">
+        <div class="card-title">No-show Rate (last 30 days)</div>
+        <div class="noshow-stats" id="noshow-stats">
+          <div class="noshow-stat noshow-stat--agent">
+            <div class="ns-figure">
+              <div class="ns-value" id="ns-agent">—</div>
+              <div class="ns-meta" id="ns-agent-meta">&nbsp;</div>
+            </div>
+            <div class="ns-label">Agent bookings</div>
+          </div>
+          <div class="noshow-stat noshow-stat--manual">
+            <div class="ns-figure">
+              <div class="ns-value" id="ns-manual">—</div>
+              <div class="ns-meta" id="ns-manual-meta">&nbsp;</div>
+            </div>
+            <div class="ns-label">Manual bookings</div>
+          </div>
         </div>
       </div>
 
@@ -213,8 +243,10 @@
           <span class="date-nav-label" id="res-date-label">Today</span>
           <button class="date-nav-arrow" id="res-next">&#8594;</button>
           <button class="btn-today" id="res-today-btn">Today</button>
-          <label for="res-date-input" class="btn-cal-icon" title="Pick date">&#128197;</label>
-          <input type="date" id="res-date-input">
+          <div class="btn-cal-wrap">
+            <button class="btn-today" id="res-cal-btn">Calendar</button>
+            <input type="date" id="res-date-input">
+          </div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
           <div class="filter-tabs" id="res-filter-tabs" style="margin-bottom:0;">
@@ -228,25 +260,26 @@
         </div>
       </div>
 
-      <div class="card" style="padding:0 24px 24px;">
+      <div class="card">
         <div class="tbl-wrap">
           <table>
             <thead>
               <tr>
                 <th>Time</th>
                 <th>Guest</th>
-                <th>Phone</th>
+                <th class="col-phone">Phone</th>
                 <th>Covers</th>
-                <th>Duration</th>
+                <th class="col-table">Table</th>
+                <th class="col-duration">Duration</th>
                 <th>Notes</th>
-                <th>Status</th>
-                <th>Source</th>
                 <th>Reminder</th>
+                <th>Source</th>
+                <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody id="res-body">
-              <tr><td colspan="10" class="empty-state" style="padding-top:24px;">Loading…</td></tr>
+              <tr><td colspan="11" class="empty-state" style="padding-top:24px;">Loading…</td></tr>
             </tbody>
           </table>
         </div>
@@ -261,8 +294,10 @@
           <span class="date-nav-label" id="calls-date-label">Today</span>
           <button class="date-nav-arrow" id="calls-next">&#8594;</button>
           <button class="btn-today" id="calls-today-btn">Today</button>
-          <label for="calls-date-input" class="btn-cal-icon" title="Pick date">&#128197;</label>
-          <input type="date" id="calls-date-input">
+          <div class="btn-cal-wrap">
+            <button class="btn-today" id="calls-cal-btn">Calendar</button>
+            <input type="date" id="calls-date-input">
+          </div>
         </div>
         <div class="filter-tabs" id="calls-filter-tabs" style="margin-bottom:0;">
           <button class="filter-tab active" data-filter="all">All</button>
@@ -274,13 +309,13 @@
         </div>
       </div>
 
-      <div class="card" style="padding:0 24px 24px;">
+      <div class="card">
         <div class="tbl-wrap">
           <table>
             <thead>
               <tr>
                 <th>Time</th>
-                <th>Duration</th>
+                <th class="col-duration">Duration</th>
                 <th>Outcome</th>
                 <th>Linked Reservation</th>
                 <th>Actions</th>
@@ -303,98 +338,104 @@
         </div>
       </div>
 
-      <!-- Restaurant info -->
-      <div class="card">
+      <div class="card settings-info-card">
         <div class="card-title">Restaurant Info</div>
-        <div class="settings-row">
-          <label>Name</label>
-          <input type="text" id="s-name">
-        </div>
-        <div class="settings-row">
-          <label>Address</label>
-          <input type="text" id="s-address">
-        </div>
-        <div class="settings-row">
-          <label>Phone</label>
-          <input type="tel" id="s-phone">
-        </div>
-        <div class="settings-row">
-          <label>Timezone</label>
-          <input type="text" id="s-timezone" placeholder="Europe/Rome">
-        </div>
-        <div class="settings-row">
-          <label>Mode</label>
-          <div class="mode-toggle">
-            <button class="mode-btn active" id="mode-seats" data-mode="seats">Seats</button>
-            <button class="mode-btn" id="mode-tables" data-mode="tables">Tables</button>
+        <div class="settings-info-grid">
+          <div class="settings-row">
+            <label>Name</label>
+            <input type="text" id="s-name">
           </div>
-        </div>
-        <div class="settings-row">
-          <label>Avg Spend</label>
-          <input type="number" id="s-avg-spend" min="0" step="0.5" placeholder="35.00">
-          <span style="color:var(--muted);font-size:12.5px;white-space:nowrap;">€ per cover</span>
+          <div class="settings-row">
+            <label>Address</label>
+            <input type="text" id="s-address">
+          </div>
+          <div class="settings-row">
+            <label>Phone</label>
+            <input type="tel" id="s-phone">
+          </div>
+          <div class="settings-row">
+            <label>Timezone</label>
+            <input type="text" id="s-timezone" placeholder="Europe/Rome">
+          </div>
+          <div class="settings-row">
+            <label>Mode</label>
+            <div class="mode-toggle">
+              <button class="mode-btn active" id="mode-seats" data-mode="seats">Seats</button>
+              <button class="mode-btn" id="mode-tables" data-mode="tables">Tables</button>
+            </div>
+          </div>
+          <div class="settings-row">
+            <label>Avg Spend</label>
+            <input type="number" id="s-avg-spend" min="0" step="0.5" placeholder="35.00">
+            <span style="color:var(--muted);font-size:12.5px;white-space:nowrap;">€ per cover</span>
+          </div>
         </div>
         <div style="margin-top:16px;">
           <button class="btn-primary" id="btn-save-info">Save Info</button>
         </div>
       </div>
 
-      <!-- Reminders -->
       <div class="card">
         <div class="card-title">Reminders</div>
-        <div class="settings-row">
-          <label>Enabled</label>
-          <label class="toggle-wrap">
-            <span class="toggle">
-              <input type="checkbox" id="s-reminders-enabled">
-              <span class="toggle-track"></span>
-            </span>
-            <span style="font-size:12.5px;color:var(--muted);">Send confirmation reminders before booking</span>
-          </label>
-        </div>
-        <div class="settings-row">
-          <label>Hours Before</label>
-          <input type="number" id="s-reminder-hours" min="1" max="72" value="24">
-          <span style="color:var(--muted);font-size:12.5px;white-space:nowrap;">hours before booking</span>
+        <div class="settings-info-grid">
+          <div class="settings-row">
+            <label>Enabled</label>
+            <label class="toggle-wrap">
+              <span class="toggle">
+                <input type="checkbox" id="s-reminders-enabled">
+                <span class="toggle-track"></span>
+              </span>
+              <span style="font-size:12.5px;color:var(--muted);white-space:nowrap;text-transform:none;letter-spacing:0;">send confirmation reminders before booking</span>
+            </label>
+          </div>
+          <div class="settings-row">
+            <label style="white-space:nowrap;width:auto;">hours before booking</label>
+            <input type="number" id="s-reminder-hours" min="1" max="72" value="24" style="width:60px;">
+          </div>
         </div>
         <div style="margin-top:16px;">
           <button class="btn-primary" id="btn-save-reminders">Save Reminders</button>
         </div>
       </div>
 
-      <!-- Capacity per day -->
-      <div class="card">
-        <div class="card-title">Capacity by Day</div>
-        <div class="day-capacity-grid" id="day-cap-grid"></div>
-        <div class="cap-editor" id="cap-editor" style="display:none;">
-          <label id="cap-editor-label">Mon</label>
-          <input type="range" id="settings-cap-slider" min="0" max="300" step="1" value="80">
-          <span class="cap-val" id="settings-cap-val">80</span>
-          <button class="btn-ghost" id="btn-save-day-cap">Save</button>
+      <div class="settings-cols">
+        <!-- Colonna sinistra -->
+        <div class="settings-col">
+          <div class="card">
+            <div class="card-title">Opening Hours</div>
+            <div class="oh-grid" id="oh-grid"></div>
+            <div style="margin-top:16px;">
+              <button class="btn-primary" id="btn-save-oh">Save All Hours</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Colonna destra -->
+        <div class="settings-col">
+          <div class="card">
+            <div class="card-title">Capacity by Day</div>
+            <div class="day-capacity-grid" id="day-cap-grid"></div>
+            <div class="cap-editor" id="cap-editor" style="display:none;">
+              <label id="cap-editor-label">Mon</label>
+              <input type="range" id="settings-cap-slider" min="0" max="300" step="1" value="80">
+              <span class="cap-val" id="settings-cap-val">80</span>
+              <button class="btn-ghost" id="btn-save-day-cap">Save</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Closed Dates</div>
+            <div class="closure-list" id="closure-list"></div>
+            <div class="add-row">
+              <input type="date" id="closure-date-input">
+              <input type="text" id="closure-reason-input" placeholder="Reason (optional)" style="max-width:200px;">
+              <button class="btn-primary" id="btn-add-closure">Add</button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Opening hours -->
-      <div class="card">
-        <div class="card-title">Opening Hours</div>
-        <div class="oh-grid" id="oh-grid"></div>
-        <div style="margin-top:16px;">
-          <button class="btn-primary" id="btn-save-oh">Save All Hours</button>
-        </div>
-      </div>
-
-      <!-- Closed dates -->
-      <div class="card">
-        <div class="card-title">Closed Dates</div>
-        <div class="closure-list" id="closure-list"></div>
-        <div class="add-row">
-          <input type="date" id="closure-date-input">
-          <input type="text" id="closure-reason-input" placeholder="Reason (optional)" style="max-width:200px;">
-          <button class="btn-primary" id="btn-add-closure">Add</button>
-        </div>
-      </div>
-
-      <!-- Tables (tables mode only) -->
+      <!-- Tables a tutta larghezza (tables mode only) -->
       <div class="card" id="tables-card" style="display:none;">
         <div class="card-title">Tables</div>
         <div class="table-list" id="tables-list"></div>
@@ -605,5 +646,239 @@
 <div class="save-msg" id="save-msg"></div>
 
 <!--SCRIPTS-->
+<script>
+(function () {
+  let slotChart = null;
+
+  /* ── Slot chart ────────────────────────────────────────────────── */
+  function buildSlotChart() {
+    const rows = document.querySelectorAll('#slot-occupancy .slot-row');
+    const canvas = document.getElementById('slot-chart');
+    if (!canvas) return;
+
+    if (!rows.length) {
+      if (slotChart) { slotChart.destroy(); slotChart = null; }
+      canvas.style.display = 'none';
+      return;
+    }
+
+    canvas.style.display = 'block';
+    const labels = [], values = [], levels = [], coversArr = [], capsArr = [];
+    rows.forEach(row => {
+      const label = row.querySelector('.slot-time')?.textContent?.trim() ?? '';
+      const fill  = row.querySelector('.slot-bar-fill');
+      const pct   = fill ? parseFloat(fill.style.width) || 0 : 0;
+      const cls   = fill?.className ?? '';
+      const meta  = row.querySelector('.slot-meta')?.textContent ?? '';
+      const m     = meta.match(/(\d+)\s*\/\s*(\d+)/);
+      labels.push(label);
+      values.push(pct);
+      coversArr.push(m ? +m[1] : 0);
+      capsArr.push(m ? +m[2] : 0);
+      if (cls.includes('over'))      levels.push('over');
+      else if (cls.includes('full')) levels.push('full');
+      else if (cls.includes('busy')) levels.push('busy');
+      else                           levels.push('quiet');
+    });
+
+    // Colore pieno per livello di occupazione
+    // Gradiente verticale (glassato) con gli stessi colori delle card sopra:
+    // verde = Available Slots, oro = Projected Revenue, bordeaux = Open Escalations
+    // [colore pieno base, versione più chiara in alto] — sfuma SOLO verso il chiaro
+    const STOPS = {
+      over:  ['#b8453d', '#d7837c'],   // bordeaux ammorbidito
+      full:  ['#edc24a', '#f6d77f'],   // giallo ammorbidito
+      busy:  ['#f1cf6e', '#f9e4a2'],   // giallo più chiaro
+      quiet: ['#46a774', '#7cc89f'],   // verde ammorbidito
+    };
+    const barFill = ctx => {
+      const area = ctx.chart.chartArea;
+      const s = STOPS[levels[ctx.dataIndex]] || STOPS.quiet;
+      if (!area) return s[0];
+      const g = ctx.chart.ctx.createLinearGradient(0, area.bottom, 0, area.top);
+      g.addColorStop(0, s[0]);   // base = colore pieno
+      g.addColorStop(1, s[1]);   // alto = più chiaro (glassato verso il chiaro)
+      return g;
+    };
+
+    // Etichetta percentuale sopra ogni barra
+    const valueLabels = {
+      id: 'valueLabels',
+      afterDatasetsDraw(chart) {
+        const { ctx } = chart;
+        const meta = chart.getDatasetMeta(0);
+        ctx.save();
+        ctx.font = '700 10.5px Inter, system-ui, sans-serif';
+        ctx.fillStyle = '#6B5F50';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        meta.data.forEach((bar, i) => {
+          if (!values[i]) return;
+          ctx.fillText(values[i] + '%', bar.x, bar.y - 6);
+        });
+        ctx.restore();
+      }
+    };
+
+    if (slotChart) slotChart.destroy();
+    slotChart = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: barFill,
+          hoverBackgroundColor: barFill,
+          borderRadius: 7,
+          borderSkipped: false,
+          barPercentage: 0.9,
+          categoryPercentage: 0.8,
+        }]
+      },
+      plugins: [valueLabels],
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { top: 20 } },
+        animation: { duration: 750, easing: 'easeOutQuart' },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(28,24,20,0.92)',
+            titleColor: '#fff',
+            bodyColor: '#EFE6D6',
+            padding: 11,
+            cornerRadius: 9,
+            displayColors: false,
+            titleFont: { family: 'Inter', weight: '700', size: 12.5 },
+            bodyFont: { family: 'Inter', size: 12 },
+            callbacks: {
+              title: items => items[0].label,
+              label: ctx => `${coversArr[ctx.dataIndex]} / ${capsArr[ctx.dataIndex]} covers · ${ctx.raw}%`
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            border: { display: false },
+            ticks: { font: { family: 'Inter', size: 11.5 }, color: '#9A8B79' }
+          },
+          y: {
+            min: 0, max: 100,
+            border: { display: false },
+            grid: { color: 'rgba(28,24,20,0.05)', drawTicks: false },
+            ticks: {
+              stepSize: 25,
+              callback: v => v + '%',
+              font: { family: 'Inter', size: 10.5 },
+              color: '#B0A08C',
+              padding: 8
+            }
+          }
+        }
+      }
+    });
+  }
+
+  const slotObs = new MutationObserver(buildSlotChart);
+  const slotEl  = document.getElementById('slot-occupancy');
+  if (slotEl) slotObs.observe(slotEl, { childList: true });
+
+  /* ── Next reservation banner ───────────────────────────────────── */
+  function updateNextRes() {
+    const banner = document.getElementById('next-res-banner');
+    if (!banner) return;
+    const rows  = document.querySelectorAll('#ov-res-body tr');
+    const now   = new Date();
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+
+    let nextRow = null, nextMin = Infinity;
+    rows.forEach(row => {
+      const tc = row.querySelector('.td-time');
+      if (!tc) return;
+      const parts = tc.textContent.trim().split(':');
+      const totalMin = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+      if (totalMin > nowMin && totalMin < nextMin) {
+        nextMin = totalMin; nextRow = row;
+      }
+    });
+
+    if (!nextRow) { banner.style.display = 'none'; return; }
+    banner.style.display = 'flex';
+
+    const timeText  = nextRow.querySelector('.td-time')?.textContent?.trim() ?? '—';
+    const guestName = nextRow.querySelector('.guest-link')?.textContent?.trim()
+                   ?? nextRow.querySelector('.td-guest')?.textContent?.trim() ?? '—';
+    const covers    = nextRow.cells[2]?.textContent?.trim() ?? '—';
+    const dur       = nextRow.cells[3]?.textContent?.trim() ?? '';
+    const diff      = nextMin - nowMin;
+    const countdown = diff <= 60
+      ? `in ${diff} min`
+      : `in ${Math.floor(diff / 60)}h ${diff % 60}min`;
+
+    document.getElementById('next-res-time').textContent    = timeText;
+    document.getElementById('next-res-name').textContent    = guestName;
+    document.getElementById('next-res-details').textContent = `${covers} covers · ${dur}`;
+    document.getElementById('next-res-countdown').textContent = countdown;
+  }
+
+  const resObs = new MutationObserver(updateNextRes);
+  const resEl  = document.getElementById('ov-res-body');
+  if (resEl) resObs.observe(resEl, { childList: true });
+  setInterval(updateNextRes, 60000);
+
+  document.getElementById('res-cal-btn')?.addEventListener('click', () => {
+    document.getElementById('res-date-input').showPicker();
+  });
+  document.getElementById('calls-cal-btn')?.addEventListener('click', () => {
+    document.getElementById('calls-date-input').showPicker();
+  });
+
+  // Notes tooltip
+  const notesTooltip = document.createElement('div');
+  notesTooltip.className = 'notes-tooltip';
+  document.body.appendChild(notesTooltip);
+
+  function addNotesData() {
+    document.querySelectorAll('#res-body .td-notes, #ov-res-body .td-notes').forEach(cell => {
+      const allergyEl = cell.querySelector('.allergy-flag');
+      const fullText  = (cell.dataset.fulltext || '').trim();
+      if (!fullText || fullText === '—') { delete cell.dataset.notes; delete cell.dataset.clipped; return; }
+      const allergyLabel = allergyEl ? allergyEl.textContent.trim() : '';
+      if (allergyEl) {
+        cell.dataset.notes = allergyLabel + '\n' + fullText;
+      } else {
+        cell.dataset.notes = fullText;
+      }
+      // Anteprima visibile (testo nella cella senza l'etichetta allergia)
+      let visible = cell.textContent.trim();
+      if (allergyLabel) visible = visible.replace(allergyLabel, '').trim();
+      cell.dataset.clipped = fullText.length > visible.length ? '1' : '0';
+    });
+  }
+  ['res-body', 'ov-res-body'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) new MutationObserver(addNotesData).observe(el, { childList: true });
+  });
+
+  document.addEventListener('mouseover', e => {
+    const cell = e.target.closest('.td-notes[data-notes]');
+    if (!cell) { notesTooltip.style.display = 'none'; return; }
+    const clipped = cell.dataset.clipped === '1' || cell.scrollWidth > cell.offsetWidth;
+    if (!clipped) { notesTooltip.style.display = 'none'; return; }
+    notesTooltip.textContent = cell.dataset.notes;
+    notesTooltip.style.display = 'block';
+    const rect = cell.getBoundingClientRect();
+    const tipH = notesTooltip.offsetHeight;
+    const top  = rect.top + (rect.height / 2) - (tipH / 2);
+    notesTooltip.style.left = Math.min(rect.left, window.innerWidth - 320) + 'px';
+    notesTooltip.style.top  = Math.max(8, top) + 'px';
+  });
+  document.addEventListener('mouseover', e => {
+    if (!e.target.closest('.td-notes')) notesTooltip.style.display = 'none';
+  });
+})();
+</script>
 </body>
 </html>
