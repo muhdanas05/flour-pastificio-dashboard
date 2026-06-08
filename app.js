@@ -292,6 +292,9 @@ async function loadOverview() {
   document.getElementById('stat-escalations').textContent = escs.length;
   updateRevenueTile(bookedCovers);
 
+  // Availability by turn
+  renderTurnsOverview(activeRes);
+
   // Time-slot occupancy
   renderTimeSlotOccupancy(activeRes, todayOH, todayCapacity);
 
@@ -727,6 +730,98 @@ function timeToMins(t) {
   return h * 60 + m;
 }
 
+/* ─── Service Turns ─────────────────────────────────────────────────────────── */
+function turnsKey() { return `turns_${restaurant?.id}`; }
+
+function getTurns() {
+  if (!restaurant) return [];
+  try { return JSON.parse(localStorage.getItem(turnsKey()) ?? '[]') ?? []; }
+  catch { return []; }
+}
+
+function saveTurnsLocal(turns) {
+  localStorage.setItem(turnsKey(), JSON.stringify(turns));
+}
+
+function renderTurnsOverview(reservations) {
+  const body = document.getElementById('turns-overview-body');
+  if (!body) return;
+  const turns = getTurns();
+
+  if (!turns.length) {
+    body.innerHTML = `<div class="empty-state">No turns configured — <button class="link-btn" onclick="navigate('settings')">add turns in Settings</button></div>`;
+    return;
+  }
+
+  body.innerHTML = turns.map(t => {
+    const booked = reservations
+      .filter(r => {
+        const rMins = timeToMins(r.time.slice(0, 5));
+        return rMins >= timeToMins(t.start) && rMins < timeToMins(t.end);
+      })
+      .reduce((s, r) => s + (r.party_size ?? 0), 0);
+    const avail = Math.max(0, t.capacity - booked);
+    const pct   = t.capacity > 0 ? Math.min(100, Math.round(booked / t.capacity * 100)) : 0;
+    const level = pct >= 100 ? 'over' : pct >= 75 ? 'full' : pct >= 50 ? 'busy' : 'quiet';
+    const levelLabel = pct >= 100 ? 'Full' : pct >= 75 ? 'Almost full' : pct >= 50 ? 'Filling up' : 'Available';
+    return `<div class="turn-row">
+      <span class="turn-time">${t.start} – ${t.end}</span>
+      <div class="turn-bar-wrap">
+        <div class="turn-bar-fill level-${level}" style="width:${pct}%"></div>
+      </div>
+      <div class="turn-stats">
+        <strong>${booked}</strong> / ${t.capacity}
+        <span class="turn-avail level-${level}">${avail} left</span>
+      </div>
+      <span class="turn-badge level-${level}">${levelLabel}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderTurnsSettings() {
+  const list = document.getElementById('turns-list');
+  if (!list) return;
+  const turns = getTurns();
+
+  if (!turns.length) {
+    list.innerHTML = `<div class="empty-state">No turns configured yet</div>`;
+    return;
+  }
+  list.innerHTML = turns.map((t, i) => `
+    <div class="turns-item">
+      <span class="turns-item-time">${t.start} – ${t.end}</span>
+      <span class="turns-item-cap">${t.capacity} seats</span>
+      <button class="btn-trash" onclick="deleteTurn(${i})" title="Remove"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+    </div>
+  `).join('');
+}
+
+window.deleteTurn = function(index) {
+  const turns = getTurns();
+  turns.splice(index, 1);
+  saveTurnsLocal(turns);
+  renderTurnsSettings();
+  showToast('Turn removed');
+};
+
+document.getElementById('btn-add-turn')?.addEventListener('click', () => {
+  const start = document.getElementById('new-turn-start').value;
+  const end   = document.getElementById('new-turn-end').value;
+  const cap   = parseInt(document.getElementById('new-turn-cap').value, 10);
+  if (!start || !end)   { showToast('Select start and end times'); return; }
+  if (!cap || cap < 1)  { showToast('Enter a valid seat count'); return; }
+  if (timeToMins(start) >= timeToMins(end)) { showToast('End time must be after start time'); return; }
+  const turns = getTurns();
+  turns.push({ start, end, capacity: cap });
+  turns.sort((a, b) => timeToMins(a.start) - timeToMins(b.start));
+  saveTurnsLocal(turns);
+  document.getElementById('new-turn-start').value = '';
+  document.getElementById('new-turn-end').value   = '';
+  document.getElementById('new-turn-cap').value   = '';
+  renderTurnsSettings();
+  showToast('Turn added');
+});
+
 /* ─── Settings view ─────────────────────────────────────────────────────────── */
 async function loadSettings() {
   if (!restaurant) return;
@@ -762,6 +857,9 @@ async function loadSettings() {
 
   // Tables (if tables mode)
   if (mode === 'tables') await loadTables();
+
+  // Service turns
+  renderTurnsSettings();
 }
 
 // Mode toggle

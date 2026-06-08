@@ -158,6 +158,14 @@
         </div>
       </div>
 
+      <!-- Availability by Turn -->
+      <div class="card" id="turns-overview-card">
+        <div class="card-title">Availability by Turn</div>
+        <div id="turns-overview-body">
+          <div class="empty-state">No turns configured — add turns in Settings</div>
+        </div>
+      </div>
+
       <!-- Time-slot occupancy -->
       <div class="card">
         <div class="card-title">Today by Time Slot</div>
@@ -432,6 +440,21 @@
               <button class="btn-primary" id="btn-add-closure">Add</button>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Service Turns -->
+      <div class="card">
+        <div class="card-title">Service Turns</div>
+        <div class="turns-list" id="turns-list">
+          <div class="empty-state">No turns configured yet</div>
+        </div>
+        <div class="add-row" style="margin-top:14px;flex-wrap:wrap;gap:8px;">
+          <input type="time" id="new-turn-start">
+          <span class="oh-sep">–</span>
+          <input type="time" id="new-turn-end">
+          <input type="number" id="new-turn-cap" placeholder="Seats" min="1" style="max-width:80px;">
+          <button class="btn-primary" id="btn-add-turn">Add Turn</button>
         </div>
       </div>
 

@@ -1558,6 +1558,95 @@ table.show-table-col:has(#ov-res-body) td:nth-child(9) { padding-left: 6px; padd
 }
 .slot-meta strong { color: var(--ink); }
 
+/* ── Service Turns — overview card ──────────────────────────────────────────── */
+.turn-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(160,123,63,0.08);
+  font-size: 13px;
+}
+.turn-row:last-child { border-bottom: none; }
+.turn-time {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  width: 130px;
+  flex-shrink: 0;
+}
+.turn-bar-wrap {
+  flex: 1;
+  height: 10px;
+  background: rgba(160,123,63,0.12);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.turn-bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.4s ease;
+}
+.turn-bar-fill.level-quiet { background: #46a774; }
+.turn-bar-fill.level-busy  { background: #edc24a; }
+.turn-bar-fill.level-full  { background: #e09533; }
+.turn-bar-fill.level-over  { background: var(--red); }
+.turn-stats {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.turn-stats strong { color: var(--ink); }
+.turn-avail { font-weight: 600; }
+.turn-avail.level-quiet { color: #46a774; }
+.turn-avail.level-busy  { color: #b08a1a; }
+.turn-avail.level-full  { color: #e09533; }
+.turn-avail.level-over  { color: var(--red); }
+.turn-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.turn-badge.level-quiet { background: rgba(70,167,116,0.12); color: #46a774; }
+.turn-badge.level-busy  { background: rgba(237,194,74,0.14); color: #b08a1a; }
+.turn-badge.level-full  { background: rgba(224,149,51,0.14); color: #e09533; }
+.turn-badge.level-over  { background: rgba(195,66,60,0.12);  color: var(--red); }
+
+/* ── Service Turns — settings list ──────────────────────────────────────────── */
+.turns-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+.turns-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+}
+.turns-item-time { font-weight: 600; color: var(--ink); flex: 1; }
+.turns-item-cap  { color: var(--muted); font-size: 12px; }
+
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--copper);
+  font-size: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  font-family: inherit;
+}
+
 /* ── No-show flag ────────────────────────────────────────────────────────── */
 .noshow-flag {
   display: inline-block;
