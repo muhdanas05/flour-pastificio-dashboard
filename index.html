@@ -150,24 +150,37 @@
         </div>
       </div>
 
-      <!-- Capacity card -->
-      <div class="card">
-        <div class="card-title" id="ov-cap-title">Today's Capacity</div>
-        <div class="capacity-block">
-          <div class="capacity-row">
-            <span><strong id="cap-booked">0</strong> covers booked</span>
-            <span>of <strong id="cap-total">0</strong> available</span>
-          </div>
-          <div class="progress-bar">
-            <div class="progress-fill" id="cap-fill" style="width:0%"></div>
-          </div>
-          <div class="slider-row">
-            <label for="capacity-slider">Today's capacity</label>
-            <input type="range" id="capacity-slider" min="0" max="300" step="1" value="80">
-            <span class="slider-val" id="cap-slider-val">80</span>
-            <button id="btn-save-capacity">Save as default</button>
+      <!-- Capacity + Upcoming side by side -->
+      <div class="capacity-upcoming-grid">
+
+        <!-- Capacity card -->
+        <div class="card">
+          <div class="card-title" id="ov-cap-title">Today's Capacity</div>
+          <div class="capacity-block">
+            <div class="capacity-row">
+              <span><strong id="cap-booked">0</strong> covers booked</span>
+              <span>of <strong id="cap-total">0</strong> available</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="cap-fill" style="width:0%"></div>
+            </div>
+            <div class="slider-row">
+              <label for="capacity-slider">Today's capacity</label>
+              <input type="range" id="capacity-slider" min="0" max="300" step="1" value="80">
+              <span class="slider-val" id="cap-slider-val">80</span>
+              <button id="btn-save-capacity">Save as default</button>
+            </div>
           </div>
         </div>
+
+        <!-- Upcoming reservations card -->
+        <div class="card upcoming-card">
+          <div class="card-title">Upcoming Reservations <span class="card-title-muted">(next 7 days)</span></div>
+          <div id="upcoming-body" class="upcoming-scroll">
+            <div class="empty-state">Loading…</div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Availability by Turn -->
@@ -221,13 +234,6 @@
         </div>
       </div>
 
-      <!-- Upcoming reservations (next 7 days) -->
-      <div class="card">
-        <div class="card-title">Upcoming Reservations <span class="card-title-muted">(next 7 days)</span></div>
-        <div id="upcoming-body">
-          <div class="empty-state">Loading…</div>
-        </div>
-      </div>
 
       <!-- No-show breakdown -->
       <div class="card">

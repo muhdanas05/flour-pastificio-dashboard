@@ -1813,6 +1813,26 @@ table.show-table-col:has(#ov-res-body) td:nth-child(9) { padding-left: 6px; padd
   .modal-overlay-base > div { max-width: 100%; border-radius: var(--radius) var(--radius) 0 0; }
 }
 
+/* ── Capacity + Upcoming side-by-side grid ──────────────────────────────────── */
+.capacity-upcoming-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+.upcoming-card { display: flex; flex-direction: column; }
+.upcoming-scroll {
+  overflow-y: auto;
+  max-height: 160px;
+  padding-right: 4px;
+}
+.upcoming-scroll::-webkit-scrollbar { width: 4px; }
+.upcoming-scroll::-webkit-scrollbar-track { background: transparent; }
+.upcoming-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+@media (max-width: 700px) {
+  .capacity-upcoming-grid { grid-template-columns: 1fr; }
+}
+
 /* ── Upcoming reservations ─────────────────────────────────────────────────── */
 .upcoming-group { margin-bottom: 10px; }
 .upcoming-group:last-child { margin-bottom: 0; }
