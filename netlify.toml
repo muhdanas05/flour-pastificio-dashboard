@@ -3,4 +3,4 @@
   publish = "dist"
 
 [build.environment]
-  SECRETS_SCAN_OMIT_PATHS = "n8n_supabase.json,n8n.json"
+  SECRETS_SCAN_OMIT_PATHS = "n8n_supabase.json,n8n.json,context.md,pastchat.md"
