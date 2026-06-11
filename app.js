@@ -235,25 +235,105 @@ function syncOvDateNav() {
   const today = isoDate(new Date());
   document.getElementById('ov-date-label').textContent =
     fmtDate(ovDate) + (ovDate === today ? ' — Today' : '');
-  const inp = document.getElementById('ov-date-input');
-  if (inp) inp.value = ovDate;
 }
 
 function ovChangeDate(n) {
   ovDate = n === 0 ? isoDate(new Date()) : addDays(ovDate, n);
-  todayCapacity = 0;  // reset so new date picks capacity from opening_hours
+  todayCapacity = 0;
   loadOverview();
 }
+
+/* ── Custom calendar picker ───────────────────────────────────────────────── */
+let calYear, calMonth;
+
+function openCalPicker() {
+  const d = new Date(ovDate + 'T00:00:00');
+  calYear  = d.getFullYear();
+  calMonth = d.getMonth();
+  renderCalPicker();
+  document.getElementById('ov-cal-popup').classList.add('open');
+}
+
+function renderCalPicker() {
+  const MONTHS = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  document.getElementById('cal-mo-label').textContent = MONTHS[calMonth] + ' ' + calYear;
+
+  const today  = isoDate(new Date());
+  const grid   = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+
+  // First day of month (shift so Monday = col 0)
+  const firstDow = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
+  const startOffset = (firstDow + 6) % 7; // Mon-based offset
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const daysInPrev  = new Date(calYear, calMonth, 0).getDate();
+
+  // Prev-month filler
+  for (let i = startOffset - 1; i >= 0; i--) {
+    const el = document.createElement('div');
+    el.className = 'cal-day other-month';
+    el.textContent = daysInPrev - i;
+    grid.appendChild(el);
+  }
+
+  // Current month days
+  for (let d = 1; d <= daysInMonth; d++) {
+    const iso = calYear + '-' +
+      String(calMonth + 1).padStart(2,'0') + '-' +
+      String(d).padStart(2,'0');
+    const el = document.createElement('div');
+    el.className = 'cal-day';
+    if (iso === today)  el.classList.add('today');
+    if (iso === ovDate) el.classList.add('selected');
+    el.textContent = d;
+    el.addEventListener('click', () => {
+      ovDate = iso;
+      todayCapacity = 0;
+      syncOvDateNav();
+      loadOverview();
+      document.getElementById('ov-cal-popup').classList.remove('open');
+    });
+    grid.appendChild(el);
+  }
+
+  // Next-month filler to complete grid
+  const filled = startOffset + daysInMonth;
+  const remainder = filled % 7 === 0 ? 0 : 7 - (filled % 7);
+  for (let d = 1; d <= remainder; d++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day other-month';
+    el.textContent = d;
+    grid.appendChild(el);
+  }
+}
+
+document.getElementById('ov-cal-btn').addEventListener('click', e => {
+  e.stopPropagation();
+  const popup = document.getElementById('ov-cal-popup');
+  if (popup.classList.contains('open')) { popup.classList.remove('open'); }
+  else { openCalPicker(); }
+});
+document.getElementById('cal-prev-mo').addEventListener('click', e => {
+  e.stopPropagation();
+  calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalPicker();
+});
+document.getElementById('cal-next-mo').addEventListener('click', e => {
+  e.stopPropagation();
+  calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalPicker();
+});
+document.addEventListener('click', e => {
+  const popup = document.getElementById('ov-cal-popup');
+  if (popup && !popup.contains(e.target) && e.target.id !== 'ov-cal-btn') {
+    popup.classList.remove('open');
+  }
+});
 
 document.getElementById('ov-prev').addEventListener('click', () => ovChangeDate(-1));
 document.getElementById('ov-next').addEventListener('click', () => ovChangeDate(+1));
 document.getElementById('ov-today-btn').addEventListener('click', () => ovChangeDate(0));
-document.getElementById('ov-cal-btn').addEventListener('click', () => {
-  document.getElementById('ov-date-input').showPicker?.();
-});
-document.getElementById('ov-date-input').addEventListener('change', e => {
-  if (e.target.value) { ovDate = e.target.value; todayCapacity = 0; syncOvDateNav(); loadOverview(); }
-});
 
 /* ─── Overview ─────────────────────────────────────────────────────────────── */
 async function loadOverview() {

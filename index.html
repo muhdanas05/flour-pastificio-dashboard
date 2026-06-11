@@ -105,7 +105,17 @@
           <button class="btn-today" id="ov-today-btn">Today</button>
           <div class="btn-cal-wrap">
             <button class="btn-today" id="ov-cal-btn">Calendar</button>
-            <input type="date" id="ov-date-input">
+            <div class="cal-popup" id="ov-cal-popup">
+              <div class="cal-header">
+                <button class="cal-nav-btn" id="cal-prev-mo">&#8249;</button>
+                <span id="cal-mo-label"></span>
+                <button class="cal-nav-btn" id="cal-next-mo">&#8250;</button>
+              </div>
+              <div class="cal-days-header">
+                <span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span><span>Su</span>
+              </div>
+              <div class="cal-grid" id="cal-grid"></div>
+            </div>
           </div>
         </div>
       </div>
