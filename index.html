@@ -93,9 +93,21 @@
       <div class="page-header">
         <div>
           <div class="page-title">Overview</div>
-          <div class="page-subtitle" id="ov-date-label"></div>
         </div>
         <button class="btn-primary" id="btn-add-res-ov">+ Add Reservation</button>
+      </div>
+
+      <div class="date-nav-bar">
+        <div class="date-nav">
+          <button class="date-nav-arrow" id="ov-prev">&#8592;</button>
+          <span class="date-nav-label" id="ov-date-label">Today</span>
+          <button class="date-nav-arrow" id="ov-next">&#8594;</button>
+          <button class="btn-today" id="ov-today-btn">Today</button>
+          <div class="btn-cal-wrap">
+            <button class="btn-today" id="ov-cal-btn">Calendar</button>
+            <input type="date" id="ov-date-input">
+          </div>
+        </div>
       </div>
 
       <!-- Stats -->
@@ -140,7 +152,7 @@
 
       <!-- Capacity card -->
       <div class="card">
-        <div class="card-title">Today's Capacity</div>
+        <div class="card-title" id="ov-cap-title">Today's Capacity</div>
         <div class="capacity-block">
           <div class="capacity-row">
             <span><strong id="cap-booked">0</strong> covers booked</span>
@@ -180,7 +192,7 @@
       <!-- Today's reservations -->
       <div class="card">
         <div class="card-title">
-          Today's Reservations
+          <span id="ov-res-card-title">Today's Reservations</span>
           <span class="badge-count" id="ov-res-count">0</span>
         </div>
         <div class="tbl-wrap">
@@ -206,6 +218,14 @@
         </div>
         <div class="see-all-wrap" id="ov-see-all" style="display:none;">
           <button class="btn-see-all" onclick="navigate('reservations')">See all reservations &rarr;</button>
+        </div>
+      </div>
+
+      <!-- Upcoming reservations (next 7 days) -->
+      <div class="card">
+        <div class="card-title">Upcoming Reservations <span class="card-title-muted">(next 7 days)</span></div>
+        <div id="upcoming-body">
+          <div class="empty-state">Loading…</div>
         </div>
       </div>
 

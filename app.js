@@ -86,6 +86,7 @@ const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
 // Initialise resDate here, after isoDate is defined
 resDate = isoDate(new Date());
+let ovDate  = isoDate(new Date());   // overview navigation date
 
 /* ─── Login ────────────────────────────────────────────────────────────────── */
 document.getElementById('btn-login').addEventListener('click', doLogin);
@@ -229,18 +230,51 @@ function noShowFlagHTML(r) {
 function openOverlay(id)  { document.getElementById(id).classList.add('open'); }
 function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
 
+/* ─── Overview date nav ──────────────────────────────────────────────────────── */
+function syncOvDateNav() {
+  const today = isoDate(new Date());
+  document.getElementById('ov-date-label').textContent =
+    fmtDate(ovDate) + (ovDate === today ? ' — Today' : '');
+  const inp = document.getElementById('ov-date-input');
+  if (inp) inp.value = ovDate;
+}
+
+function ovChangeDate(n) {
+  ovDate = n === 0 ? isoDate(new Date()) : addDays(ovDate, n);
+  todayCapacity = 0;  // reset so new date picks capacity from opening_hours
+  loadOverview();
+}
+
+document.getElementById('ov-prev').addEventListener('click', () => ovChangeDate(-1));
+document.getElementById('ov-next').addEventListener('click', () => ovChangeDate(+1));
+document.getElementById('ov-today-btn').addEventListener('click', () => ovChangeDate(0));
+document.getElementById('ov-cal-btn').addEventListener('click', () => {
+  document.getElementById('ov-date-input').showPicker?.();
+});
+document.getElementById('ov-date-input').addEventListener('change', e => {
+  if (e.target.value) { ovDate = e.target.value; todayCapacity = 0; syncOvDateNav(); loadOverview(); }
+});
+
 /* ─── Overview ─────────────────────────────────────────────────────────────── */
 async function loadOverview() {
   if (!restaurant) return;
   const today = isoDate(new Date());
+  const targetDate = ovDate;
 
-  document.getElementById('ov-date-label').textContent = fmtDate(today);
+  syncOvDateNav();
 
-  const [resResult, escResult, ohResult] = await Promise.all([
+  // Update dynamic card titles
+  const isToday = targetDate === today;
+  document.getElementById('ov-cap-title').textContent =
+    isToday ? "Today's Capacity" : `Capacity — ${fmtDate(targetDate)}`;
+  document.getElementById('ov-res-card-title').textContent =
+    isToday ? "Today's Reservations" : `Reservations — ${fmtDate(targetDate)}`;
+
+  const [resResult, escResult, ohResult, turnsResult] = await Promise.all([
     db.from('reservations')
       .select('*, restaurant_tables(table_name)')
       .eq('restaurant_id', restaurant.id)
-      .eq('date', today),
+      .eq('date', targetDate),
     db.from('escalations')
       .select('*')
       .eq('restaurant_id', restaurant.id)
@@ -248,11 +282,16 @@ async function loadOverview() {
     db.from('opening_hours')
       .select('*')
       .eq('restaurant_id', restaurant.id),
+    db.from('restaurant_turns')
+      .select('*')
+      .eq('restaurant_id', restaurant.id)
+      .order('start_time'),
   ]);
 
-  const allRes = resResult.data ?? [];
-  const escs   = escResult.data ?? [];
-  ohData       = ohResult.data ?? [];
+  const allRes    = resResult.data ?? [];
+  const escs      = escResult.data ?? [];
+  ohData          = ohResult.data ?? [];
+  const turnsData = turnsResult.data ?? [];
 
   const activeRes   = allRes.filter(r => r.status !== 'cancelled');
   const bookedCovers = activeRes.reduce((s, r) => s + (r.party_size ?? 0), 0);
@@ -260,9 +299,9 @@ async function loadOverview() {
   // No-show map (used by reservation rows below)
   await loadNoShowMap();
 
-  // Capacity: use slider session value or today's opening_hours default
-  const todayDow = new Date().getDay();
-  const todayOH  = ohData.find(h => h.day_of_week === todayDow);
+  // Capacity: use slider session value or target date's opening_hours default
+  const targetDow = new Date(targetDate + 'T00:00:00').getDay();
+  const todayOH   = ohData.find(h => h.day_of_week === targetDow);
   if (todayCapacity === 0) {
     todayCapacity = todayOH?.max_covers ?? 80;
   }
@@ -292,14 +331,17 @@ async function loadOverview() {
   document.getElementById('stat-escalations').textContent = escs.length;
   updateRevenueTile(bookedCovers);
 
-  // Availability by turn
-  renderTurnsOverview(activeRes);
+  // Availability by turn (turns fetched from Supabase, passed in)
+  renderTurnsOverview(activeRes, turnsData);
 
   // Time-slot occupancy
   renderTimeSlotOccupancy(activeRes, todayOH, todayCapacity);
 
   // No-show breakdown (last 30 days)
   loadNoShowBreakdown();
+
+  // Upcoming reservations (next 7 days from today, not from targetDate)
+  loadUpcomingReservations();
 
   // Today's reservations
   const sorted = [...activeRes].sort((a,b) => a.time.localeCompare(b.time));
@@ -420,6 +462,52 @@ async function loadNoShowBreakdown() {
   document.getElementById('ns-agent-meta').textContent  = `${agentNo} of ${agentTotal} bookings`;
   document.getElementById('ns-manual').textContent      = pct(manualNo, manualTotal);
   document.getElementById('ns-manual-meta').textContent = `${manualNo} of ${manualTotal} bookings`;
+}
+
+/* ─── Upcoming reservations ──────────────────────────────────────────────────── */
+async function loadUpcomingReservations() {
+  if (!restaurant) return;
+  const from = addDays(isoDate(new Date()), 1);
+  const to   = addDays(isoDate(new Date()), 7);
+  const { data } = await db.from('reservations')
+    .select('customer_name, date, time, party_size, status, source')
+    .eq('restaurant_id', restaurant.id)
+    .neq('status', 'cancelled')
+    .gte('date', from)
+    .lte('date', to)
+    .order('date')
+    .order('time')
+    .limit(20);
+
+  const body = document.getElementById('upcoming-body');
+  if (!body) return;
+  const rows = data ?? [];
+  if (rows.length === 0) {
+    body.innerHTML = `<div class="empty-state">No upcoming reservations in the next 7 days</div>`;
+    return;
+  }
+
+  // Group by date
+  const byDate = {};
+  rows.forEach(r => {
+    if (!byDate[r.date]) byDate[r.date] = [];
+    byDate[r.date].push(r);
+  });
+
+  body.innerHTML = Object.entries(byDate).map(([date, res]) => `
+    <div class="upcoming-group">
+      <div class="upcoming-date-label">${fmtDate(date)}</div>
+      ${res.map(r => `
+        <div class="upcoming-row">
+          <span class="upcoming-time">${fmtTime(r.time)}</span>
+          <span class="upcoming-guest">${esc(r.customer_name)}</span>
+          <span class="upcoming-covers">${r.party_size} pax</span>
+          ${sourceBadge(r.source ?? 'manual')}
+          ${statusBadge(r.status)}
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
 }
 
 function updateCapacityUI(booked, capacity) {
@@ -730,23 +818,12 @@ function timeToMins(t) {
   return h * 60 + m;
 }
 
-/* ─── Service Turns ─────────────────────────────────────────────────────────── */
-function turnsKey() { return `turns_${restaurant?.id}`; }
+/* ─── Service Turns (stored in Supabase restaurant_turns table) ──────────────── */
+const TRASH_ICON = `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`;
 
-function getTurns() {
-  if (!restaurant) return [];
-  try { return JSON.parse(localStorage.getItem(turnsKey()) ?? '[]') ?? []; }
-  catch { return []; }
-}
-
-function saveTurnsLocal(turns) {
-  localStorage.setItem(turnsKey(), JSON.stringify(turns));
-}
-
-function renderTurnsOverview(reservations) {
+function renderTurnsOverview(reservations, turns) {
   const body = document.getElementById('turns-overview-body');
   if (!body) return;
-  const turns = getTurns();
 
   if (!turns.length) {
     body.innerHTML = `<div class="empty-state">No turns configured — <button class="link-btn" onclick="navigate('settings')">add turns in Settings</button></div>`;
@@ -754,10 +831,12 @@ function renderTurnsOverview(reservations) {
   }
 
   body.innerHTML = turns.map(t => {
+    const start  = t.start_time;
+    const end    = t.end_time;
     const booked = reservations
       .filter(r => {
         const rMins = timeToMins(r.time.slice(0, 5));
-        return rMins >= timeToMins(t.start) && rMins < timeToMins(t.end);
+        return rMins >= timeToMins(start) && rMins < timeToMins(end);
       })
       .reduce((s, r) => s + (r.party_size ?? 0), 0);
     const avail = Math.max(0, t.capacity - booked);
@@ -765,7 +844,7 @@ function renderTurnsOverview(reservations) {
     const level = pct >= 100 ? 'over' : pct >= 75 ? 'full' : pct >= 50 ? 'busy' : 'quiet';
     const levelLabel = pct >= 100 ? 'Full' : pct >= 75 ? 'Almost full' : pct >= 50 ? 'Filling up' : 'Available';
     return `<div class="turn-row">
-      <span class="turn-time">${t.start} – ${t.end}</span>
+      <span class="turn-time">${start} – ${end}</span>
       <div class="turn-bar-wrap">
         <div class="turn-bar-fill level-${level}" style="width:${pct}%"></div>
       </div>
@@ -774,51 +853,66 @@ function renderTurnsOverview(reservations) {
         <span class="turn-avail level-${level}">${avail} left</span>
       </div>
       <span class="turn-badge level-${level}">${levelLabel}</span>
+      <button class="btn-trash turn-row-del" onclick="deleteTurn('${t.id}')" title="Remove turn">${TRASH_ICON}</button>
     </div>`;
   }).join('');
 }
 
-function renderTurnsSettings() {
+async function renderTurnsSettings() {
   const list = document.getElementById('turns-list');
-  if (!list) return;
-  const turns = getTurns();
+  if (!list || !restaurant) return;
+
+  const { data } = await db.from('restaurant_turns')
+    .select('*')
+    .eq('restaurant_id', restaurant.id)
+    .order('start_time');
+  const turns = data ?? [];
 
   if (!turns.length) {
     list.innerHTML = `<div class="empty-state">No turns configured yet</div>`;
     return;
   }
-  list.innerHTML = turns.map((t, i) => `
+  list.innerHTML = turns.map(t => `
     <div class="turns-item">
-      <span class="turns-item-time">${t.start} – ${t.end}</span>
+      <span class="turns-item-time">${t.start_time} – ${t.end_time}</span>
       <span class="turns-item-cap">${t.capacity} seats</span>
-      <button class="btn-trash" onclick="deleteTurn(${i})" title="Remove"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+      <button class="btn-trash" onclick="deleteTurn('${t.id}')" title="Remove">${TRASH_ICON}</button>
     </div>
   `).join('');
 }
 
-window.deleteTurn = function(index) {
-  const turns = getTurns();
-  turns.splice(index, 1);
-  saveTurnsLocal(turns);
-  renderTurnsSettings();
+window.deleteTurn = async function(id) {
+  await db.from('restaurant_turns')
+    .delete()
+    .eq('id', id)
+    .eq('restaurant_id', restaurant.id);
   showToast('Turn removed');
+  if (document.getElementById('view-overview').classList.contains('active')) {
+    loadOverview();
+  } else {
+    await renderTurnsSettings();
+  }
 };
 
-document.getElementById('btn-add-turn')?.addEventListener('click', () => {
+document.getElementById('btn-add-turn')?.addEventListener('click', async () => {
   const start = document.getElementById('new-turn-start').value;
   const end   = document.getElementById('new-turn-end').value;
   const cap   = parseInt(document.getElementById('new-turn-cap').value, 10);
   if (!start || !end)   { showToast('Select start and end times'); return; }
   if (!cap || cap < 1)  { showToast('Enter a valid seat count'); return; }
   if (timeToMins(start) >= timeToMins(end)) { showToast('End time must be after start time'); return; }
-  const turns = getTurns();
-  turns.push({ start, end, capacity: cap });
-  turns.sort((a, b) => timeToMins(a.start) - timeToMins(b.start));
-  saveTurnsLocal(turns);
+
+  await db.from('restaurant_turns').insert({
+    restaurant_id: restaurant.id,
+    start_time:    start,
+    end_time:      end,
+    capacity:      cap,
+  });
+
   document.getElementById('new-turn-start').value = '';
   document.getElementById('new-turn-end').value   = '';
   document.getElementById('new-turn-cap').value   = '';
-  renderTurnsSettings();
+  await renderTurnsSettings();
   showToast('Turn added');
 });
 
@@ -858,8 +952,8 @@ async function loadSettings() {
   // Tables (if tables mode)
   if (mode === 'tables') await loadTables();
 
-  // Service turns
-  renderTurnsSettings();
+  // Service turns (async — fetches from Supabase)
+  await renderTurnsSettings();
 }
 
 // Mode toggle
